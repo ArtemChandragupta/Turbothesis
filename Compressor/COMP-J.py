@@ -1,4 +1,5 @@
 from   scipy.interpolate import make_interp_spline
+import matplotlib        as mpl
 import matplotlib.pyplot as plt
 import numpy             as np
 import pandas            as pd
@@ -16,10 +17,11 @@ plt.plot(X_, Y_)
 yi = [J  , J    ]
 xi = [0.5, 1.886]
 plt.plot(xi, yi, '--', label = f'$J={J}$')
+# ax.set_box_aspect(1/1.5)
 
 plt.ylabel(r'$J$'           )
-plt.xlabel(r'$\dfrac{b}{t}$')
+plt.xlabel(r'$b / t$')
 plt.legend(                 )
 plt.grid  (True             )
 
-plt.show()
+plt.savefig('COMP-J.pgf', bbox_inches='tight', backend='pgf')
