@@ -184,4 +184,4 @@ am4 = AngleAnnotation((0,0),(-2 ,  0  ),(p2 , -cz2),ax=ax,size=175,text=f'{round
 ax.axes.xaxis.set_ticks([])
 ax.axes.yaxis.set_ticks([])
 
-plt.show()
+plt.savefig('speed.pgf', bbox_inches='tight', backend='pgf')
