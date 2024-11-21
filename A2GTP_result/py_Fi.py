@@ -21,16 +21,18 @@ y5 = data5.loc[:,['ФИ' ]]
 
 fig, ax = plt.subplots()
 
-ax.plot(x1,y1,'o-', label = 'T1 = 1543K')
-ax.plot(x2,y2,'^-', label = 'T1 = 1593K')
-ax.plot(x3,y3,'s-', label = 'T1 = 1643K')
-ax.plot(x4,y4,'^-', label = 'T1 = 1693K')
-ax.plot(x5,y5,'o-', label = 'T1 = 1743K')
+ax.plot(x1,y1,'o-', label = 'T1 = 1543K', markersize=4)
+ax.plot(x2,y2,'^-', label = 'T1 = 1593K', markersize=4)
+ax.plot(x3,y3,'s-', label = 'T1 = 1643K', markersize=4)
+ax.plot(x4,y4,'^-', label = 'T1 = 1693K', markersize=4)
+ax.plot(x5,y5,'o-', label = 'T1 = 1743K', markersize=4)
 
-ax.set_xlabel(r'$\Pi_k^*$')
-ax.set_ylabel(r'$\Phi$')
+ax.set_box_aspect(1/1.5)
+
+ax.set_xlabel(r'$\pi_k^*$')
+ax.set_ylabel(r'$\varphi$')
 ax.legend()
 
 plt.grid(True)
 
-plt.show()
+plt.savefig('Fi.pgf', bbox_inches='tight', backend='pgf')
