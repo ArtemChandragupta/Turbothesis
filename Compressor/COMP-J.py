@@ -3,8 +3,7 @@ import matplotlib.pyplot as plt
 import numpy             as np
 import pandas            as pd
 
-# t = np.arange(0.5, 1.886, 0.1)
-# plt.plot(t, (0.177+0.916*t-0.0884*(t**2)), '-')
+J = 0.796
 
 x = np.array([0.5, 0.551, 0.6  , 0.7  , 0.9 , 1, 1.279, 1.653, 1.886])
 y = np.array([0.6, 0.654, 0.697, 0.788, 0.94, 1, 1.194, 1.447, 1.595])
@@ -14,13 +13,13 @@ X_ = np.linspace(x.min(), x.max(), 500)
 Y_ = X_Y_Spline(X_)
 plt.plot(X_, Y_)
 
-yi = [1.366, 1.366]
-xi = [0.5,   1.886]
-plt.plot(xi, yi, '--', label = r'$J=1.366$')
+yi = [J  , J    ]
+xi = [0.5, 1.886]
+plt.plot(xi, yi, '--', label = f'$J={J}$')
 
-plt.ylabel(r'$J$'  )
-plt.xlabel(r'$b/t$')
-plt.legend(        )
-plt.grid  (True    )
+plt.ylabel(r'$J$'           )
+plt.xlabel(r'$\dfrac{b}{t}$')
+plt.legend(                 )
+plt.grid  (True             )
 
 plt.show()
