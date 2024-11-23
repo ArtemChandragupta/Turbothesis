@@ -41,53 +41,53 @@
 Принимаем коэффициент потерь полного давления во входном устройстве ГТУ $\sigma^*_{\text{вх}}=\SigEN$;
 
 Давление воздуха перед компрессором:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	P_{1}^*=\sigma_{\text{вх}}^*\cdot P_{\text{н}}=\SigEN \cdot \PN=\Podi \ \text{МПа};
 \end{equation}
 
 Температура воздуха перед компрессором:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	T_{1}^*=T_{\text{н}}=\TN \ \text{К};
 \end{equation}
 
 Давление воздуха за компрессором:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	P_{2}^*=\pi_{\text{к}}^*\cdot P_{1}^*=\Podi \cdot \Pik = \Pdwa \ \text{МПа};
 \end{equation}
 
 Определим $T_2^*$ (температуру воздуха за компрессором):
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	T_{2}^*=T_{\text{н}}^*\cdot \left(\pi_{\text{к}}^*\right)^{\tfrac{k_{\text{в}}-1}{k_{\text{в}}}}=\TN \cdot \Pik^{0.279}=\Tdwa \ \text{К};
 \end{equation}
 
 Работа, соответствующая изоэнтропийному перепаду в компрессоре:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 H_{\text{ок}}^*=C_{p_{\text{в}}}\cdot T_{1}^*\cdot\left[ (\pi_{\text{к}}^*)^{\tfrac{k_{\text{в}}-1}{k_{\text{в}}}}-1 \right]=\CPN \cdot \TN \cdot \left[\Pik ^{0.279}-1\right]=\Hok \ \dfrac{\text{кДж}}{\text{кг}};
 \end{equation}
 
 $\eta_{\text{к ад}}=\EtaKAD$ - политропный к.п.д. компрессора, его выбор для расчета обусловлен тем, что он мало зависит от степени повышения давления в компрессоре $\pi^*_{\text{к}}$.
 
 Полезная работа в компрессоре:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	H_{\text{к}}=\dfrac{H_{\text{ок}}^*}{\eta_{\text{к ад}}}=\dfrac{\Hok}{\EtaKAD}=\Hk \  \dfrac{\text{кДж}}{\text{кг}};
 \end{equation}
 
 Принимаем коэффициент потерь полного давления в камере сгорания $\sigma^*_{\text{кс}}=\SigBU$;
 
 Давление газа перед турбиной:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	P_{3}^*=P_{2}^* \cdot \sigma^*_{\text{кс}}= \pi_{\text{к}}^* \cdot P_{1}^* \cdot \sigma^*_{\text{кс}}= \Pik \cdot \Podi \cdot \SigBU=\Ptri \ \text{МПа};
 \end{equation}
 
 Принимаем коэффициент потерь полного давления в выходном устройстве ГТУ $\sigma^*_{\text{вых}}=\SigOUT$;
 
 Давление газа за турбиной:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	P_{4}^*=\frac{P^*_{\text{н}}}{\sigma^*_{\text{вых}}}=\dfrac{\PN}{\SigOUT}= \PN \ \text{МПа};
 \end{equation}
 
 Степень расширения газа в турбине:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\pi_{\text{т}}^*=\dfrac{P_{3}^*}{P_{4}^*}=\dfrac{\Ptri}{\Pdwa}=\PiT;
 \end{equation}
 
@@ -100,50 +100,108 @@ $c_{p_{\text{г}}}=\CPg \ \dfrac{\text{кДж}}{\text{кг}\cdot \text{К}}$ - �
 \
 
 Работа, соответствующая изоэнтропийному перепаду в турбине:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	H_{\text{от}}^*=c_{p_{\text{г}}}\cdot T_{3}^*\cdot \left[1-(\pi_{\text{т}}^*)^{-\tfrac{k_{\text{г}}-1}{k_{\text{г}}}}\right]= \CPg \cdot \Ttri\cdot \left[1-(\PiT)^{-0.248} \right]=\Hot \  \dfrac{\text{кДж}}{\text{кг}};
 \end{equation}
 
 Принимаем политропный кпд турбины $\eta_{\text{т пол}}=\EtaTpol$
 
 Полезная работа в турбине:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	H_{\text{т}}=H_{\text{от}}^* \cdot \eta_{\text{т пол}}=\Hot \cdot \EtaTpol =\Ht \  \dfrac{\text{кДж}}{\text{кг}};
 \end{equation}
 
 Температура газа за турбиной $T_{4}^*$ определяется как:
-\begin{equation} \label{eu_eqn}
-	T_{4}^*=T_{3}^* \cdot (\pi_{\text{т}}^*)^{-\frac{k_{\text{г}}-1}{k_{\text{г}}}}=\Ttri \cdot (\PiT)^{-0.248}=\Tche \ \text{К};
+\begin{equation} \label{}
+	T_{4}^*=T_{3}^* \cdot (\pi_{\text{т}}^*)^{-\tfrac{k_{\text{г}}-1}{k_{\text{г}}}}=\Ttri \cdot (\PiT)^{-0.248}=\Tche \ \text{К};
 \end{equation}
 
 Примем коэффициенты механических потерь в турбине и компрессоре $\eta_{\text{мт}}=\Etamt$; $\eta_{\text{мк}}=\Etamk$;
 
 Расход воздуха через компрессор:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	G_{\text{в}}=\dfrac{N_{e}}{H_{\text{т}}\cdot \eta_{\text{мт}}-\dfrac{H_{\text{к}}}{\eta_{\text{мк}}}}=\dfrac{\N \cdot 10^6}{\Ht \cdot 10^3 \cdot \Etamt -  \dfrac{\Hk \cdot 10^3}{\Etamk}}= \GN \ \dfrac{\text{кг}}{\text{с}};
 \end{equation}
 
-Теплоты с учетом потерь в камере сгорания:
-\begin{equation} \label{eu_eqn}
+Теплота с учетом потерь в камере сгорания:
+\begin{equation} \label{}
 	Q_{1}'=c_{p_\text{г}}\cdot(T_{3}^*-T_{2}^*)=1.16\cdot(1643.15-644.41)=1159 \ \dfrac{\text{кДж}}{\text{кг}};
 \end{equation}
 
 Примем КПД камеры сгорания $\eta_{\text{кс}}=\Etaks$;
 
 Расход теплоты:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	Q_{1}=\dfrac{Q_{1}'}{\eta_{\text{кс}}}=\dfrac{\Qii}{\Etaks}=\Qodi \ \dfrac{\text{кДж}}{\text{кг}};
 \end{equation}
 
 Эффективный КПД ГТУ:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\eta_{\text{е}}=\dfrac{H_{\text{т}}\cdot \eta_{\text{мт}}-\dfrac{H_{\text{к}}}{\eta_{\text{мк}}}}{Q_{1}}=\dfrac{\Ht \cdot 10^3 \cdot \Etamt - \dfrac{\Hk \cdot 10^3}{\Etamk}}{\Qodi \cdot 10^3}=0.36;
 \end{equation}
 
 Коэффициент полезной работы ГТУ:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\varphi=\dfrac{H_{\text{т}}\cdot \eta_{\text{мт}}-\dfrac{H_{\text{к}}}{\eta_{\text{мк}}}}{H_{\text{т}}\cdot \eta_{\text{мт}}}=\dfrac{\Ht \cdot 10^3 \cdot \Etamt- \dfrac{\Hk \cdot 10^3}{\Etamk}}{\Ht \cdot 10^3 \cdot \Etamt}= \phi;
 \end{equation}
+
+\newpage
+Относительное количество воздуха, содержащегося в продуктах сгорания за камерой сгорания:
+\begin{multline*}
+g_{\text{в}}=\dfrac{Q_{\text{p}}^{\text{н}}\cdot \eta_{\text{кс}}+h_{\text{т}}+L_{0}\cdot c_{p_{\text{в}}} \cdot t_{2}^*- (L_{0}+1)\cdot (c_{p_{\text{г}}})_{\alpha=1}\cdot t_{3}}{c_{p_{\text{в}}}\cdot (t_{3}^*-t_{2}^*)}= \\
+=\dfrac{\Qnp \cdot \Etaks+\htop+\Lo\cdot \CPN \cdot \ttdwa- (\Lo+1)\cdot \Cpao \cdot \tttri}{\Cpao\cdot (\tttri-\ttdwa)}=\gv,
+\end{multline*}
+
+где $Q_{\text{p}}^{\text{н}}=\Qnp \ \dfrac{\text{кДж}}{\text{К}}$ - низшая теплота сгорания топлива;
+
+$h_{\text{т}}=\htop$ - Энтальпия топлива (пренебрежимо мала);
+
+$(c_{p_{\text{г}}})_{\alpha=1}=\Cpao\ \dfrac{\text{кДж}}{\text{К}}$ - Удельная теплоемкость газа при $\alpha=1$;
+
+$L_{0}=15 \ \dfrac{\text{кг}_{\text{возд}}}{\text{кг}_{\text{топ}}}$ - Стехиометрический коэффициент.
+
+\
+
+Коэффициент избытка воздуха в камере сгорания:
+$$\alpha= \dfrac{L_{0}+g_{\text{в}}}{L_{0}}=\dfrac{\Lo+1}{\Lo}=\aaa;$$
+
+Относительный расход топлива:
+$$g_{\text{т}}=\dfrac{1}{\alpha\cdot L_{0}}=\dfrac{1}{\aaa \cdot Lo}= \gt;$$
+
+Допустимая температура для стали лопаток: $T_{\text{ст}}= \Tst\ \text{К};$
+
+Расход воздуха для охлаждения статора:
+	$$g_{\text{охл}}^{\text{с}}=0.01 + 0.25\cdot10^{-4} \cdot (T_{3}^*-T_{\text{ст}})=0.01 + 0.25\cdot10^{-4} \cdot (\Ttri-\Tst)=\gcohl;$$
+
+Расход воздуха для охлаждения ротора:
+	$$g_{\text{охл}}^{\text{р}}=0.08 + 0.22\cdot10^{-4} \cdot (T_{3}^*-T_{\text{ст}})=0.08 + 0.22\cdot10^{-4} \cdot (\Ttri-\Tst)=\gpohl;$$
+
+Общий расход воздуха для охлаждения турбины:
+$$g_{\text{охл}}=\sigma_{\text{ут}}\cdot(g_{\text{охл}}^{\text{с}}+g_{\text{охл}}^{\text{р}})=\SigUT \cdot (\gcohl+\gpohl)=\gohl;$$
+
+Относительный расход охлаждающего воздуха по отншению к расходу воздуха через компрессор:
+	$$g_{\text{охл}}'=\dfrac{(1+g_{\text{т}})\cdot g_{\text{охл}}}{1+(1+g_{\text{т}})\cdot g_{\text{охл}}}=\dfrac{(1+\gt)\cdot \gohl}{1+(1+\gt)\cdot \gohl}=\gohll$$
+
+Расход топлива:
+$$G_{\text{т}}=g_{\text{т}}\cdot(1-g_{\text{охл}}')\cdot G_{\text{в}}=\gt\cdot (1-\gohll)\cdot \GN=\Gt\ \dfrac{\text{кг}}{\text{К}}$$
+	
+Коэффициент располагаемой мощности:
+\begin{equation} \label{}
+	\Omega_{\text{рас}}=H_{\text{от}}^* \cdot \dfrac{G_{\text{в}}}{G_{\text{т}}}= \Hot \cdot \dfrac{\GN}{\Gt}=\Omeras\ \dfrac{\text{кДж}}{\text{К}}
+\end{equation}
+
+Удельная эффективная работа ГТУ:
+\begin{multline*}
+H_{e}=(1+g_{\text{т}})\cdot (1-g_{\text{охл}}')\cdot H_{\text{Т}}\cdot \eta_{\text{тм}}-\dfrac{H_{\text{к}}}{\eta_{\text{мк}}}=\\
+=(1+\gt)\cdot (1-\gohll)\cdot \Ht \cdot \Etamt-\dfrac{\Hk}{\Etamk}=\He\ \dfrac{\text{кДж}}{\text{К}}
+\end{multline*}
+
+Коэффициент полезной мощности:
+\begin{equation} \label{}
+    \Omega_{\text{пол}}=H_{e}^* \cdot \dfrac{{G_{\text{в}}\cdot 10^{-6}}}{G_{\text{т}}}=\He \cdot \dfrac{\GN}{\Gt}=\Omepol\ \dfrac{\text{кДж}}{\text{К}}
+\end{equation}
+
+
 
 \newpage
 \section{Вариантный расчет ГТУ на ЭВМ}
@@ -179,26 +237,26 @@ $T_3^* = \To \ \text{К}; \ \pi_{\text{к}}^*=16$
 При приближенном расчете осевого компрессора основными расчетными сечениями являются: сечение 1-1 на входе в первую ступень и сечение 2-2  на выходе из последней ступени (рис.4.2). Определим параметры $P$ и $T$ в трех сечениях.
 
 Давление воздуха в сечении 1-1:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	P_{1}^*=\sigma_{\text{вх}}\cdot P_{\text{н}}=\Sigin \cdot \PN=\PCone \ \text{МПа};
 \end{equation}
 
 где коэффициент уменьшения полного давления во входной части компрессора $\sigma_{\text{вх}}^*=\Sigin$.
 
 Температура в сечении 1-1:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	T_{1}^*=T_{\text{н}}=\TN \ \text{К};
 \end{equation}
 
 Давление воздуха в сечении К-К:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	P_{\text{к}}^*=P_{\text{н}}\cdot \pi_{\text{к}}^*=\PN \cdot \PiPi=\Pk \ \text{МПа},
 \end{equation}
 
 где $\pi_{\text{к}}^*=16$ - степень повышения давления компрессоре.
 
 Давление в сечении 2-2:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	P_{2}^*=\dfrac{P_{\text{к}}^*}{\sigma_{\text{вых}}^*}=\dfrac{\Pk}{\Sigout}=\PCtwo \  \text{МПа};
 \end{equation}
 
@@ -207,7 +265,7 @@ $T_3^* = \To \ \text{К}; \ \pi_{\text{к}}^*=16$
 \image{COMP-lopatki.png}{Схема первой и последней ступеней компрессора.}{0.7}
 
 Значение плотностей:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\rho_{1}=\dfrac{P_{1}^*}{R_{\text{в}}\cdot T_{1}^*}= \dfrac{\PCone}{\RN \cdot \TN} =\Rhoone \ \dfrac{\text{кг}}{\text{м}^3};
 \end{equation}
 
@@ -221,12 +279,12 @@ $T_3^* = \To \ \text{К}; \ \pi_{\text{к}}^*=16$
 
 Коэффициент полезного действия компресора: $\eta^*_{\text{ад}}=\Etad$
 
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\rho_{2}=\rho_{1}\left(\dfrac{P_{2}^*}{P_{1}^*}\right)^{\tfrac{1}{n}}=\Rhoone\left(\dfrac{\PCtwo}{\PCone}\right)^{\tfrac{1}{\nk}}=\Rhotwo \ \dfrac{\text{кг}}{\text{м}^3}
 \end{equation}
 
 где $n$ - показатель политропы определяется из равенства:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\dfrac{k}{k-1}\cdot \eta_{\text{ад}}^*=\dfrac{n}{n-1};
 \end{equation}
 $$\dfrac{\KN}{\KN-1} \cdot \Etad=\dfrac{n}{n-1};$$
@@ -235,7 +293,7 @@ $$n = \nk.$$
 Примем величины осевой составляющей абсолютных скоростей в сечениях 1-1 и 2-2 соответственно $C_{z_1}=\Czone \  \dfrac{\text{м}}{\text{с}}$ и $C_{z_2}=\Cztwo \  \dfrac{\text{м}}{\text{с}}$. Втулочное отношение выберем $V_{1}=\dfrac{D_{\text{вт}_{1}}}{D_{\text{н}_{1}}}=\Vone$. Расход воздуха $G_{\text{в}}=\GNN \ \dfrac{\text{кг}}{\text{с}}$.
 
 Из уравнения расхода первой ступени выразим значение наружного диаметра на входе в компрессор:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	G_{\text{в}}=\rho_{1}\cdot \dfrac{\pi}{4}\cdot \left(D_{\text{н}_{1}}^2\cdot D^2_{\text{вт}_{1}}\right)\cdot C_{z_{1}}=\rho_{1}\cdot D_{\text{н}_{1}}\cdot \left(1-\nu_{1}^2\right)\cdot C_{z_{1}};
 \end{equation}
 
@@ -243,109 +301,108 @@ $$n = \nk.$$
 $$D_{\text{н}_{1}}=\sqrt{ \dfrac{4\cdot G_{\text{в}}}{\rho_{1}\cdot \pi\cdot \left(1-\nu_1^2 \right)\cdot C_{z_{1}}} }=\sqrt{ \dfrac{4\cdot \GNN}{\Rhoone \cdot 3.14\cdot (1-\Vone^2)\cdot \Czone} }=\Dodi \ \text{м};$$
 
 Диаметр втулки первой ступени:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	D_{\text{вт}_{1}}=\nu_{1}\cdot D_{\text{н}_{1}}=\Vone \cdot \Dodi= \Dvtone \ \text{м};
 \end{equation}
 
 Средний диаметр первой ступени:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	D_{\text{ср}_{1}}=\dfrac{D_{\text{н}_{1}}+D_{\text{вт}_{1}}}{2}=\dfrac{\Dodi + \Dvtone}{2}=\Dsrone \ \text{м};
 \end{equation}
 
 Длина рабочей лопатки первой ступени:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	l_{1}=\dfrac{D_{\text{н}_{1}}-D_{\text{вт}_{1}}}{2}=\dfrac{\Dodi-\Dvtone}{2}=\Lone \ \text{м};
 \end{equation}
 
 Размеры проходного сечения 2-2:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	F_{2}=\dfrac{G_{\text{в}}}{C_{z_{2}}\cdot \rho_{2}}=\dfrac{\GNN}{\Cztwo \cdot \Rhotwo}=\Ftwo \ \text{м}^2;
 \end{equation}
 
 Принимаем в проточной части $D_{\text{вт}}=const$.
 
 Тогда:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\nu_{2}=\dfrac{1}{\sqrt{ \dfrac{1+4F_{2}}{\pi\cdot D_{\text{вт}_{1}}^2} }}=\dfrac{1}{\sqrt{ \dfrac{1+4\cdot \Ftwo}{\pi\cdot \Dvtone^2} }}=\Vtwo;
 \end{equation}
 
 Длина рабочей лопатки на последней ступени:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	l_{2}=\dfrac{1}{2} \left(\dfrac{1}{\nu_{2}}-1\right)\cdot D_{\text{вт}_{1}}=\dfrac{1}{2}\left(\dfrac{1}{\Vtwo}-1\right)\cdot \Dvtone=\Ltwo \ \text{м};
 \end{equation}
 
 Для расчета частоты вращения необходимо задать окружную скорость на наружном диаметре первой ступени $u_{\text{н}_{1}}=\Unone \ \dfrac{\text{м}}{\text{с}}$, тогда:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	n=\dfrac{60\cdot u_{\text{н}_{1}}}{\pi\cdot D_{\text{н}_{1}}}=\dfrac{60\cdot \Unone}{3.14\cdot \Dodi}=\n \ \dfrac{\text{об}}{\text{мин}};
 \end{equation}
 
 Адиабатический напор в проточной части компрессора по полным параметрам:
-\begin{multline} \label{eu_eqn}
+\begin{multline} \label{}
 	H_{\text{ад. пр. ч.}}^*=\dfrac{k}{k-1}\cdot R_{\text{в}}\cdot T_{1}^*\cdot \left[\left(\dfrac{P_{2}^*}{P_{1}^*}\right)^{\tfrac{{k-1}}{k}}-1\right]=\\
 	=\dfrac{\KN}{\KN-1}\cdot \RN \cdot \TN \cdot \left[\left(\dfrac{\PCtwo}{\PCone}\right)^{\tfrac{{\KN-1}}{\KN}}-1\right]=\Ha \ \dfrac{\text{кДж}}{\text{кг}};
 \end{multline}
 
 Приближенная величина теоретического напора или удельная работа, затрачиваемая на сжатие 1 кг воздуха:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	H_{\text{к}}^*=\dfrac{H_{\text{ад. пр. ч.}}^*}{\eta_{\text{ад}^*}}=\dfrac{\Ha}{\Etad}=\Hkk \ \dfrac{\text{кДж}}{\text{кг}};
 \end{equation}
 
 Выберем средний теоретический напор $h_{\text{ср}}=\hcp \ \dfrac{\text{кДж}}{\text{кг}}$.
 
 Число ступеней компрессора:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	i= \dfrac{H^*_{\text{к}}}{h_{\text{ср}}}=\dfrac{\Hkk}{\hcp}=14.77;
 \end{equation}
 
 Принимаем $i=\i$.
 
 Теоретический напор в первой ступени:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	h_{1}=(0.6\dots 0.7)\cdot h_{\text{ср}}=0.65\cdot \hcp=\hone \ \dfrac{\text{кДж}}{\text{кг}};
 \end{equation}
 
 Теоретический напор в средних ступенях:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	h_{\text{ср. ст.}}=(1.1\dots 1.2)\cdot h_{\text{ср}}=1.15 \cdot \hcp=\hm \ \dfrac{\text{кДж}}{\text{кг}};
 \end{equation}
 
 Теоретический напор в последней ступени:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	h_{\text{п}}=(0.95\dots 1)\cdot h_{\text{ср}}=1\cdot \hcp=\hcp \ \dfrac{\text{кДж}}{\text{кг}};
 \end{equation}
 
 \inputpgf{Images/dgf}{COMP-stup.pgf}{Распределение теоретического напора по ступеням компрессора.}
 
 В результате распределения напоров соблюдается условие:
-
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\sum h_{i} \approx H^*_{\text{к}}=\Hkk \ \dfrac{\text{кДж}}{\text{кг}};
 \end{equation}
 
 Уточняем величину окружной скорости на среднем диаметре первой ступени:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	u_{\text{ср}_{1}}=\dfrac{\pi\cdot D_{\text{ср}_{1}}\cdot n}{60}=\dfrac{3.14\cdot \Dsrone \cdot \n}{60}=\Usrone \ \dfrac{\text{м}}{\text{с}};
 \end{equation}
 
 Производим расчет первой ступени по среднему диаметру;
 
 Коэффициент расхода на среднем диаметре:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\varphi_{1}=\dfrac{C_{z_{1}}}{u_{\text{ср}_{1}}}=\dfrac{\Czone}{\Usrone}=\Phione;
 \end{equation}
 
 Коэффициент теоретического напора:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\bar{h}_{1}=\dfrac{h_{1}}{u_{\text{ср}_{1}^2}}=\dfrac{\hone \cdot 10^3}{\Usrone^2}=\hhone;
 \end{equation}
 
 Отношение:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\dfrac{\bar{h}_{1}}{\varphi}=\dfrac{\hhone}{\Phione}=\otn;
 \end{equation}
 
 Зададим степень реактивности $\Omega=\OME$ и найдем:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\dfrac{\Omega}{\varphi}=\dfrac{\OME}{\Phione}=\otm;
 \end{equation}
 
@@ -354,7 +411,7 @@ $$D_{\text{н}_{1}}=\sqrt{ \dfrac{4\cdot G_{\text{в}}}{\rho_{1}\cdot \pi\cdot \
 \inputpgf{Images/dgf}{COMP-ome-approx.pgf}{График зависимости $\left(\dfrac{\bar{h}_{1}}{\varphi} \right)_{\tfrac{b}{t}=1}$ от $\dfrac{\Omega}{\varphi}$}
 
 Коэффициент:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	J= \dfrac{\dfrac{\bar{h}_{1}}{\varphi}}{\left(\dfrac{\bar{h}_{1}}{\varphi} \right)_{\tfrac{b}{t}=1}}= \dfrac{\otn}{\Pograph}=\J;
 \end{equation}
 
@@ -363,104 +420,104 @@ $$D_{\text{н}_{1}}=\sqrt{ \dfrac{4\cdot G_{\text{в}}}{\rho_{1}\cdot \pi\cdot \
 Пользуясь рисунком 4.5, определяем $\dfrac{b}{t}=\GraphJ \to \dfrac{t}{b}=\tb$.
 
 При постоянной вдоль радиуса хорде относительный шаг у втулки первой ступени:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\left(\dfrac{t}{b}\right)_{\text{вт}}=\dfrac{t}{b}\cdot \dfrac{D_{\text{вт}_{1}}}{D_{\text{ср}_{1}}}=\tb \cdot \dfrac{\Dvtone}{\Dsrone}=\tbem;
 \end{equation}
 
 Окружные скорости на входе и на выходе из рабочего колеса принимаем одинаковыми, т. е. $u_{\text{ср}_{1}}=u_{\text{ср}_{2}}=u=\U \ \dfrac{\text{м}}{\text{с}}$.
 
 Проекция абсолютной скорости на окружное направление входной скорости на входе в рабочее колесо:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	C_{u_{1}}=u(1-\Omega)-\dfrac{h_{1}}{2u}=\U \cdot0.5- \dfrac{\hone \cdot 10^3}{2\cdot \U}=\Cuone\ \dfrac{\text{м}}{\text{с}};
 \end{equation}
 
 На выходе из рабочего колеса:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	C_{u_{2}}=u(1-\Omega)+\dfrac{h_{1}}{2u}=\U \cdot0.5+ \dfrac{\hone \cdot 10^3}{2\cdot \U}=\Cutwo \ \dfrac{\text{м}}{\text{с}};
 \end{equation}
 
 Абсолютная скорость на входе в рабочее колесо:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	C_{1}=\sqrt{ C_{z_{1}}^2+C_{u_{1}}^2 }=\sqrt{ \Czone^2+\Cuone^2 }=\Cone \ \dfrac{\text{м}}{\text{с}};
 \end{equation}
 
 Угол наклона вектора  для построения треугольников скоростей:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	a_{1}=arcctg\left( \dfrac{C_{u_{1}}}{C_{z_{1}}} \right)=arcctg \left( \dfrac{\Cuone}{\Czone} \right)=\aone \textdegree;
 \end{equation}
 
 Температура воздуха перед рабочим колесом:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	T_{1}=T_{1}^*-\dfrac{C_{1}^2}{2\cdot  \frac{k_{\text{в}}}{k_{\text{в}}-1}\cdot R_{\text{в}}}=\TN- \frac{\Cone^2}{2\cdot  \frac{\KN}{\KN-1}\cdot \RN}=\Too \ \text{К};
 \end{equation}
 
 Проекция относительной скорости W на окружное направление входной скорости на входе в рабочее колесо:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	W_{u_{1}}=C_{u_{1}}-u=\Cuone-\U=\Wuone \ \dfrac{\text{м}}{\text{с}};
 \end{equation}
 
 Относительная скорость на входе в колесо:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	W_{1}=\sqrt{ C_{z_{1}}^2+W_{u_{1}}^2 }=\sqrt{ \Czone^2+(\Wuone)^2 }=\Wone \ \dfrac{\text{м}}{\text{с}};
 \end{equation}
 
 Число Маха по относительной скорости на входе в рабочее колесо первой ступени:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	M_{W_{1}}=\dfrac{W_{1}}{\sqrt{ k_{\text{в}}\cdot R_{\text{в}}\cdot T_{1} }}= \dfrac{\Wone}{\sqrt{ \KN \cdot \RN \cdot \Too}}=\Mwone;
 \end{equation}
 
 Наклон входной относительной скорости при отсчете от отрицательного направления оси $u$ характеризуется углом $\beta$:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\beta_{1}=arcctg\left( \dfrac{W_{u_{1}}}{C_{z_{1}}} \right)=arcctg\left( \dfrac{\Wone}{\Czone} \right)=\Bone \textdegree;
 \end{equation}
 
 Уменьшение осевой составляющей скорости в одной ступени:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\Delta C_{z}=\dfrac{{C_{z_{1}}-C_{z_{2}}}}{i}=\dfrac{\Czone-\Cztwo}{15}=\DCz \ \dfrac{\text{м}}{\text{с}};
 \end{equation}
 
 Осевая составляющая скорости на выходе из рабочего колеса первой ступени:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	C_{z_{2}}=C_{z_{1}}- \dfrac{\Delta C_{z}}{2}=\Czone- \dfrac{\DCz}{2}=\OCztwo \ \dfrac{\text{м}}{\text{с}};
 \end{equation}
 
 Абсолютная скорость на выходе  в рабочее колесо:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	C_{2}=\sqrt{ C_{z_{2}}^2+C_{u_{2}}^2 }=\sqrt{\Cztwo^2 + \Cutwo^2 }=\Ctwo\ \dfrac{\text{м}}{\text{с}};
 \end{equation}
 
 Угол наклона вектора  для построения треугольников скоростей:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\alpha_{2}=arcctg\left( \dfrac{C_{u_{2}}}{C_{z_{2}}} \right)=arcctg\left( \dfrac{\Cutwo}{\Cztwo} \right)=\atwo \textdegree;
 \end{equation}
 
 Проекция относительной скорости $W$ на окружное направление входной скорости на выходе из рабочего колеса:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	W_{u_{2}}=C_{u_{2}}-u= \Cuone - \U=\Wutwo \ \dfrac{\text{м}}{\text{с}};
 \end{equation}
 
 Относительная скорость на выходе из колеса:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	W_{2}=\sqrt{ C_{z_{2}}^2+W_{u_{2}}^2 }=\sqrt{ \Cztwo ^2+(\Wutwo)^2 }=\Wtwo \ \dfrac{\text{м}}{\text{с}};
 \end{equation}
 
 Наклон выходной относительной скорости:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\beta_{2}=arcctg\left( \dfrac{W_{u_{2}}}{C_{z_{2}}} \right)=arcctg\left( \dfrac{\Wutwo}{\Cztwo} \right)=\Btwo \textdegree;
 \end{equation}
 
 Угол поворота в решетке рабочего колеса:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\varepsilon= \beta_{2}-\beta_{1}=\Btwo -\Bone =\Epsi \textdegree;
 \end{equation}
 
 Коэффициент расхода на внешнем диаметре:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	\varphi_{\text{н}}= \dfrac{C_{z_{1}}}{u_{\text{н}_{1}}}=\dfrac{\Czone}{\Unone}=\Phin;
 \end{equation}
 
 Проверка числа Маха по средней относительной скорости на внешнем диаметре первой ступени:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	M_{\text{wc}}=u_{\text{н}_{1}}\cdot \dfrac{\sqrt{ 1+\varphi_{\text{н}}^2 }}{\sqrt{ k_{\text{в}}\cdot R_{\text{в}}\cdot T_{1}^* }}= \Unone \cdot \dfrac{\sqrt{ 1+ \Phin ^2 }}{\sqrt{ \KN \cdot \RN \cdot \TN }}=\Mwc;
 \end{equation}
 
@@ -474,7 +531,7 @@ $$D_{\text{н}_{1}}=\sqrt{ \dfrac{4\cdot G_{\text{в}}}{\rho_{1}\cdot \pi\cdot \
 
 \begin{enumerate} 
   \item Полное давление и полная температура на входе в турбину:
-	\begin{equation} \label{eu_eqn}
+	\begin{equation} \label{}
 		P_{0}^*=\sigma_{\text{кс}}^*\cdot P_{\text{к}},\text{МПа};
 	\end{equation}
 	
@@ -493,13 +550,13 @@ $$D_{\text{н}_{1}}=\sqrt{ \dfrac{4\cdot G_{\text{в}}}{\rho_{1}\cdot \pi\cdot \
  
       \end{itemize}
   \item Мощность проектируемой турбины:
-	\begin{equation} \label{eu_eqn}
-		N_{\text{т}}=N_{\text{е}}+N_{\text{к}}=\N + \TNk = \TNt \ \text{МВт}
+	\begin{equation} \label{}
+		N_{\text{т}}=N_{\text{е}}+N_{\text{к}}=\N + \TNk = \TNt \ \text{МВт},
 	\end{equation}
 
-где $N_{\text{к}}$ – мощность, потребляемая компрессором	;
-	\begin{equation} \label{eu_eqn}
-		N_{\text{к}}=H^*_{\text{к}}\cdot G_{\text{в}}=\Hkk \cdot 10^3 \cdot \GTN = \TNk \ \text{МВт}
+где $N_{\text{к}}$ – мощность, потребляемая компрессором:
+	\begin{equation} \label{}
+		N_{\text{к}}=H^*_{\text{к}}\cdot G_{\text{в}}=\Hkk \cdot 10^3 \cdot \GTN = \TNk \ \text{МВт}.
 	\end{equation}  
   
   \item Номинальный расход газа - $G_{\text{г}}=\GTN \ \dfrac{\text{кг}}{\text{с}}$; 
@@ -513,72 +570,72 @@ $$D_{\text{н}_{1}}=\sqrt{ \dfrac{4\cdot G_{\text{в}}}{\rho_{1}\cdot \pi\cdot \
 \subsection{Предварительный расчет турбины}
 
 Удельная внутренняя мощность турбины:
-\begin{equation} \label{eu_eqn}
-		H_{UT}=k_{N} \dfrac{N_{\text{т}}}{G_{\text{г}}}= 1.0185\cdot \dfrac{\TNt \cdot 10^3}{\GTN} =\THut \ \dfrac{\text{кДж}}{\text{кг}}
-	\end{equation}
+\begin{equation} \label{}
+	H_{UT}=k_{N} \dfrac{N_{\text{т}}}{G_{\text{г}}}= 1.0185\cdot \dfrac{\TNt \cdot 10^3}{\GTN} =\THut \ \dfrac{\text{кДж}}{\text{кг}};
+\end{equation}
 
 Температурный перепад на турбину по параметрам торможения:
-\begin{equation} \label{eu_eqn}
-		\Delta T_{T}^*= \dfrac{H_{UT}}{c_{p_{\text{г}}}}= \dfrac{\THut}{\Cpg}= \TDTt \ \text{К}
-	\end{equation}
+\begin{equation} \label{}
+	\Delta T_{T}^*= \dfrac{H_{UT}}{c_{p_{\text{г}}}}= \dfrac{\THut}{\Cpg}= \TDTt \ \text{К};
+\end{equation}
 
 Температура торможения за турбиной:
-\begin{equation} \label{eu_eqn}
-		T_{2T}^*=T_{0}^*-\Delta T_{T}^*=\To - \TDTt=\Ttwot \ \text{К}
-	\end{equation}
+\begin{equation} \label{}
+	T_{2T}^*=T_{0}^*-\Delta T_{T}^*=\To - \TDTt=\Ttwot \ \text{К};
+\end{equation}
 
 Критическая скорость потока газа, выходящего из турбины:
-\begin{equation} \label{eu_eqn}
-		a_{\text{кр}_{2}}=\sqrt{ \dfrac{2k}{k+1} RT_{2T}^*}=\sqrt{ \dfrac{2\cdot \Kg}{\Kg+1} \cdot \RNNN \cdot \Ttwot}= \akrtwo \ \dfrac{\text{м}}{\text{с}}
+\begin{equation} \label{}
+	a_{\text{кр}_{2}}=\sqrt{ \dfrac{2k}{k+1} RT_{2T}^*}=\sqrt{ \dfrac{2\cdot \Kg}{\Kg+1} \cdot \RNNN \cdot \Ttwot}= \akrtwo \ \dfrac{\text{м}}{\text{с}};
 \end{equation}
 
 Скорость потока газа за турбиной:
-\begin{equation} \label{eu_eqn}
-		C_{2{\text{т}}}=\lambda_{c_{2} \text{т}}\cdot a_{\text{кр}_{2}}=\Lacm \cdot \akrtwo = \ctwom \ \dfrac{\text{м}}{\text{с}}
+\begin{equation} \label{}
+	C_{2{\text{т}}}=\lambda_{c_{2} \text{т}}\cdot a_{\text{кр}_{2}}=\Lacm \cdot \akrtwo = \ctwom \ \dfrac{\text{м}}{\text{с}};
 \end{equation}
 
 Адиабатный перепад энтальпий на турбину:
-\begin{equation} \label{eu_eqn}
-		H_{\text{ад.т}}= H_{UT}+ \dfrac{C_{2\text{т}}^2}{2}=\THut \cdot \dfrac{\ctwom^2}{2}=\Hadm \ \dfrac{\text{кДж}}{\text{кг}}
+\begin{equation} \label{}
+	H_{\text{ад.т}}= H_{UT}+ \dfrac{C_{2\text{т}}^2}{2}=\THut \cdot \dfrac{\ctwom^2}{2}=\Hadm \ \dfrac{\text{кДж}}{\text{кг}};
 \end{equation}
 
 Изоэнтропийный перепад энтальпий на турбину:
-\begin{equation} \label{eu_eqn}
-		H_{\text{от}}=\dfrac{H_{\text{ад.т}}}{\eta_{\text{ад.т}}}=\dfrac{\Hadm}{0.91}=\Hot \ \dfrac{\text{кДж}}{\text{кг}}
+\begin{equation} \label{}
+	H_{\text{от}}=\dfrac{H_{\text{ад.т}}}{\eta_{\text{ад.т}}}=\dfrac{\Hadm}{0.91}=\Hot \ \dfrac{\text{кДж}}{\text{кг}};
 \end{equation}
 
 Температура в потоке за турбиной при изоэнтропийном процессе расширения:
-\begin{equation} \label{eu_eqn}
-		T_{2t_{T}}^*=T_{0}- \dfrac{H_{\text{от}}}{c_{p_{{\text{г}}}}}=\To -  \dfrac{\Hot \cdot 10^3}{\Cpg}=\Ttwott \ \text{К}
+\begin{equation} \label{}
+	T_{2t_{T}}^*=T_{0}- \dfrac{H_{\text{от}}}{c_{p_{{\text{г}}}}}=\To -  \dfrac{\Hot \cdot 10^3}{\Cpg}=\Ttwott \ \text{К};
 \end{equation}
 
 Давление в потоке за турбиной:
-\begin{equation} \label{eu_eqn}
-		P_{2T}=P_{0}^* \left(\dfrac{T_{2t_{T}^*}}{T_{0}^*} \right)^{\tfrac{k}{k-1}}=\TPo \cdot\left(\dfrac{\Ttwott}{\Ttri} \right)^{\tfrac{\Kg}{\Kg-1}}=\Ptwot \ \text{МПа}
+\begin{equation} \label{}
+		P_{2T}=P_{0}^* \left(\dfrac{T_{2t_{T}^*}}{T_{0}^*} \right)^{\tfrac{k}{k-1}}=\TPo \cdot\left(\dfrac{\Ttwott}{\Ttri} \right)^{\tfrac{\Kg}{\Kg-1}}=\Ptwot \ \text{МПа};
 \end{equation}
 
 Температура в потоке за турбиной:
-\begin{equation} \label{eu_eqn}
-		T_{2T}=T_{2T}^*- \dfrac{C_{2 \text{т}}^2}{2c_{p_{\text{г}}}}=\Ttwot - \dfrac{\ctwom^2}{2\cdot \Cpg}= \TtwoT \ \text{К}
+\begin{equation} \label{}
+		T_{2T}=T_{2T}^*- \dfrac{C_{2 \text{т}}^2}{2c_{p_{\text{г}}}}=\Ttwot - \dfrac{\ctwom^2}{2\cdot \Cpg}= \TtwoT \ \text{К};
 \end{equation}
 
 Плотность в потоке за турбиной:
-\begin{equation} \label{eu_eqn}
-		\rho_{2T}=\dfrac{P_{2T}}{R \cdot T_{2T}}=\dfrac{\Ptwot \cdot 10^6}{\RNNN \cdot \Ttwott}= \Trhotwot \ \dfrac{\text{кг}}{\text{м}^3}
+\begin{equation} \label{}
+		\rho_{2T}=\dfrac{P_{2T}}{R \cdot T_{2T}}=\dfrac{\Ptwot \cdot 10^6}{\RNNN \cdot \Ttwott}= \Trhotwot \ \dfrac{\text{кг}}{\text{м}^3};
 \end{equation}
 
 Площадь сечения на выходе из рабочего колеса последней ступени:
-\begin{equation} \label{eu_eqn}
-		F_{2T}=\dfrac{G_{\text{г}}}{\rho_{2T}\cdot C_{2\text{т}}\cdot \sin(a_{2\text{т}})}=\dfrac{\GTN}{\Trhotwot \cdot \ctwom \cdot 1}=\Ftwot \ \text{м}^2
+\begin{equation} \label{}
+		F_{2T}=\dfrac{G_{\text{г}}}{\rho_{2T}\cdot C_{2\text{т}}\cdot \sin(a_{2\text{т}})}=\dfrac{\GTN}{\Trhotwot \cdot \ctwom \cdot 1}=\Ftwot \ \text{м}^2;
 \end{equation}
 
 Напряжения в корневом сечении рабочей лопатки:
-\begin{equation} \label{eu_eqn}
-		\sigma_{p}=0.89\cdot 10^{-5}\cdot n^2\cdot F_{2T}=0.89\cdot 10^{-5}\cdot \n ^2\cdot \Ftwot=\Sigp \ \text{МПа}
+\begin{equation} \label{}
+		\sigma_{p}=0.89\cdot 10^{-5}\cdot n^2\cdot F_{2T}=0.89\cdot 10^{-5}\cdot \n ^2\cdot \Ftwot=\Sigp \ \text{МПа};
 \end{equation}
 
 Выберем материал для лопаток – сталь ЭИ437Б \cite{STEL}, для которой предел длительной прочности $[\sigma_{500}]=\SigSoo \ \text{МПа}$ и находим коэффициент запаса прочности:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 		K_{\text{пр}}=\dfrac{[\sigma_{500}]}{\sigma_{p}}=\dfrac{\SigSoo}{\Sigp}=\KPR,
 \end{equation}
 
@@ -587,22 +644,22 @@ $$D_{\text{н}_{1}}=\sqrt{ \dfrac{4\cdot G_{\text{в}}}{\rho_{1}\cdot \pi\cdot \
 Далее следует выбрать средний диаметр. Его выбирают, ориентируясь на диаметральные габариты компрессора и камеры сгорания, и таким образом, чтобы окружная скорость на среднем диаметре не превышала $500 \ \dfrac{\text{м}}{\text{с}}$. Если она меньше $300 \ \dfrac{\text{м}}{\text{с}}$, то следует увеличить диаметр или частоту вращения ротора.
 
 Для данного расчета примем $d_{2T}=\dtwom \ \text{м}$. Тогда окружная скорость на среднем диаметре рабочего колеса последней ступени:
-\begin{equation} \label{eu_eqn}
-		u_{2} =\dfrac{\pi \cdot d_{2T} \cdot n}{60}= \dfrac{3.14\cdot \dtwom \cdot \n}{60}= \Tu \ \dfrac{\text{м}}{\text{с}}
+\begin{equation} \label{}
+		u_{2} =\dfrac{\pi \cdot d_{2T} \cdot n}{60}= \dfrac{3.14\cdot \dtwom \cdot \n}{60}= \Tu \ \dfrac{\text{м}}{\text{с}};
 \end{equation}
 
 Высота лопаток последней ступени:
-\begin{equation} \label{eu_eqn}
-	l_{2}=\dfrac{F_{2T}}{\pi d_{2T}}= \dfrac{\Ftwot}{3.14\cdot \dtwom }=\ltwo \ \text{м}
+\begin{equation} \label{}
+	l_{2}=\dfrac{F_{2T}}{\pi d_{2T}}= \dfrac{\Ftwot}{3.14\cdot \dtwom }=\ltwo \ \text{м},
 \end{equation}
 
-Параметр:
-\begin{equation} \label{eu_eqn}
-	\dfrac{d_{2T}}{l_{2}}=\dfrac{\dtwom}{\ltwo}=\Totn
+в результате чего параметр $\dfrac{d_{2T}}{l_{2}}$:
+\begin{equation} \label{}
+	\dfrac{d_{2T}}{l_{2}}=\dfrac{\dtwom}{\ltwo}=\Totn.
 \end{equation}
 
 Примем число ступеней турбины $m=4$. Тогда характерный напорный параметр $Y$ равен:
-\begin{equation} \label{eu_eqn}
+\begin{equation} \label{}
 	Y=\dfrac{\sqrt{ \sum u_{2}^2 }}{\sqrt{ 2H_{\text{от}} }}=\dfrac{\sqrt{ 4\cdot \Tu^2}}{\sqrt{ 2\cdot \Hot}}=\Y,
 \end{equation}
 
