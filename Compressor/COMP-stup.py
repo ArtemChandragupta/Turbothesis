@@ -15,7 +15,7 @@ ax.set_xlim(0, 16)
 plt.xticks(np.arange(0 , 16, 1.0))
 plt.yticks(np.arange(16, 32, 2.0))
 
-ax.set_box_aspect(1/1.5)
+ax.set_box_aspect(1/2)
 
 ax.set_ylabel(r'$h, \mathrm{кДж} / \mathrm{кг}$')
 ax.set_xlabel(r'$i$')
