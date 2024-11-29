@@ -1,9 +1,4 @@
-% Список пользовательских команд 
-
-%%%%%%%%%%%% \image %%%%%%%%%%%%%%%%%%
-
 % \image {Имя изображения.расширение}{Подпись к рисунку}{Скейл Изображения}
-
 \newcommand{\image}[3]{
 \begin{figure}[!htb]
 	\centering
@@ -12,5 +7,13 @@
 \end{figure}
 }
 
-
-
+% \inputpgf {Имя изображения.расширение}{Директория}{Подпись к рисунку}
+\newcommand\inputpgf[3]{{
+\begin{figure}[!ht]
+	\centering
+	\let\pgfimageWithoutPath\pgfimage
+	\renewcommand{\pgfimage}[2][]{\pgfimageWithoutPath[##1]{#1/##2}}
+	\input{#1/#2}
+	\caption{#3}
+\end{figure}
+}}
