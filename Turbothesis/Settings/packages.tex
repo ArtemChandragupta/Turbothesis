@@ -1,12 +1,11 @@
 \usepackage{polyglossia} % языковой пакет
 
-\usepackage{pdfpages} % пакет для импорта pdf-файлов
-
-\usepackage{tocvsec2} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{tocloft} %пакет для оформления оглавления
+\usepackage{tocvsec2}
 
 \usepackage{longtable,booktabs,array}
 
-\usepackage{fontspec}
+\usepackage{fontspec} % шрифты для XeLaTeX
 
 \usepackage{ulem}
 
@@ -16,32 +15,29 @@
 
 \usepackage{caption}
 
-\usepackage{graphicx} % пакет для использования графики (чтобы вставлять рисунки, фотографии и пр.)
-\usepackage{pgf}      % пакет для использование pgf
+\usepackage{graphicx} % для использования графики
+\usepackage{pgf}      % для использование pgf
+\usepackage{pdfpages} % для импорта pdf-файлов
 
 \usepackage{amsmath} % поддержка математических символов
+\usepackage{eqexpl}  % экспланации для формул
+\eqexplSetIntro{где}
+\eqexplSetDelim{\textemdash}
 
 \usepackage{url} % поддержка url-ссылок
 
-\usepackage{csquotes}
+\usepackage{csquotes} % цитирование
 \usepackage[ 
   backend=biber,
   sorting=none,
   bibstyle=gost-numeric,
   citestyle=gost-numeric
 ]{biblatex} % Библиография по ГОСТу
-
 \addbibresource{refs.bib}
 
 \usepackage{multirow} % таблицы с объединенными строками
 
-\usepackage{hyperref} % пакет для интеграции гиперссылок
-
-\usepackage{indentfirst} % пакет для отступа абзаца
-
 \usepackage{chngcntr} % пакет подписей и нумерации рисунков
 
-\usepackage{verbatim}
-\usepackage{fancyvrb}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{verbatim} % для моноширинных участков
+\usepackage{fancyvrb} % для красивых моноширинных участков

@@ -1,59 +1,61 @@
-%%%%%%%%%%%%%%%%% Оформление ГОСТА%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% Шрифт и язык %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Все параметры указаны в ГОСТЕ на 2021, а именно:
-
-% Шрифт для курсовой Times New Roman, размер – 14 пт.
 \setdefaultlanguage[spelling=modern]{russian}
-    \setotherlanguage{english}
+\setotherlanguage{english}
     
 \setmonofont{NotoMono Nerd Font}
 \setmainfont{Times New Roman} 
 \setromanfont{Times New Roman} 
 \newfontfamily\cyrillicfont{Times New Roman}
+\newfontfamily\cyrillicfontsf{Times New Roman}
 \newfontfamily{\cyrillicfonttt}{JetBrainsMono Nerd Font}
 
-\usepackage[left=3cm,right=1.5cm,top=2cm,bottom=2cm]{geometry} % поля
+\urlstyle{same} % шрифт для URL-ссылок
 
-% шрифт для URL-ссылок
-\urlstyle{same}
+%%%%%%%%%%%%%%%%%% Геометрия %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Междустрочный интервал должен быть равен 1.5 сантиметра.
+\usepackage[
+  left=3cm,
+  right=1.5cm,
+  top=2cm,
+  bottom=2cm
+]{geometry} % поля
+
 \linespread{1.5} % междустрочный интервал
 
-% Каждая новая строка должна начинаться с отступа равного 1.25 сантиметра.
+\emergencystretch=25pt % Перенос текста при переполнении
+
+\usepackage{indentfirst}       % пакет для отступа абзаца
 \setlength{\parindent}{1.25cm} % отступ для абзаца
-
-%%%%%%%%%%%%%%%%%% Дополнения %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% Путь до папки с изображениями
-\graphicspath{ {./Images/} }
 
 % Внесение titlepage в учёт счётчика страниц
 \makeatletter
 \renewenvironment{titlepage} {
-	\thispagestyle{empty}
+  \thispagestyle{empty}
 }
 
+\usepackage{fancyhdr} % пакет для красивых полей снизу
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot{}
+\fancyfoot[R]{\thepage} % номера страниц справа
+\renewcommand{\headrulewidth}{0pt} % убираем линию сверху
+
+%%%%%%%%%%%%%%%%%% Дополнения %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\graphicspath{ {./Images/} } % Путь до папки с изображениями
+
+\renewcommand{\l@section}{\@dottedtocline{1}{0.5em}{1.2em}} % Точки у секций, а не только субсекций в содержании.
 
 % Цвет гиперссылок и цитирования
-\usepackage{hyperref} 
- \hypersetup{ 
-     colorlinks=true, 
-     linkcolor=black, 
-     filecolor=blue, 
-     citecolor = black,       
-     urlcolor=blue, 
-     }
-    
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true, 
+  linkcolor=black, 
+  filecolor=blue, 
+  citecolor = black,       
+  urlcolor=blue, 
+}
 
-% Нумерация рисунков
-\counterwithin{figure}{section}
-
-% Нумерация таблиц
-\counterwithin{table}{section}
-
-\counterwithin{table}{section}
-
-
-% Перенос текста при переполнении
-\emergencystretch=25pt
+\counterwithin{figure}{section} % Нумерация рисунков
+\counterwithin{table}{section} % Нумерация таблиц
