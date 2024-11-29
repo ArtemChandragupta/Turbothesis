@@ -1,5 +1,7 @@
 # Turbothesis
-![image](https://github.com/user-attachments/assets/9de78986-acbe-4cb5-8c69-15d0817ab219)
+![image](https://github.com/user-attachments/assets/1a168fcc-4c4e-4c24-924d-d1b6a2c6d2ac)
+
+
 
 Документ написан на $\LaTeX$ с компилятором Xelatex и менеджером библиографии biber.
 
