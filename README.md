@@ -3,7 +3,7 @@
 
 
 
-Документ написан на $\LaTeX$ с компилятором Xelatex и менеджером библиографии biber.
+[Документ](https://github.com/ArtemChandragupta/Turbothesis/blob/main/Turbothesis/main.pdf) написан на $\LaTeX$ с компилятором Xelatex и менеджером библиографии biber.
 
 Расчеты проводились инструментами Python в среде Jupyter Lab, от чего я в будущем хотел бы отказаться, перейдя на Haskell, к модели вычислений и синтаксису которого я предрасположен.
 Все переменные и расчеты в документе автоматизированны с помощью Jupyter, при изменении любых данных вводить всё заново не придётся.
@@ -12,4 +12,4 @@
 
 Предполагаемым способом обратной связи является github issues - с созданием issue на каждый вопрос. Так можно легко указать и отслеживать исправление ошибки и смотреть на конкретное изменение (commit), предполагающее исправление
 
-Презентация сделана по [неофициальному шаблону Политеха](https://github.com/polytechnic-templates/presentation-template).
+[Презентация](https://github.com/ArtemChandragupta/Turbothesis/blob/main/Dmitriev_65Mvt.pdf) сделана по [неофициальному шаблону Политеха](https://github.com/polytechnic-templates/presentation-template).
