@@ -21,16 +21,16 @@ y5 = data5.loc[:,['КПДЕ']]
 
 fig, ax = plt.subplots()
 
-ax.plot(x1,y1,'o-', label = 'T1 = 1543K', markersize=4)
-ax.plot(x2,y2,'^-', label = 'T1 = 1593K', markersize=4)
-ax.plot(x3,y3,'s-', label = 'T1 = 1643K', markersize=4)
-ax.plot(x4,y4,'^-', label = 'T1 = 1693K', markersize=4)
-ax.plot(x5,y5,'o-', label = 'T1 = 1743K', markersize=4)
+ax.plot(x1,y1,'o-', label = r'$T_1 = 1543 \ K$', markersize=4)
+ax.plot(x2,y2,'^-', label = r'$T_1 = 1593 \ K$', markersize=4)
+ax.plot(x3,y3,'s-', label = r'$T_1 = 1643 \ K$', markersize=4)
+ax.plot(x4,y4,'^-', label = r'$T_1 = 1693 \ K$', markersize=4)
+ax.plot(x5,y5,'o-', label = r'$T_1 = 1743 \ K$', markersize=4)
 
 ax.set_box_aspect(1/1.5)
 
-ax.set_xlabel(r'$\pi_k^*$')
-ax.set_ylabel(r'$\eta_e$')
+ax.set_xlabel(r'$\pi_k^*$',fontsize=14,loc='right'           ,labelpad=-13)
+ax.set_ylabel(r'$\eta_e$' ,fontsize=14,loc='top'  ,rotation=0,labelpad=-20)
 ax.legend()
 
 plt.grid(True)
