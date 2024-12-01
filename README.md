@@ -12,4 +12,4 @@
 
 Предполагаемым способом обратной связи является github issues - с созданием issue на каждый вопрос. Так можно легко указать и отслеживать исправление ошибки и смотреть на конкретное изменение (commit), предполагающее исправление
 
-[Презентация](https://github.com/ArtemChandragupta/Turbothesis/blob/main/Dmitriev_65Mvt.pdf) сделана по [неофициальному шаблону Политеха](https://github.com/polytechnic-templates/presentation-template).
+[Презентация](https://github.com/ArtemChandragupta/Turbothesis/blob/main/Presentation/Dmitriev_65Mvt.pdf) сделана по [неофициальному шаблону Политеха](https://github.com/polytechnic-templates/presentation-template).
