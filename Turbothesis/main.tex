@@ -1,27 +1,24 @@
 %! TeX program = lualatex
 
 \documentclass[14pt, a4paper]{extarticle}
+\input{Settings/packages}
 
-\include{Settings/packages}
-
-\include{Settings/format}
+\input{Settings/format}
 
 \begin{document}
+  \include{macros}
 
-	\include{macros}
-	
-	\include{titlepage}
+  \include{titlepage}
 
-	\include{tocpage}
+  \include{tocpage}
 
-	\include{Vars/FIRST}
-	\include{Vars/COMP}
-	\include{Vars/TURB}
+  \include{Vars/FIRST}
+  \include{Vars/COMP}
+  \include{Vars/TURB}
 
-	\include{content}
+  \include{content}
 
-	\include{bibpage}
+  \include{bibpage}
 
-	\include{supplement-1}
-
+  \include{supplement-1}
 \end{document}
