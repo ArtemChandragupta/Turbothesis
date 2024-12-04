@@ -1,7 +1,5 @@
 # Turbothesis
-![image](https://github.com/user-attachments/assets/1a168fcc-4c4e-4c24-924d-d1b6a2c6d2ac)
-
-
+![image](https://github.com/user-attachments/assets/0babdeca-399f-4437-b4b6-12ce99caeb07)
 
 [Документ](https://github.com/ArtemChandragupta/Turbothesis/blob/main/Turbothesis/main.pdf) написан на $\LaTeX$ в [Neovim](https://neovim.io/) + [VimTeX](https://github.com/lervag/vimtex) с компилятором [LuaTeX](https://www.luatex.org/) и менеджером библиографии [biber](https://biblatex-biber.sourceforge.net/).
 
