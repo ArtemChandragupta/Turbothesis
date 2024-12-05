@@ -21,11 +21,11 @@ y5 = data5.loc[:,['НЕ' ]]
 
 fig, ax = plt.subplots()
 
-ax.plot(x1,y1,'o-', label = r'$T_1 = 1543 \ K$', markersize=4)
-ax.plot(x2,y2,'^-', label = r'$T_1 = 1593 \ K$', markersize=4)
-ax.plot(x3,y3,'s-', label = r'$T_1 = 1643 \ K$', markersize=4)
-ax.plot(x4,y4,'^-', label = r'$T_1 = 1693 \ K$', markersize=4)
-ax.plot(x5,y5,'o-', label = r'$T_1 = 1743 \ K$', markersize=4)
+ax.plot(x1,y1,'o-', label = r'$T_3^* = 1543 \ K$', markersize=4)
+ax.plot(x2,y2,'^-', label = r'$T_3^* = 1593 \ K$', markersize=4)
+ax.plot(x3,y3,'s-', label = r'$T_3^* = 1643 \ K$', markersize=4)
+ax.plot(x4,y4,'^-', label = r'$T_3^* = 1693 \ K$', markersize=4)
+ax.plot(x5,y5,'o-', label = r'$T_3^* = 1743 \ K$', markersize=4)
 
 ax.set_box_aspect(1/1.5)
 
