@@ -1,0 +1,176 @@
+% \definecolor{cd8d8d8}{RGB}{216,216,216}
+% \definecolor{c333333}{RGB}{51,51,51}
+%
+%
+% \def \globalscale {1.000000}
+\begin{tikzpicture}[y=1cm, x=1cm, yscale=\globalscale,xscale=\globalscale, every node/.append style={scale=\globalscale}, inner sep=0pt, outer sep=0pt]
+  \path[draw=black,fill=cd8d8d8,dash pattern=on 0.2646cm] (5.5464, -1.3615) -- (5.5552, -6.9615);
+
+
+
+  \path[draw=black,fill=cd8d8d8,dash pattern=on 0.2646cm] (7.5057, -8.5949) -- (7.5146, -12.4493);
+
+
+
+  \path[draw=black] (6.1833, -6.5775) -- (6.3783, -2.3421) -- (7.5745, -2.4484) -- (7.7606, -6.5775);;
+
+
+
+  \path[draw=black] (8.3188, -2.3952) -- (8.4606, -6.4092) -- (9.7543, -6.4181) -- (9.896, -2.5724);;
+
+
+
+  \path[draw=black,fill=cd8d8d8] (5.3238, -2.0851) -- (10.4011, -2.6256);
+
+
+
+  \path[draw=black,fill=cd8d8d8] (10.3036, -6.5775) -- (3.8529, -6.5687);
+
+
+
+  \path[draw=black,fill=cd8d8d8] (4.0943, -8.8075) -- (8.2678, -9.2949);
+
+
+
+  \path[draw=black,fill=cd8d8d8] (9.7209, -11.9) -- (3.8285, -11.8822);
+
+
+
+  \path[draw=black] (4.6437, -11.8842) -- (4.7588, -9.0487) -- (5.4589, -9.1108) -- (5.5209, -11.8842);;
+
+
+
+  \path[draw=black] (5.9905, -9.0133) -- (6.0703, -11.7779) -- (6.7969, -11.7601) -- (6.9475, -9.1373);;
+
+
+
+  \node[text=c333333,anchor=south west] (text133) at (4.9046, -8.0996){Последняя ступень};
+
+
+
+  \node[text=c333333,anchor=south west] (text9511) at (5.9699, -1.1616){Первая ступень};
+
+
+
+  \node[text=c333333,anchor=south west] (text4765) at (5.4844, -1.2812){1};
+
+
+
+  \node[text=c333333,anchor=south west] (text7743) at (5.4742, -7.3253){1};
+
+
+
+  \node[text=c333333,anchor=south west] (text5350) at (7.4067, -8.4678){2};
+
+
+
+  \node[text=c333333,anchor=south west] (text7028) at (7.4094, -12.7769){2};
+
+
+
+  \path[draw=black,fill=cd8d8d8,line width=0.0529cm,rotate around={-2.0:(0.0, 0.0)}] (4.349, -4.4484) -- (4.8046, -4.4385);
+
+
+
+  \path[draw=black,fill=cd8d8d8,line width=0.0529cm] (9.3927, -9.1822) -- (6.9563, -9.1575);
+
+
+
+  \path[draw=black,fill=cd8d8d8,line width=0.0529cm] (4.0074, -6.5789) -- (4.0123, -2.1793);
+
+
+
+  \path[draw=black,fill,line width=0.0cm] (4.0139, -2.1803) -- (4.0634, -2.4279) -- (3.9643, -2.4279) -- (4.0139, -2.1803) -- cycle;
+
+
+
+  \path[draw=black,fill,line width=0.0cm,cm={ -1.0,-0.0,-0.0,-1.0,(8.0078, -12.9128)}] (-4.0039, 6.5802) -- (-3.9544, 6.3326) -- (-4.0534, 6.3326) -- (-4.0039, 6.5802) -- cycle;
+
+
+
+  \path[draw=black,fill,line width=0.0cm] (4.7037, -4.4533) -- (4.7533, -4.7009) -- (4.6542, -4.7009) -- (4.7037, -4.4533) -- cycle;
+
+
+
+  \path[draw=black,fill=cd8d8d8,line width=0.0529cm] (4.7056, -4.4369) -- (4.7006, -7.2348);
+
+
+
+  \path[draw=black,fill=white,line width=0.0cm] (3.7339, -4.2234) rectangle (4.2538, -4.58);
+
+
+
+  \node[cm={ 0.0,1.0,-1.0,0.0,(0.4447, 0.2823)},anchor=south west] (text5459) at (3.1603, -4.7831){l};
+
+
+
+  \node[text=c333333,anchor=south,cm={ 0.0,1.0,-1.0,0.0,(1.27, -0.0794)}] (text7443) at (2.8632, -4.3819){1};
+
+
+
+  \path[draw=black,fill=white,line width=0.0cm] (4.4679, -5.5187) rectangle (4.9878, -5.8752);
+
+
+
+  \path[draw=black,fill=white,line width=0.0cm] (4.4346, -5.8595) rectangle (4.9546, -6.216);
+
+
+
+  \node[cm={ 0.0,1.0,-1.0,0.0,(1.0726, -1.3747)},anchor=south west] (text6157) at (3.1603, -4.7831){D};
+
+
+
+  \node[text=c333333,anchor=south,cm={ 0.0,1.0,-1.0,0.0,(1.9202, -1.4752)}] (text363) at (2.8632, -4.3819){ср.1};
+
+
+
+  \path[draw=black,fill=cd8d8d8,line width=0.0529cm] (9.2971, -9.1767) -- (9.338, -11.8764);
+
+
+
+  \path[draw=black,fill=cd8d8d8,line width=0.0529cm] (8.445, -10.5197) -- (8.7313, -10.5265);
+
+
+
+  \path[draw=black,fill=cd8d8d8,line width=0.0529cm] (8.5404, -12.5376) -- (8.5336, -10.5265);
+
+
+
+  \path[draw=black,fill=white,line width=0.0cm] (9.1267, -10.3311) rectangle (9.5357, -10.7811);
+
+
+
+  \path[draw=black,fill=white,line width=0.0cm] (8.2473, -11.0946) rectangle (8.7586, -11.8377);
+
+
+
+  \node[cm={ 0.0,1.0,-1.0,0.0,(4.9595, -6.9437)},anchor=south west] (text533) at (3.1603, -4.7831){D};
+
+
+
+  \node[text=c333333,anchor=south,cm={ 0.0,1.0,-1.0,0.0,(5.8, -7.0502)}] (text1071) at (2.8632, -4.3819){ср.2};
+
+
+
+  \path[draw=black,fill=cd8d8d8,line width=0.0529cm] (3.8803, -2.161) -- (6.3686, -2.1883);
+
+
+
+  \path[draw=black,fill,line width=0.0cm,cm={ -1.0,-0.0,-0.0,-1.0,(19.5542, -23.5778)}] (-10.2137, 11.9258) -- (-10.1642, 11.6782) -- (-10.2632, 11.6782) -- (-10.2137, 11.9258) -- cycle;
+
+
+
+  \node[text=c333333,anchor=south west] (text8880) at (9.7239, -12.9277){};
+
+
+
+  \node[cm={ 0.0,1.0,-1.0,0.0,(5.7026, -5.866)},anchor=south west] (text4398) at (3.1603, -4.7831){l};
+
+
+
+  \node[text=c333333,anchor=south,cm={ 0.0,1.0,-1.0,0.0,(6.5568, -6.2125)}] (text1594) at (2.8632, -4.3819){2};
+
+
+
+
+\end{tikzpicture}
