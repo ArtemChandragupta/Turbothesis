@@ -1,19 +1,24 @@
 % \image {Имя изображения.расширение}{Подпись к рисунку}{Скейл Изображения}
-\newcommand{\image}[3]{
+\newcommand{\image}[4]{
 \begin{figure}[!htb]
-	\centering
-	\includegraphics[width=#3\textwidth]{#1}
-	\caption{#2}
+  \centering
+  \includegraphics[width=#3\textwidth]{#1}
+
+  #4
+  
+  \caption{#2}
+  \label{#1}
 \end{figure}
 }
 
-% \inputpgf {Имя изображения.расширение}{Директория}{Подпись к рисунку}
+% \inputpgf {Директория}{Имя изображения.расширение}{Подпись к рисунку}
 \newcommand\inputpgf[3]{{
 \begin{figure}[!ht]
-	\centering
-	\let\pgfimageWithoutPath\pgfimage
-	\renewcommand{\pgfimage}[2][]{\pgfimageWithoutPath[##1]{#1/##2}}
-	\input{#1/#2}
-	\caption{#3}
+  \centering
+  \let\pgfimageWithoutPath\pgfimage
+  \renewcommand{\pgfimage}[2][]{\pgfimageWithoutPath[##1]{#1/##2}}
+  \input{#1/#2}
+  \caption{#3}
+  \label{#2}
 \end{figure}
 }}
