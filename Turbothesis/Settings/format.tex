@@ -2,7 +2,7 @@
 
 \setdefaultlanguage[spelling=modern]{russian}
 \setotherlanguage{english}
-    
+ 
 \setmonofont{NotoMono Nerd Font}
 \setmainfont{Times New Roman} 
 \setromanfont{Times New Roman} 
@@ -45,17 +45,14 @@
 
 \graphicspath{ {./Images/} } % Путь до папки с изображениями
 
+\addto\captionsrussian{
+  \renewcommand{\contentsname}{СОДЕРЖАНИЕ}
+}
+\renewcommand{\cfttoctitlefont}{\normalfont\fontsize{14pt}{0}\bfseries}
 \renewcommand{\l@section}{\@dottedtocline{1}{0.5em}{1.2em}} % Точки у секций, а не только субсекций в содержании.
 
-% Цвет гиперссылок и цитирования
-% \usepackage{hyperref}
-% \hypersetup{
-%   colorlinks=true, 
-%   linkcolor=black, 
-%   filecolor=blue, 
-%   citecolor = black,       
-%   urlcolor=blue, 
-% }
+\usepackage{titlesec}
+\titleformat{\section}{\normalfont\fontsize{14pt}{0}\bfseries}{\thesection}{1.25em}{}
+\titleformat{\subsection}{\normalfont\fontsize{14pt}{0}\bfseries}{\thesubsection}{1.25em}{}
 
-\counterwithin{figure}{section} % Нумерация рисунков
-\counterwithin{table}{section} % Нумерация таблиц
+\usepackage[figurename=Рисунок]{caption}
