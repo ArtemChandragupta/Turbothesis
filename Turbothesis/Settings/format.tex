@@ -2,7 +2,7 @@
 
 \setdefaultlanguage[spelling=modern]{russian}
 \setotherlanguage{english}
- 
+
 \setmonofont{NotoMono Nerd Font}
 \setmainfont{Times New Roman} 
 \setromanfont{Times New Roman} 
@@ -21,7 +21,9 @@
   bottom=2cm
 ]{geometry} % поля
 
-\linespread{1.5} % междустрочный интервал
+% LaTeX, а конкретно - setspace, рассматривает межстрочный интервал не так, как MS Word:https://forum.typst.app/t/whats-the-equivalent-of-ms-words-1-5-line-spacing/1057
+% \linespread{1.5} % междустрочный интервал
+\linespread{1.25} % междустрочный интервал
 
 \emergencystretch=25pt % Перенос текста при переполнении
 
@@ -52,7 +54,7 @@
 \renewcommand{\l@section}{\@dottedtocline{1}{0.5em}{1.2em}} % Точки у секций, а не только субсекций в содержании.
 
 \usepackage{titlesec}
-\titleformat{\section}{\normalfont\fontsize{14pt}{0}\bfseries}{\thesection}{1.25em}{}
-\titleformat{\subsection}{\normalfont\fontsize{14pt}{0}\bfseries}{\thesubsection}{1.25em}{}
+\titleformat{\section}{\raggedright\normalfont\fontsize{14pt}{0}\bfseries}{\thesection}{1.25em}{}
+\titleformat{\subsection}{\raggedright\normalfont\fontsize{14pt}{0}\bfseries}{\thesubsection}{1.25em}{}
 
 \usepackage[figurename=Рисунок]{caption}
