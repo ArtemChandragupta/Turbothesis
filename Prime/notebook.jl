@@ -166,6 +166,17 @@ function calc_comp(I, C, πₖ, 𝒞 = CONST, 𝒯 = TASK)
 	(;σᵢₙ, σₒᵤₜ, ηₐ, nₖ, cᶻ₁, cᶻ₂, V₁, Ω, hₘ, P₁, T₁, Pₖ, P₂, ρ₁, ρ₂, D₁, Dᵥₜ₁, Dₘ₁, l₁, F₂, V₂, l₂, uₙ₁, Hₐ, Hₖ, i, h₁, h₂, uₘ₁, Φ₁, hh₁, otn, otm, P₀ᵍ, J, tb, tbem, uₘ₂, u, cᵤ₁, cᵤ₂, c₁, α₁, T₁¹, wᵤ₁, w₁, Mʷ₁, β₁, Δcᶻ, Ocᶻ₂, c₂, α₂, wᵤ₂, w₂, β₂, ϵ, Φₙ, Mʷₘ)
 end
 
+# ╔═╡ d4a9d15f-df48-456b-9bc7-ff88a61d634f
+function calc_turbine(I, C, πₖ, O, 𝒞 = CONST, 𝒯 = TASK)
+	kₙ = 1.0185
+	
+	P₀  = 𝒞.σₖₛ * O.Pₖ
+	Nₖ  = O.Hₖ * C.gₐᵢᵣ * 1000
+	Nₜ  = 𝒯.N + Nₖ
+	Hᵤₜ = kₙ * Nₜ / C.Gₜ
+	
+end
+
 # ╔═╡ ced360e6-6a20-462b-862f-bb68fed673cd
 begin
 	I = calc_prime()
@@ -176,6 +187,9 @@ end
 
 # ╔═╡ 2fbdd00b-466e-441e-8a56-67508a433c18
 I
+
+# ╔═╡ ef602ec4-d5bb-4dc3-aa24-2aa3a042cc03
+O
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -194,7 +208,7 @@ PlutoUI = "~0.7.62"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.5"
+julia_version = "1.11.6"
 manifest_format = "2.0"
 project_hash = "301f9c36f6fae660861067c4579f4b843ec546cd"
 
@@ -1735,7 +1749,9 @@ version = "3.6.0+0"
 # ╠═f8608c64-aead-49cb-809e-bf60b383ff1c
 # ╠═f22d9c8b-04d1-4acb-92ed-5dda7404940d
 # ╠═fe821429-f573-4fb8-9268-54aeb6be6e49
+# ╠═d4a9d15f-df48-456b-9bc7-ff88a61d634f
 # ╠═ced360e6-6a20-462b-862f-bb68fed673cd
-# ╠═2fbdd00b-466e-441e-8a56-67508a433c18
+# ╟─2fbdd00b-466e-441e-8a56-67508a433c18
+# ╟─ef602ec4-d5bb-4dc3-aa24-2aa3a042cc03
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
