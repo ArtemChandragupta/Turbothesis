@@ -45,6 +45,14 @@ end
 
 # ╔═╡ f8608c64-aead-49cb-809e-bf60b383ff1c
 function calc_prime(𝒞 = CONST, 𝒯 = TASK)
+	Qₙₚ  = 44.3e6
+	hₜₒₚ = 0
+	L₀   = 15
+	T̂₀   = 273.15
+	Cpₐ  = 1200
+	Tₛₜ  = 1100
+	σᵤₜ  = 1.15
+	
 	kₙ  = 𝒞.Cpₙ / (𝒞.Cpₙ - 𝒞.Rₙ )
 	P⃰₁  = 𝒞.σ₁ * 𝒯.Pₙ
 	T⃰₁  = 𝒯.Tₙ
@@ -63,21 +71,8 @@ function calc_prime(𝒞 = CONST, 𝒯 = TASK)
 	Q₁  = Q̇₁ / 𝒞.ηₖₛ
 	ηe  = (Hₜ * 𝒞.ηₘₜ - Hₖ / 𝒞.ηₘₖ) / Q₁
 	Φ   = (Hₜ * 𝒞.ηₘₜ - Hₖ / 𝒞.ηₘₖ) / (Hₜ * 𝒞.ηₘₜ)
-	
-	(; kₙ, P⃰₁, T⃰₁, P⃰₂, T⃰₂, H⃰ₒₖ,	Hₖ,	P⃰₃, P⃰₄,	π⃰ₜ,	H⃰ₒₜ, Hₜ, T⃰₄, Gₙ, Q̇₁, Q₁, ηe, Φ)
-end
 
-# ╔═╡ f22d9c8b-04d1-4acb-92ed-5dda7404940d
-function calc_coolant(I, 𝒞 = CONST, 𝒯 = TASK)
-	Qₙₚ  = 44.3e6
-	hₜₒₚ = 0
-	L₀   = 15
-	T̂₀   = 273.15
-	Cpₐ  = 1200
-	Tₛₜ  = 1100
-	σᵤₜ  = 1.15
-	
-	t⃰₂   = I.T⃰₂ - T̂₀
+	t⃰₂   = T⃰₂ - T̂₀
 	t⃰₃   = 𝒯.T⃰₃ - T̂₀
 	gₐᵢᵣ = (Qₙₚ*𝒞.ηₖₛ + hₜₒₚ + L₀*𝒞.Cpₙ*t⃰₂ - (L₀+1)*Cpₐ*t⃰₃) / (Cpₐ * (t⃰₃-t⃰₂))
 	a    = (L₀ + gₐᵢᵣ)/ L₀
@@ -86,16 +81,17 @@ function calc_coolant(I, 𝒞 = CONST, 𝒯 = TASK)
 	gᵖc  = 0.08 + 0.22 / 10000 * (𝒯.T⃰₃ - Tₛₜ)
 	gc   = σᵤₜ * (gᶜc + gᵖc)
 	ĝc   = ( (1+gₜ) * gc ) / ( 1 + (1+gₜ)*gc )
-	Gₜ   = gₜ * (1-ĝc) * I.Gₙ
-	Ωᵣₐₛ = I.H⃰ₒₜ * I.Gₙ / Gₜ
-	Hₑ   = (1+gₜ) * (1-ĝc) * I.Hₜ * 𝒞.ηₘₜ - I.Hₖ * 𝒞.ηₘₖ
-	Ωₐₗₗ = Hₑ * I.Gₙ / Gₜ
+	Gₜ   = gₜ * (1-ĝc) * Gₙ
+	Ωᵣₐₛ = H⃰ₒₜ * Gₙ / Gₜ
+	Hₑ   = (1+gₜ) * (1-ĝc) * Hₜ * 𝒞.ηₘₜ - Hₖ * 𝒞.ηₘₖ
+	Ωₐₗₗ = Hₑ * Gₙ / Gₜ
 	
-	(; Qₙₚ, hₜₒₚ, L₀, T̂₀, Cpₐ, Tₛₜ, σᵤₜ, t⃰₂, t⃰₃, gₐᵢᵣ, a, gₜ, gᶜc, gᵖc, gc, ĝc, Gₜ, Ωᵣₐₛ, Hₑ, Ωₐₗₗ,)
+	(; kₙ, P⃰₁, T⃰₁, P⃰₂, T⃰₂, H⃰ₒₖ,	Hₖ,	P⃰₃, P⃰₄,	π⃰ₜ,	H⃰ₒₜ, Hₜ, T⃰₄, Gₙ, Q̇₁, Q₁, ηe, Φ,
+	Qₙₚ, hₜₒₚ, L₀, T̂₀, Cpₐ, Tₛₜ, σᵤₜ, t⃰₂, t⃰₃, gₐᵢᵣ, a, gₜ, gᶜc, gᵖc, gc, ĝc, Gₜ, Ωᵣₐₛ, Hₑ, Ωₐₗₗ)
 end
 
 # ╔═╡ fe821429-f573-4fb8-9268-54aeb6be6e49
-function calc_comp(I, C, π⃰ₖ, 𝒞 = CONST, 𝒯 = TASK)
+function calc_comp(I, π⃰ₖ, 𝒞 = CONST, 𝒯 = TASK)
 	σ⃰ᵢₙ  = 0.99
 	σ⃰ₒᵤₜ = 0.98
 	η⃰ₐ   = 0.88
@@ -135,9 +131,9 @@ function calc_comp(I, C, π⃰ₖ, 𝒞 = CONST, 𝒯 = TASK)
 	otm  = Ω / Φ₁
 	P₀ᵍ  = 0.935 - 0.777 * otm + 0.503 * otm^2
 	J    = otn / P₀ᵍ
-	#Jᵃ   = (-0.916 + √(0.916^2 + 4 * (0.177-J) * 0.0884) ) / (-2 * 0.0884)
-	#tb   = 1 / Jᵃ
-	tb   = 1 / J
+	Jᵃ   = (-0.916 + √(0.916^2 + 4 * (0.177-J) * 0.0884) ) / (-2 * 0.0884)
+	tb   = 1 / Jᵃ
+	#tb   = 1 / J
 	tbem = tb * Dᵥₜ₁ / Dₘ₁
 	u    = uₘ₁
 	cᵤ₁  = u * (1-Ω) - h₁ / 2u
@@ -164,7 +160,7 @@ function calc_comp(I, C, π⃰ₖ, 𝒞 = CONST, 𝒯 = TASK)
 end
 
 # ╔═╡ d4a9d15f-df48-456b-9bc7-ff88a61d634f
-function calc_turb(I, C, O, π⃰ₖ, T⃰₀, 𝒞 = CONST, 𝒯 = TASK)
+function calc_turb(I, C, π⃰ₖ, T⃰₀, 𝒞 = CONST, 𝒯 = TASK)
 	kₙ   = 1.0185
 	λ₂ₜ  = 0.5
 	ηₐ   = 0.91
@@ -173,10 +169,10 @@ function calc_turb(I, C, O, π⃰ₖ, T⃰₀, 𝒞 = CONST, 𝒯 = TASK)
 	d₂ₘ  = 1.4
 	m    = 4
 	
-	P⃰₀   = 𝒞.σ⃰ₖₛ * O.P⃰ₖ
-	Nₖ   = O.H⃰ₖ * I.Gₙ
+	P⃰₀   = 𝒞.σ⃰ₖₛ * C.P⃰ₖ
+	Nₖ   = C.H⃰ₖ * I.Gₙ
 	Nₜ   = 𝒯.N + Nₖ
-	Gᵧ   = I.Gₙ + C.Gₜ
+	Gᵧ   = I.Gₙ + I.Gₜ
 	Hᵤₜ  = kₙ * Nₜ / Gᵧ
 	ΔT⃰ₜ  = Hᵤₜ / 𝒞.Cpᵧ
 	T⃰₂ₜ  = T⃰₀ - ΔT⃰ₜ
@@ -202,14 +198,13 @@ end
 # ╔═╡ ced360e6-6a20-462b-862f-bb68fed673cd
 begin
 	I = calc_prime()
-	C = calc_coolant(I)
 
 	# Результат A2GTP
 	π⃰ₖ  = 16
 	T⃰₀  = 1693
 	
-	O = calc_comp(I, C, π⃰ₖ)
-	T = calc_turb(I, C, O, π⃰ₖ, T⃰₀)
+	C = calc_comp(I, π⃰ₖ)
+	T = calc_turb(I, C, π⃰ₖ, T⃰₀)
 end
 
 # ╔═╡ f39cfba9-db24-43ef-9cc6-dc294456a177
@@ -253,18 +248,21 @@ end
 
 # ╔═╡ 4f8e5f86-b871-4b39-8750-cd62dde519a3
 begin
+
+	open("vars/CONST.typ", "w") do file
+    	write(file, namedtuple_to_typst(TASK; prefix ="TA"))
+		write(file, "\n" )
+		write(file, namedtuple_to_typst(CONST; prefix ="CO"))
+		write(file, "\n" )
+	end
+
 	open("vars/Prime.typ", "w") do file
     	write(file, namedtuple_to_typst(I; prefix ="I"))
 		write(file, "\n" )
 	end
-	
-	open("vars/Cool.typ", "w") do file
-    	write(file, namedtuple_to_typst(C; prefix ="C"))
-		write(file, "\n" )
-	end
 
 	open("vars/Comp.typ", "w") do file
-    	write(file, namedtuple_to_typst(O; prefix ="O"))
+    	write(file, namedtuple_to_typst(C; prefix ="C"))
 		write(file, "\n" )
 	end
 
@@ -1831,9 +1829,8 @@ version = "3.6.0+0"
 # ╟─6799a962-4b97-11f0-09c5-a3dd1bde673a
 # ╠═dab0fc69-515a-4784-acea-e020259f25c2
 # ╠═f8608c64-aead-49cb-809e-bf60b383ff1c
-# ╠═f22d9c8b-04d1-4acb-92ed-5dda7404940d
-# ╟─fe821429-f573-4fb8-9268-54aeb6be6e49
-# ╟─d4a9d15f-df48-456b-9bc7-ff88a61d634f
+# ╠═fe821429-f573-4fb8-9268-54aeb6be6e49
+# ╠═d4a9d15f-df48-456b-9bc7-ff88a61d634f
 # ╠═ced360e6-6a20-462b-862f-bb68fed673cd
 # ╟─f39cfba9-db24-43ef-9cc6-dc294456a177
 # ╟─9942bf76-188a-47b7-838d-52280230aee3
