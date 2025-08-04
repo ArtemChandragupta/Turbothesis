@@ -98,7 +98,7 @@ function calc_prime(𝒞 = CONST, 𝒯 = TASK)
 	# Расчет с охладителем
 	t⃰₂   = T⃰₂ - 𝒞.T̂₀
 	t⃰₃   = 𝒯.T⃰₃ - 𝒞.T̂₀
-	gₐᵢᵣ = (𝒞.Qₙₚ*𝒞.ηₖₛ + 𝒞.hₜₒₚ + 𝒞.L₀*𝒞.Cpₙ*t⃰₂ - (𝒞.L₀+1)*𝒞.Cpₐ*t⃰₃) / (𝒞.Cpₐ * (t⃰₃-t⃰₂))
+	gₐᵢᵣ = (𝒞.Qₙₚ*𝒞.ηₖₛ + 𝒞.hₜₒₚ + 𝒞.L₀*𝒞.Cpₙ*t⃰₂ - (𝒞.L₀+1)*𝒞.Cpₐ*t⃰₃) / (𝒞.Cpₙ * (t⃰₃-t⃰₂))
 	a    = (𝒞.L₀ + gₐᵢᵣ)/ 𝒞.L₀
 	gₜ   = 1 / (a * 𝒞.L₀)
 	gᶜc  = 0.01 + 0.25 / 10000 * (𝒯.T⃰₃ - 𝒞.Tₛₜ)
@@ -150,23 +150,23 @@ function calc_comp(I, π⃰ₖ, 𝒞 = CONST, 𝒯 = TASK)
 	cᵤ₂  = u * (1-𝒞.Ω) + h₁ / 2u
 	c₁   = √(𝒞.cᶻ₁^2 + cᵤ₁^2)
 	α₁   = atand(𝒞.cᶻ₁ / cᵤ₁)
-	T₁   = T⃰₁ - c₁^2 / ( 2 * 𝒞.Rₙ * 1000 * (I.kₙ / ( I.kₙ - 1 )) )
+	T₁   = T⃰₁ - c₁^2 / ( 2 * 𝒞.Rₙ * (I.kₙ / ( I.kₙ - 1 )) )
 	wᵤ₁  = cᵤ₁ - u
 	w₁   = √(𝒞.cᶻ₁^2 + wᵤ₁^2)
 	Mʷ₁  = w₁ / √(I.kₙ * 𝒞.Rₙ * T₁)
 	β₁   = atand(𝒞.cᶻ₁ / (-wᵤ₁))
 	Δcᶻ  = (𝒞.cᶻ₁ - 𝒞.cᶻ₂) / i
-	Ocᶻ₂ = 𝒞.cᶻ₁ - Δcᶻ/2
-	c₂   = √(Ocᶻ₂^2 + cᵤ₂^2)
+	Ccᶻ₂ = 𝒞.cᶻ₁ - Δcᶻ/2
+	c₂   = √(Ccᶻ₂^2 + cᵤ₂^2)
 	α₂   = atand(𝒞.cᶻ₂ / cᵤ₂)
 	wᵤ₂  = cᵤ₂ - u
-	w₂   = √(Ocᶻ₂^2 + wᵤ₂^2)
+	w₂   = √(Ccᶻ₂^2 + wᵤ₂^2)
 	β₂   = atand(𝒞.cᶻ₂ / (-wᵤ₂))
 	ϵ    = β₂ - β₁
 	Φₙ   = 𝒞.cᶻ₁ / uₙ₁
 	Mʷₘ  = uₙ₁ * √(1 + Φₙ^2) / √(I.kₙ * 𝒞.Rₙ * T⃰₁)
 	
-	(; P⃰₁, T⃰₁, P⃰ₖ, P⃰₂, ρ₁, ρ₂, D₁, Dᵥₜ₁, Dₘ₁, l₁, F₂, ν₂, l₂, uₙ₁, H⃰ₐ, H⃰ₖ, i, h₁, h₂, uₘ₁, Φ₁, h̄₁, otn, otm, P₀ᵍ, J, tb, tbem, u, cᵤ₁, cᵤ₂, c₁, α₁, T₁, wᵤ₁, w₁, Mʷ₁, β₁, Δcᶻ, Ocᶻ₂, c₂, α₂, wᵤ₂, w₂, β₂, ϵ, Φₙ, Mʷₘ)
+	(; P⃰₁, T⃰₁, P⃰ₖ, P⃰₂, ρ₁, ρ₂, D₁, Dᵥₜ₁, Dₘ₁, l₁, F₂, ν₂, l₂, uₙ₁, H⃰ₐ, H⃰ₖ, i, h₁, h₂, uₘ₁, Φ₁, h̄₁, otn, otm, P₀ᵍ, J, tb, tbem, u, cᵤ₁, cᵤ₂, c₁, α₁, T₁, wᵤ₁, w₁, Mʷ₁, β₁, Δcᶻ, Ccᶻ₂, c₂, α₂, wᵤ₂, w₂, β₂, ϵ, Φₙ, Mʷₘ)
 end
 
 # ╔═╡ d4a9d15f-df48-456b-9bc7-ff88a61d634f
@@ -194,7 +194,7 @@ function calc_turb(I, C, π⃰ₖ, T⃰₀, 𝒞 = CONST, 𝒯 = TASK)
 	kₘ   = 𝒞.d₂ₘ / l₂
 	Y    = √(2 * u₂^2 / Hₒₜ)
 	
-	(; P⃰₀, Nₖ, Nₜ, Hᵤₜ, ΔT⃰ₜ, T⃰₂ₜ, aᵏʳ₂, c₂ₜ, Hₐₜ, Hₒₜ, T⃰₂ₜₜ, P₂ₜ, T₂T, ρ₂ₜ, F₂ₜ, σₚ, kₚ, u₂, l₂, kₘ, Y )
+	(; P⃰₀, Nₖ, Gᵧ, Nₜ, Hᵤₜ, ΔT⃰ₜ, T⃰₂ₜ, aᵏʳ₂, c₂ₜ, Hₐₜ, Hₒₜ, T⃰₂ₜₜ, P₂ₜ, T₂T, ρ₂ₜ, F₂ₜ, σₚ, kₚ, u₂, l₂, kₘ, Y )
 end
 
 # ╔═╡ ced360e6-6a20-462b-862f-bb68fed673cd
@@ -253,25 +253,29 @@ end
 # ╔═╡ 4f8e5f86-b871-4b39-8750-cd62dde519a3
 begin
 
+	CO = map(x -> round(x; sigdigits=4), CONST)
 	open("vars/CONST.typ", "w") do file
     	write(file, namedtuple_to_typst(TASK; prefix ="TA"))
 		write(file, "\n" )
-		write(file, namedtuple_to_typst(CONST; prefix ="CO"))
+		write(file, namedtuple_to_typst(CO; prefix ="CO"))
 		write(file, "\n" )
 		write(file, "#let AAπsₖ = $π⃰ₖ \n")
-		write(file, "#let AATs₀ = $T⃰₀ \n")
+		write(file, "#let AATs0 = $T⃰₀ \n")
 	end
 
+	II = map(x -> round(x; sigdigits=4), I)
 	open("vars/Prime.typ", "w") do file
-    	write(file, namedtuple_to_typst(I; prefix ="I"))
+    	write(file, namedtuple_to_typst(II; prefix ="I"))
 	end
 
+	CC = map(x -> round(x; sigdigits=4), C)
 	open("vars/Comp.typ", "w") do file
-    	write(file, namedtuple_to_typst(C; prefix ="C"))
+    	write(file, namedtuple_to_typst(CC; prefix ="C"))
 	end
 
+	TT = map(x -> round(x; sigdigits=4), T)
 	open("vars/Turb.typ", "w") do file
-    	write(file, namedtuple_to_typst(T; prefix ="T"))
+    	write(file, namedtuple_to_typst(TT; prefix ="T"))
 	end
 
 	md"Запись в файл"
@@ -577,8 +581,8 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─6799a962-4b97-11f0-09c5-a3dd1bde673a
-# ╟─dab0fc69-515a-4784-acea-e020259f25c2
-# ╟─f8608c64-aead-49cb-809e-bf60b383ff1c
+# ╠═dab0fc69-515a-4784-acea-e020259f25c2
+# ╠═f8608c64-aead-49cb-809e-bf60b383ff1c
 # ╠═fe821429-f573-4fb8-9268-54aeb6be6e49
 # ╠═d4a9d15f-df48-456b-9bc7-ff88a61d634f
 # ╠═ced360e6-6a20-462b-862f-bb68fed673cd
