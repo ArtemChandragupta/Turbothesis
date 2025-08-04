@@ -258,22 +258,23 @@ begin
 		write(file, "\n" )
 		write(file, namedtuple_to_typst(CONST; prefix ="CO"))
 		write(file, "\n" )
+		write(file, "#let AAπsₖ = $π⃰ₖ \n")
+		write(file, "#let AATs₀ = $T⃰₀ \n")
 	end
 
 	open("vars/Prime.typ", "w") do file
     	write(file, namedtuple_to_typst(I; prefix ="I"))
-		write(file, "\n" )
 	end
 
 	open("vars/Comp.typ", "w") do file
     	write(file, namedtuple_to_typst(C; prefix ="C"))
-		write(file, "\n" )
 	end
 
 	open("vars/Turb.typ", "w") do file
     	write(file, namedtuple_to_typst(T; prefix ="T"))
-		write(file, "\n" )
 	end
+
+	md"Запись в файл"
 
 end
 
@@ -578,9 +579,9 @@ version = "17.4.0+2"
 # ╟─6799a962-4b97-11f0-09c5-a3dd1bde673a
 # ╟─dab0fc69-515a-4784-acea-e020259f25c2
 # ╟─f8608c64-aead-49cb-809e-bf60b383ff1c
-# ╟─fe821429-f573-4fb8-9268-54aeb6be6e49
-# ╟─d4a9d15f-df48-456b-9bc7-ff88a61d634f
-# ╟─ced360e6-6a20-462b-862f-bb68fed673cd
+# ╠═fe821429-f573-4fb8-9268-54aeb6be6e49
+# ╠═d4a9d15f-df48-456b-9bc7-ff88a61d634f
+# ╠═ced360e6-6a20-462b-862f-bb68fed673cd
 # ╟─f39cfba9-db24-43ef-9cc6-dc294456a177
 # ╟─9942bf76-188a-47b7-838d-52280230aee3
 # ╟─4f8e5f86-b871-4b39-8750-cd62dde519a3

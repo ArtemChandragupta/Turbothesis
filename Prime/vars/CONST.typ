@@ -42,3 +42,5 @@
 #let COσ500 = 6.1e8
 #let COd2ₘ = 1.4
 #let COm = 4
+#let AAπsₖ = 16 
+#let AATs₀ = 1693 
