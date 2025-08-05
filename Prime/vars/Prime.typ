@@ -1,4 +1,3 @@
-#let Ikₙ = 1.386
 #let IPs1 = 99980.0
 #let ITs1 = 288.0
 #let IPs2 = 1.8e6
