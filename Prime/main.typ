@@ -493,7 +493,66 @@ $ M_W_с = u_н_1 dot sqrt(1+phi_н^2)/sqrt(k_в dot R_в dot T_1^*) = Cuₙ1 do
 
 Сверхзвуковое число $M_W_c$ свидетельствует о необходимости профилирования лопаточного аппарата первой ступени турбины по закону $Omega = "const"$ вдоль радиуса.
 
-На рисунке приведён построенный по полученным данным треугольник скоростей:
+На @Tri[рисунке] приведён построенный по полученным данным треугольник скоростей:
+
+#figure(
+  text(size: 12pt)[#cetz.canvas(length:0.05cm, {
+    import cetz.draw: *
+    set-style(
+      mark: (transform-shape: false, fill: black),
+      stroke: (cap: "round")
+    )
+    // Variable
+    let start =  150
+    
+    // Оси
+    line((start,0),(-start,0), mark:(end: "stealth"), name: "axisu")
+    content("axisu.end", $U$, padding: 5, anchor: "north-west" )
+    line((0,0),(0,-COcᶻ1), mark:(end: "stealth"), name: "axisz")
+    content("axisz.end", $z$, padding: 5, anchor: "south-west" )
+
+    // Треугольник 1
+    line(name:"C1", (0,0),(-Ccᵤ1  ,-COcᶻ1), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
+    line(name:"W1", (0,0),(-Ccᵤ1 + Cu, -COcᶻ1), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
+    line(name:"U1", "W1.end","C1.end", mark:(end: "stealth", fill:red),stroke:(paint:red, thickness: 2pt))
+
+    // Треугольник 2
+    line(name:"C2", (0,0),(-Ccᵤ2  ,-CCcᶻ2), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
+    line(name:"W2", (0,0),(-Ccᵤ2 + Cu, -CCcᶻ2), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
+    line(name:"U2","W2.end","C2.end", mark:(end: "stealth", fill:blue),stroke:(paint:blue, thickness: 2pt))
+
+    // линии для U1 и U2
+    line(name:"U1s","U1.start", (rel:(0,-20)))
+    line(name:"U1e","U1.end",   (rel:(0,-20)))
+    line(name:"U_1", "U1s.16", "U1e.16", mark:(symbol: "stealth"))
+    line(name:"U2s","U2.start", (rel:(0,-40)))
+    line(name:"U2e","U2.end",   (rel:(0,-40)))
+    line(name:"U_2", "U2s.36", "U2e.36", mark:(symbol: "stealth"))
+
+    // Подписи
+    content("C1.70%", angle:Cα1 * 1deg, box(fill:white, inset:3pt)[$C_1 = Cc1 "м/с"$])
+    content("W1.70%", angle:-Cβ1 * 1deg, box(fill:white, inset:3pt)[$W_1 = Cw1 "м/с"$])
+    content("C2.70%", angle:Cα2 * 1deg, box(fill:white, inset:3pt)[$C_2 = Cc2 "м/с"$])
+    content("W2.70%", angle:-Cβ2 * 1deg, box(fill:white, inset:3pt)[$W_2 = Cw2 "м/с"$])
+    content("U_1.mid", box(fill:white, inset:3pt)[$U_1 = Cu "м/с"$])
+    content("U_2.mid", box(fill:white, inset:3pt)[$U_2 = Cu "м/с"$])
+    content("axisz.90", angle:90deg, box(fill:white, inset:3pt)[$C_z_1 = COcᶻ1 "м/с"$], anchor: "south")
+    content("axisz.90", angle:-90deg, box(fill:white, inset:3pt)[$C_z_2 = CCcᶻ2 "м/с"$], anchor: "south")
+
+    // Дуги
+    arc(name:"a2", (0,0), start:180deg, stop: 180deg + Cα2 * 1deg, radius:80, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"b2", (0,0), start:0deg, stop: -Cβ2 * 1deg , radius:45, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"a1", (0,0), start:-180deg, stop: -180deg + Cα1 * 1deg, radius:45, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"b1", (0,0), start:0deg, stop: 0deg - Cβ1 * 1deg, radius:80, anchor:"origin", mark:(symbol:"stealth"))
+
+    // Подписи дуг
+    content("a1.50%", angle: Cα1 * 1deg * 0.5, box(fill:white, inset:3pt)[$alpha_1 = Cα1 degree $])
+    content("b1.30%", angle: -Cβ1 * 1deg * 0.3, box(fill:white, inset:3pt)[$beta_1 = Cβ1 degree$])
+    content("a2.30%", angle: Cα2 * 1deg * 0.3, box(fill:white, inset:3pt)[$alpha_2 = Cα2 degree$])
+    content("b2.50%", angle: -Cβ2 * 1deg * 0.5, box(fill:white, inset:3pt)[$beta_2 = Cβ2 degree$])
+  })],
+  caption: text(size:14pt)[Треугольник скоростей на среднем диаметре первой ступени компрессора]
+) <Tri>
 
 = Расчет турбины
 
