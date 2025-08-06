@@ -1,6 +1,7 @@
 #import "@preview/physica:0.9.5": *
 #import "@preview/cetz:0.4.1"
 #import "@preview/cetz-plot:0.1.2": plot, chart
+#import "@preview/lilaq:0.4.0" as lq
 
 #import "vars/CONST.typ": *
 #import "vars/Prime.typ": *
@@ -302,7 +303,82 @@ $ Omega_"пол" = H_e^* dot G_в / G_т = IHₑ dot IGₙ/IGₜ = IΩₐₗₗ;
 
 == Результаты расчета
 
-Графики на рисунках отражают результаты расчета. Полные результаты рассчета смотреть в Приложении Б.
+Графики на рисунках @ne[], @phi[] и @He[] отражают результаты расчета. Полные результаты рассчета смотреть в Приложении Б.
+
+#let csv_data = (
+  csv("A2GTP/1.csv").slice(2),
+  csv("A2GTP/2.csv").slice(2),
+  csv("A2GTP/3.csv").slice(2),
+  csv("A2GTP/4.csv").slice(2),
+  csv("A2GTP/5.csv").slice(2)
+)
+
+#let pik = for line in csv_data.at(0) { (float(line.at(0)),) }
+
+#let KPD = for page in csv_data {
+  (for line in page { (float(line.at(1)),) },)
+}
+#let He = for page in csv_data {
+  (for line in page { (float(line.at(2)),) },)
+}
+#let Phi = for page in csv_data {
+  (for line in page { (float(line.at(3)),) },)
+}
+
+#figure(
+  lq.diagram(
+    width: 15cm, height:10cm, legend: (position: bottom + right),
+    ylabel: $eta_e$, xlabel: $pi_k^*$,
+    cycle: (
+      (color: red,    mark: "o"),
+      (color: orange, mark: "^"),
+      (color: green,  mark: "s"),
+      (color: blue,   mark: "v"),
+      (color: purple, mark: "d"),
+    ),
+    ..for i in range(csv_data.len()) {
+      let Tt = 1543 + 50 * i
+      (lq.plot(pik,KPD.at(i), smooth:true, label:[$T_3^* = Tt K$]),)
+    }
+  ),
+  caption: [Зависимость эффективного КПД ГТУ от степени повышения давления в компрессоре, при различных значениях температуры]
+) <ne>
+#figure(
+  lq.diagram(
+    width: 15cm, height:10cm, legend: (position: bottom),
+    ylabel: $phi$, xlabel: $pi_k^*$,
+    cycle: (
+      (color: red,    mark: "o"),
+      (color: orange, mark: "^"),
+      (color: green,  mark: "s"),
+      (color: blue,   mark: "v"),
+      (color: purple, mark: "d"),
+    ),
+    ..for i in range(csv_data.len()) {
+      let Tt = 1543 + 50 * i
+      (lq.plot(pik,He.at(i), smooth:true, label:[$T_3^* = Tt K$]),)
+    }
+  ),
+  caption: [Зависимость коэффициента полезной работы ГТУ от степени повышения давления в компрессоре, при различных значениях температуры]
+) <phi>
+#figure(
+  lq.diagram(
+    width: 15cm, height:8cm,
+    ylabel: $H_e$, xlabel: $pi_k^*$,
+    cycle: (
+      (color: red,    mark: "o"),
+      (color: orange, mark: "^"),
+      (color: green,  mark: "s"),
+      (color: blue,   mark: "v"),
+      (color: purple, mark: "d"),
+    ),
+    ..for i in range(csv_data.len()) {
+      let Tt = 1543 + 50 * i
+      (lq.plot(pik,Phi.at(i), smooth:true, label:[$T_3^* = Tt K$]),)
+    }
+  ),
+  caption: [Зависимость эффективной удельной работы ГТУ от степени повышения давления в компрессоре, при различных значениях температуры]
+) <He>
 
 == Выбор степени повышения давления в компрессоре и начальной температуры газа перед турбиной
 
