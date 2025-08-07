@@ -505,13 +505,13 @@ $ H_к^* = H^*_"ад. пр. ч." / eta^*_"ад" = CHsₐ / COηsₐ = CHsₖ "Д
 $ i = ceil( H_к^* / h_"ср") = ceil(CHsₖ / COhₘ) = Ci; $
 
 Теоретический напор в первой ступени:
-$ h_1 = (0.6 dots 0.7) dot h_"ср" = "Дж/кг" $
+$ h_1 = (0.6 dots 0.7) dot h_"ср" = COk1 dot COhₘ = Ch1 "Дж/кг" $
 
 Теоретический напор в средних ступенях:
-$ h_"ср. ст." = (1.1 dots 1.2) dot h_"ср" = "Дж/кг" $
+$ h_"ср. ст." = (1.1 dots 1.2) dot h_"ср" = Ckₘ dot COhₘ = Ch2 "Дж/кг" $
 
 Теоретический напор в последней ступени:
-$ h_п = (0.95 dots 1) dot h_"ср" = "Дж/кг" $
+$ h_п = (0.95 dots 1) dot h_"ср" = 1 dot COhₘ = COhₘ "Дж/кг" $
 
 Считая рост напора в ступенях от и его падение в ступенях линейным, изобразим распределение напора на @Ras[рисунке]:
 
@@ -541,10 +541,6 @@ $ h_п = (0.95 dots 1) dot h_"ср" = "Дж/кг" $
       stroke:(dash:(10pt, 5pt), thickness:1.5pt), mark: none
     ),
 
-    // let col(i, h) = {
-      
-    // },
-
     lq.bar(
       (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
       (
@@ -557,13 +553,17 @@ $ h_п = (0.95 dots 1) dot h_"ср" = "Дж/кг" $
         Ch2, Ch2, Ch2, Ch2, Ch2, Ch2, Ch2,
         (Ch2 + COhₘ)/2, COhₘ
       ),
+      // width: 2,
+      fill: aqua,
     ),
+
+    lq.place(7, 0.8 * COhₘ)[#rotate(90deg)[$h_7 = COhₘ$]],
     
     lq.plot( (1,7,13,15),(Ch1,Ch2,Ch2,COhₘ), stroke:2pt, mark:none),
-    lq.fill-between(
-      (1,7,13,15),(Ch1,Ch2,Ch2,COhₘ),
-      fill: rgb("#7fdbff45")
-    ),
+    // lq.fill-between(
+    //   (1,7,13,15),(Ch1,Ch2,Ch2,COhₘ),
+    //   fill: rgb("#7fdbff45")
+    // ),
 
     // let n = 2,
     // lq.plot((n,n),(Ch1, Ch1 +  (Ch2 - Ch1) * (n -1) / 6   ),stroke: 2pt)
