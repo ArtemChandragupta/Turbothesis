@@ -513,9 +513,68 @@ $ h_"ср. ст." = (1.1 dots 1.2) dot h_"ср" = "Дж/кг" $
 Теоретический напор в последней ступени:
 $ h_п = (0.95 dots 1) dot h_"ср" = "Дж/кг" $
 
-Считая рост напора в ступенях от и его падение в ступенях линейным, изобразим распределение напора на рисунке.
+Считая рост напора в ступенях от и его падение в ступенях линейным, изобразим распределение напора на @Ras[рисунке]:
 
-$ sum h_i approx H_k^* = "Дж/кг" $
+#figure(
+  [
+  // #show: lq.cond-set(lq.grid.with(kind: "x"), ticks:(1,2,3))
+  
+  #lq.diagram(
+    legend: (position: right),
+    width: 15cm, height: 8cm,
+    xlim: (0.1,15.9), ylim: (1.7 * 10000,3.1 * 10000),
+    lq.xaxis(tick-distance: 1),
+
+    lq.plot((-1,17),(Ch1,Ch1),
+      label: $h_1$,
+      // label: $h_1 = Ch1 "Дж/кг"$,
+      stroke:(dash:(10pt, 5pt), thickness:1.5pt), mark: none
+    ),
+    lq.plot((-1,17),(Ch2,Ch2),
+      label: $h_"ср.ст."$,
+      // label: $h_"ср.ст." = Ch2 "Дж/кг"$,
+      stroke:(dash:(10pt, 5pt), thickness:1.5pt), mark: none
+    ),
+    lq.plot((-1,17),(COhₘ,COhₘ),
+      label: $h_"ср"$,
+      // label: $h_"ср" = h_п = COhₘ "Дж/кг"$,
+      stroke:(dash:(10pt, 5pt), thickness:1.5pt), mark: none
+    ),
+
+    // let col(i, h) = {
+      
+    // },
+
+    lq.bar(
+      (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
+      (
+        Ch1,
+        (Ch1 + (Ch2 - Ch1)*1/6),
+        (Ch1 + (Ch2 - Ch1)*2/6),
+        (Ch1 + (Ch2 - Ch1)*3/6),
+        (Ch1 + (Ch2 - Ch1)*4/6),
+        (Ch1 + (Ch2 - Ch1)*5/6),
+        Ch2, Ch2, Ch2, Ch2, Ch2, Ch2, Ch2,
+        (Ch2 + COhₘ)/2, COhₘ
+      ),
+    ),
+    
+    lq.plot( (1,7,13,15),(Ch1,Ch2,Ch2,COhₘ), stroke:2pt, mark:none),
+    lq.fill-between(
+      (1,7,13,15),(Ch1,Ch2,Ch2,COhₘ),
+      fill: rgb("#7fdbff45")
+    ),
+
+    // let n = 2,
+    // lq.plot((n,n),(Ch1, Ch1 +  (Ch2 - Ch1) * (n -1) / 6   ),stroke: 2pt)
+    
+  )],
+  caption: [Распределение теоретического напора по ступеням компрессора]
+) <Ras>
+
+В результате распределения напоров соблюдается условие:
+
+$ sum h_i = H_k^* = CHsₖ "Дж/кг". $
 
 Уточняем величину окружной скорости на среднем диаметре первой ступени:
 $ u_"ср"_1 = (pi dot D_"ср"_1 dot n)/60 = (pi dot CDₘ1 dot TAn)/60 = Cuₘ1 "м/c"; $

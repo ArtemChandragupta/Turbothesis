@@ -35,6 +35,7 @@
 #let COν1 = 0.5
 #let COΩ = 0.5
 #let COhₘ = 27000.0
+#let COk1 = 0.65
 #let COkₙₜ = 1.018
 #let COλ2ₜ = 0.5
 #let COηₐₜ = 0.91
