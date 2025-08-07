@@ -361,7 +361,7 @@ $ Omega_"пол" = H_e^* dot G_в / G_т = IHₑ dot IGₙ/IGₜ = IΩₐₗₗ 
     ),
     ..for i in range(csv_data.len()) {
       let Tt = 1543 + 50 * i
-      (lq.plot(pik,KPD.at(i), smooth:true, label:[$T_3^* = Tt "K "$]),)
+      (lq.plot(pik,KPD.at(i), stroke:1.5pt, mark-size: 5pt, smooth:true, label:[$T_3^* = Tt "K "$]),)
     }
   ),
   caption: [Зависимость эффективного КПД ГТУ от степени повышения давления в компрессоре, при различных значениях температуры]
@@ -379,7 +379,7 @@ $ Omega_"пол" = H_e^* dot G_в / G_т = IHₑ dot IGₙ/IGₜ = IΩₐₗₗ 
     ),
     ..for i in range(csv_data.len()) {
       let Tt = 1543 + 50 * i
-      (lq.plot(pik,He.at(i), smooth:true, label:[$T_3^* = Tt "K "$]),)
+      (lq.plot(pik,He.at(i), stroke:1.5pt, mark-size: 5pt, smooth:true, label:[$T_3^* = Tt "K "$]),)
     }
   ),
   caption: [Зависимость коэффициента полезной работы ГТУ от степени повышения давления в компрессоре, при различных значениях температуры]
@@ -397,7 +397,7 @@ $ Omega_"пол" = H_e^* dot G_в / G_т = IHₑ dot IGₙ/IGₜ = IΩₐₗₗ 
     ),
     ..for i in range(csv_data.len()) {
       let Tt = 1543 + 50 * i
-      (lq.plot(pik,Phi.at(i), smooth:true, label:[$T_3^* = Tt "K "$]),)
+      (lq.plot(pik,Phi.at(i), stroke:1.5pt, mark-size: 5pt, smooth:true, label:[$T_3^* = Tt "K "$]),)
     }
   ),
   caption: [Зависимость эффективной удельной работы ГТУ от степени повышения давления в компрессоре, при различных значениях температуры]
@@ -516,30 +516,17 @@ $ h_п = (0.95 dots 1) dot h_"ср" = 1 dot COhₘ = COhₘ "Дж/кг" $
 Считая рост напора в ступенях от и его падение в ступенях линейным, изобразим распределение напора на @Ras[рисунке]:
 
 #figure(
-  [
-  // #show: lq.cond-set(lq.grid.with(kind: "x"), ticks:(1,2,3))
+  text(size:14pt)[
+  
+  #show: lq.cond-set(lq.grid.with(kind: "x"), stroke:none)
+  #show lq.selector(lq.label): set align(top + right)
   
   #lq.diagram(
     legend: (position: right),
     width: 15cm, height: 8cm,
     xlim: (0.1,15.9), ylim: (1.7 * 10000,3.1 * 10000),
-    lq.xaxis(tick-distance: 1),
-
-    lq.plot((-1,17),(Ch1,Ch1),
-      label: $h_1$,
-      // label: $h_1 = Ch1 "Дж/кг"$,
-      stroke:(dash:(10pt, 5pt), thickness:1.5pt), mark: none
-    ),
-    lq.plot((-1,17),(Ch2,Ch2),
-      label: $h_"ср.ст."$,
-      // label: $h_"ср.ст." = Ch2 "Дж/кг"$,
-      stroke:(dash:(10pt, 5pt), thickness:1.5pt), mark: none
-    ),
-    lq.plot((-1,17),(COhₘ,COhₘ),
-      label: $h_"ср"$,
-      // label: $h_"ср" = h_п = COhₘ "Дж/кг"$,
-      stroke:(dash:(10pt, 5pt), thickness:1.5pt), mark: none
-    ),
+    xlabel: $i$,      ylabel: $h,"Дж/кг"$,
+    xaxis: (tick-distance: 1,subticks:none,),
 
     lq.bar(
       (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
@@ -552,25 +539,26 @@ $ h_п = (0.95 dots 1) dot h_"ср" = 1 dot COhₘ = COhₘ "Дж/кг" $
         (Ch1 + (Ch2 - Ch1)*5/6),
         Ch2, Ch2, Ch2, Ch2, Ch2, Ch2, Ch2,
         (Ch2 + COhₘ)/2, COhₘ
-      ),
-      // width: 2,
-      fill: aqua,
+      ), fill: aqua, //width: 0.9
     ),
 
-    lq.place(7, 0.8 * COhₘ)[#rotate(90deg)[$h_7 = COhₘ$]],
-    
-    lq.plot( (1,7,13,15),(Ch1,Ch2,Ch2,COhₘ), stroke:2pt, mark:none),
-    // lq.fill-between(
-    //   (1,7,13,15),(Ch1,Ch2,Ch2,COhₘ),
-    //   fill: rgb("#7fdbff45")
-    // ),
+    // lq.plot( (1,7,13,15),(Ch1,Ch2,Ch2,COhₘ), stroke:(paint:black), mark:none),
 
-    // let n = 2,
-    // lq.plot((n,n),(Ch1, Ch1 +  (Ch2 - Ch1) * (n -1) / 6   ),stroke: 2pt)
+    lq.plot( (-1,17),(Ch2,Ch2), label: $h_"ср.ст."$, mark: none,
+      stroke:(dash:(10pt, 4pt), thickness:1.5pt, paint:olive)
+    ),
+    lq.plot( (-1,17),(COhₘ,COhₘ), label: $h_"ср"$, mark: none,
+      stroke:(dash:(10pt, 4pt), thickness:1.5pt, paint:red)
+    ),
+    lq.plot( (-1,17),(Ch1,Ch1), label: $h_1$, mark: none,
+      stroke:(dash:(10pt, 4pt), thickness:1.5pt, paint: fuchsia)
+    ),
     
   )],
   caption: [Распределение теоретического напора по ступеням компрессора]
 ) <Ras>
+
+
 
 В результате распределения напоров соблюдается условие:
 
