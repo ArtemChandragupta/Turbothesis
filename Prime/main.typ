@@ -817,17 +817,17 @@ $ Y = sqrt( (sum u_2^2) / (2 H_"от")) = sqrt( (sum Tu2^2) / (2 dot THₒₜ)) 
   #pagebreak(weak: true)
 ]
 
-1) $T_3^* = 1543 " K"$
+1) $T_3^* = 1543 "K:"$
 #printA2GTP(read("A2GTP/1.txt"))
 
-2) $T_3^* = 1593 " K" $
+2) $T_3^* = 1593 "K:" $
 #printA2GTP(read("A2GTP/2.txt"))
 
-3) $T_3^* = 1643 " K" $
+3) $T_3^* = 1643 "K:" $
 #printA2GTP(read("A2GTP/3.txt"))
 
-4) $T_3^* = 1694 " K" $
+4) $T_3^* = 1694 "K:" $
 #printA2GTP(read("A2GTP/4.txt"))
 
-5) $T_3^* = 1743 " K" $
+5) $T_3^* = 1743 "K:" $
 #printA2GTP(read("A2GTP/5.txt"))
