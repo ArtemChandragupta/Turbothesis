@@ -589,27 +589,33 @@ $ J = ((dash(h)_1 / phi))  / (dash(h)_1/phi)_(b/t=1) = Cotn / CP0ᵍ = CJ; $
 $ (t/b)_"вт" = t/b dot D_"вт"_1 / D_"ср"_1 = Ctb dot CDᵥₜ1/CDₘ1 = Ctbem. $
 
 #figure(
-  lq.diagram(
-    width: 15cm, height: 9cm, ylim: (0.6, 0.87),
-    xlabel: $Omega/phi$, ylabel: $(dash(h)_1/phi)_(b/t=1)$,
+  [
+    #show lq.selector(lq.legend): set grid(row-gutter: 8pt)
+    #lq.diagram(
+      legend: (inset:10pt),
+      width: 15cm, height: 9cm, ylim: (0.6, 0.87), xlim: (0, 1.5),
+      xlabel: $Omega"/"phi$, ylabel: $(dash(h)_1"/"phi)_(b/t=1)$,
 
-    let lx = lq.linspace(0.11, 1.368),
+      let lx = lq.linspace(0.11, 1.368),
 
-    lq.plot(mark: none, stroke: 2pt,
-      lx, lx.map(lx => 0.935 - 0.777*lx + 0.503 * lx * lx)
-    ),
-    lq.plot(mark:none, stroke: (dash: (10pt, 4pt), thickness: 2pt ),
-      (Cotn,Cotn),(0.6, 0.87), label: $Omega"/"phi = Cotn$
-    ),
-    lq.plot((0,2),(CP0ᵍ,CP0ᵍ))
-  ),
+      lq.plot(mark: none, stroke: 2pt,
+        lx, lx.map(lx => 0.935 - 0.777*lx + 0.503 * lx * lx)
+      ),
+      lq.plot(mark:none, stroke:(dash:(10pt, 4pt), thickness: 1.5pt),
+        (Cotm,Cotm),(0.6, CP0ᵍ), label: $Omega"/"phi = Cotm$
+      ),
+      lq.plot(mark:none, stroke:(dash:(10pt, 4pt), thickness: 1.5pt),
+        (0,Cotm),(CP0ᵍ,CP0ᵍ), label: $(dash(h)_1 "/" phi)_(b/t=1)=CJ$
+      )
+    )
+  ],
   caption: [график зависимости $(dash(h)_1/phi)_(b/t=1)$ от $Omega/phi$]
 ) <otn>
 
 #figure(
   lq.diagram(
     width: 15cm, height: 9cm, ylim: (0.6, 1.7), xlim:(0.4,2),
-    xlabel: $b/t$, ylabel: $J$,
+    xlabel: $b"/"t$, ylabel: $J$,
 
     let lx = lq.linspace(0.11, 1.368),
 
@@ -618,9 +624,11 @@ $ (t/b)_"вт" = t/b dot D_"вт"_1 / D_"ср"_1 = Ctb dot CDᵥₜ1/CDₘ1 = Ct
       (0.6, 0.654, 0.697, 0.788, 0.94, 1, 1.194, 1.447, 1.595),
     ),
     lq.plot(mark:none, stroke: (dash: (10pt, 4pt), thickness: 2pt ),
-      (0.4,2),(CJ, CJ), label: $J = CJ$
+      (0.4,1/Ctb),(CJ, CJ), label: $J = CJ$
     ),
-    lq.plot((1/Ctb,1/Ctb),(0,2))
+    lq.plot(mark:none, stroke: (dash: (10pt, 4pt), thickness: 2pt ),
+      (1/Ctb,1/Ctb),(0,CJ), label: $b"/"t = #calc.round(digits: 4,1/Ctb)$
+    )
   ),
   caption: [гравик зависимости коэффициента $J$ от густоты решетки]
 ) <J>
