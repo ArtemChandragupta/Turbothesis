@@ -1,5 +1,7 @@
 #import "@preview/physica:0.9.5": *
 #import "@preview/cetz:0.4.1"
+#import "@preview/fletcher:0.5.8" as fletcher: diagram, node, edge
+#import fletcher.shapes:parallelogram, diamond, brace, trapezium
 #import "@preview/tiptoe:0.3.1"
 #import "@preview/lilaq:0.4.0" as lq
 
@@ -175,8 +177,35 @@
 
 #figure(
   [
-    #image("assets/HeatScheme.jpg", width: 90%)
-    К --- компрессор; КС --- камера сгорания; Т --- газовая турбина
+    #diagram(
+      node-stroke: 1.5pt,
+      let inset-turb = 30pt,
+      let radius-ks = 13pt,
+
+      node( (0,1), $~$, shape:circle),
+      edge(),
+      node( (1,1), [К], name: <K>, shape: trapezium.with(dir: right, fit:1), inset:inset-turb ),
+      edge(),
+      node( (4,1), [Т], name: <T>, shape: trapezium.with(dir: left, fit:1), inset:inset-turb ),
+
+      node( (2.5,0.3), h(2 * radius-ks), name:<KS-main>, shape:circle, inset:0pt ),
+      node(shape:rect, enclose:((2.5,0.3),), circle(radius:radius-ks, stroke:none), inset:0pt),
+      
+      node( (1,1), name: <KK>, text(rgb(0,0,0,0%))[К], shape:rect, stroke:none, inset:inset-turb ),
+      node( (4,1), name: <TT>, text(rgb(0,0,0,0%))[T], shape:rect, stroke:none, inset:inset-turb ),
+    
+      edge(<KK.north-east>, <KS-main.west>, corner:right, "-|>", label:$2$, label-pos: 55%),
+      edge(<KS-main.east>, <TT.north-west>, corner:right, "-|>", label:$3$, label-pos: 45%),
+      edge(<K.south-west>, "d","<|-", label:$1$),
+      edge(<T.south-east>, "d","-|>", label:$4$),
+      edge(<KS-main.north-east>, <KS-main.south-west>),
+      edge(<KS-main.north-west>, <KS-main.south-east>),
+      edge(<KS-main>,"u","<|-", label: "Топливо", label-pos:100%,label-side:center),
+
+      node((2.5,0.6),[КС], stroke:none)
+    )
+    
+    #text(size:12pt)[К --- компрессор; КС --- камера сгорания; Т --- газовая турбина]
   ],
   caption: [Тепловая схема одновальной ГТУ]
 ) <HeatScheme>
@@ -198,8 +227,8 @@
     #lq.diagram(
       width: 15cm, height:10cm, legend: (position: bottom + right),
       ylabel: $T$, xlabel: $S$,
-      xaxis: (format-ticks: none, ticks: none),
-      yaxis: (format-ticks: none, ticks: none),
+      xaxis: (format-ticks: none),
+      yaxis: (format-ticks: none),
 
       cycle: (black,),
     
