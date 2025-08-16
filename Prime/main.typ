@@ -1,5 +1,6 @@
 #import "@preview/physica:0.9.5": *
 #import "@preview/cetz:0.4.1"
+#import "@preview/tiptoe:0.3.1"
 #import "@preview/lilaq:0.4.0" as lq
 
 #import "vars/CONST.typ": *
@@ -8,7 +9,6 @@
 #import "vars/Turb.typ": *
 
 // LTeX: enabled=false
-// LTeX: language=ru-RU
 
 #set text(
   font: "Times New Roman",
@@ -183,8 +183,47 @@
 
 #figure(
   [
-    #image("assets/HeatGraph.png", width: 70%)
-    #text(hyphenate: false)[1-2 --- адиабатное сжатие в компрессоре, 2-3 --- изобарный подвод теплоты в камере сгорания, 3-4 --- адиабатное расширение продуктов сгорания на лопатках газовой турбины, 4-1 --- изобарный отвод теплоты от продуктов сгорания в атмосферу]
+    #let schoolbook-style = it => {
+      let filter(value, distance) = value != 0 and distance >= 5pt
+
+      show: lq.set-spine(tip: tiptoe.stealth)
+      show: lq.set-diagram(
+        xaxis: (position: 200, ),//optfilter: filter),
+        yaxis: (position: 0.9, )//filter: filter)
+      )
+      it
+    }
+
+    // #show: schoolbook-style
+    #lq.diagram(
+      width: 15cm, height:10cm, legend: (position: bottom + right),
+      ylabel: $T$, xlabel: $S$,
+      xaxis: (format-ticks: none, ticks: none),
+      yaxis: (format-ticks: none, ticks: none),
+
+      cycle: (black,),
+    
+      let cc1 = 1/ calc.ln((TATs3/ITs2)),
+      let cc2 = 1/ calc.ln((ITs4/ITs1)),
+      let lx = lq.linspace(1, 2),
+
+      lq.place(1,ITs1,align: right+top   )[#block(inset:2pt)[$1$]],
+      lq.place(1,ITs2,align: right+bottom)[#block(inset:2pt)[$2$]],
+      lq.place(2,TATs3,align:left+bottom )[#block(inset:2pt)[$3$]],
+      lq.place(2,ITs4,align: left+top    )[#block(inset:2pt)[$4$]],
+
+      lq.plot(stroke:1.5pt, (1,1),(ITs1, ITs2) ),
+      lq.plot(stroke:1.5pt, (2,2),(TATs3,ITs4) ),
+      lq.plot(stroke:1.5pt, mark:none,
+        lx, lx.map(x => ITs2 * calc.exp((x - 1)/cc1 ))
+      ),
+      lq.plot(stroke:1.5pt, mark:none,
+        lx, lx.map(x => ITs1 * calc.exp((x - 1)/cc2 ))
+      ),
+
+    )
+    
+    #text(hyphenate: false, size:12pt)[1-2 --- адиабатное сжатие в компрессоре, 2-3 --- изобарный подвод теплоты в камере сгорания, 3-4 --- адиабатное расширение продуктов сгорания на лопатках газовой турбины, 4-1 --- изобарный отвод теплоты от продуктов сгорания в атмосферу]
   ],
   caption: [Цикл одновальной ГТУ простого типа в T-S-диаграмме]
 ) <HeatGraph>
