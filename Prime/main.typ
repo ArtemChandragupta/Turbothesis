@@ -1,6 +1,5 @@
 #import "@preview/physica:0.9.5": *
 #import "@preview/cetz:0.4.1"
-#import "@preview/cetz-plot:0.1.2": plot, chart
 #import "@preview/lilaq:0.4.0" as lq
 
 #import "vars/CONST.typ": *
@@ -8,6 +7,7 @@
 #import "vars/Comp.typ": *
 #import "vars/Turb.typ": *
 
+// LTeX: enabled=false
 // LTeX: language=ru-RU
 
 #set text(
