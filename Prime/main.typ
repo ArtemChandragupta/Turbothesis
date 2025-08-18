@@ -47,7 +47,7 @@
 )
 
 #show figure.where(kind: "table"): set figure.caption(position: top)
-#show figure.caption.where(kind: "table"): it => align(left,it)
+#show figure.caption.where(kind: "table"): it => align(left, it)
 
 #show figure: it => {
   linebreak()
@@ -292,7 +292,7 @@
 
 == Методы и пример расчета параметров рабочего процесса в характерных сечениях проточной части ГТУ. Определение основных характеристик ГТУ
 
-Расчет производится по методике из пособия @PERV (c. 77-78).
+Расчет производится по методике из пособия @PERV (с. 77-78).
 
 Зададимся параметром степени повышения давления $pi_k^* = P_2^* / P_1^* = TAπsₖ $;
 
@@ -541,7 +541,7 @@ $ T_1^* = T_н = CTs1 "K;" $
 Давление воздуха в сечении К-К:
 $ P_к^* = P_н dot pi_к^* = TAPₙ dot AAπsₖ = CPsₖ "Па", $
 
-#noind где $pi_k^*$ --- #context box(baseline: 100% - measure([a]).height, [степень повышения давления компрессора \ (из первичного расчета $pi_k^*=AAπsₖ$).]) \ \
+#noind где $pi_k^*$ --- #context box(baseline: 100% - measure([a]).height, [степень повышения давления компрессора (из первичного расчета\ $pi_k^*=AAπsₖ$).]) \ \
 
 Давление в сечении 2-2:
 $ P_2^* = P_к^* / sigma_"вых"^* = CPsₖ / COσsₒᵤₜ = CPs2 "Па", $
