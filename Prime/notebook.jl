@@ -218,30 +218,30 @@ md"# Приложение"
 
 # ╔═╡ 9942bf76-188a-47b7-838d-52280230aee3
 begin
-	function namedtuple_to_typst(nt; prefix = "")
+	function typst_vars(nt; prefix = "")
 	    modified_nt = add_suffix_to_names(replace_letters_in_names(nt), prefix)
 
-	    lines = ["#let $k = $(v)" for (k, v) in pairs(modified_nt)]
+	    lines = ["#let $k = num($(v)) \n#let Raw$k = $(v)" for (k, v) in pairs(modified_nt)]
 	    join(lines, "\n")
 	end
 	
 	function replace_letters_in_names(nt::NamedTuple)
 	    new_names = [Symbol(replace(String(name), 
-									"₁" => "1", 
-									"₂" => "2",
-									"₃" => "3",
-									"₄" => "4",
-									"₅" => "5",
-									"₆" => "6",
-									"₇" => "7",
-									"₈" => "8",
-									"₉" => "9",
-									"₀" => "0",
-									"⃰" => "s",
-									"_" => "",
+									"₁"   => "1", 
+									"₂"   => "2",
+									"₃"   => "3",
+									"₄"   => "4",
+									"₅"   => "5",
+									"₆"   => "6",
+									"₇"   => "7",
+									"₈"   => "8",
+									"₉"   => "9",
+									"₀"   => "0",
+									"⃰"    => "s",
+									"_"   => "",
 									"ₒₚₜ" => "0",
-									"¹" => "1",
-									"²" => "2",
+									"¹"   => "1",
+									"²"   => "2",
 								   )) for name in keys(nt)]
 	    return NamedTuple{Tuple(new_names)}(values(nt))
 	end
@@ -252,32 +252,18 @@ begin
 	end
 end
 
-# ╔═╡ 4f8e5f86-b871-4b39-8750-cd62dde519a3
+# ╔═╡ 7781971c-c446-4661-a3c6-c0409092ea02
 begin
-
-	CO = map(x -> round(x; sigdigits=4), CONST)
-	open("vars/CONST.typ", "w") do file
-    	write(file, namedtuple_to_typst(TASK; prefix ="TA"))
-		write(file, "\n" )
-		write(file, namedtuple_to_typst(CO; prefix ="CO"))
-		write(file, "\n" )
-		write(file, "#let AAπsₖ = $π⃰ₖ \n")
-		write(file, "#let AATs0 = $T⃰₀ \n")
-	end
-
-	II = map(x -> round(x; sigdigits=4), I)
-	open("vars/Prime.typ", "w") do file
-    	write(file, namedtuple_to_typst(II; prefix ="I"))
-	end
-
-	CC = map(x -> round(x; sigdigits=4), C)
-	open("vars/Comp.typ", "w") do file
-    	write(file, namedtuple_to_typst(CC; prefix ="C"))
-	end
-
-	TT = map(x -> round(x; sigdigits=4), T)
-	open("vars/Turb.typ", "w") do file
-    	write(file, namedtuple_to_typst(TT; prefix ="T"))
+	open("vars.typ", "w") do file
+    	write(file,
+			  "#import \"lib.typ\": * \n \n",
+			  typst_vars(TASK; prefix ="TA"), "\n \n",
+			  typst_vars(CONST; prefix ="CO"), "\n \n",
+			  "#let AAπsₖ = $π⃰ₖ \n#let AATs0 = $T⃰₀ \n \n",
+			  typst_vars(I; prefix ="I"), "\n \n",
+			  typst_vars(C; prefix ="C"), "\n \n",
+			  typst_vars(T; prefix ="T"), "\n \n",
+			 )
 	end
 
 	md"Запись в файл"
@@ -589,7 +575,7 @@ version = "17.4.0+2"
 # ╠═d4a9d15f-df48-456b-9bc7-ff88a61d634f
 # ╠═ced360e6-6a20-462b-862f-bb68fed673cd
 # ╟─f39cfba9-db24-43ef-9cc6-dc294456a177
-# ╟─9942bf76-188a-47b7-838d-52280230aee3
-# ╟─4f8e5f86-b871-4b39-8750-cd62dde519a3
+# ╠═9942bf76-188a-47b7-838d-52280230aee3
+# ╠═7781971c-c446-4661-a3c6-c0409092ea02
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

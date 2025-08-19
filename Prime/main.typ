@@ -5,10 +5,7 @@
 #import "@preview/tiptoe:0.3.1"
 #import "@preview/lilaq:0.4.0" as lq
 
-#import "vars/CONST.typ": *
-#import "vars/Prime.typ": *
-#import "vars/Comp.typ": *
-#import "vars/Turb.typ": *
+#import "vars.typ": *
 
 // LTeX: enabled=false
 
@@ -245,42 +242,34 @@
 
 #figure(
   [
-    #let schoolbook-style = it => {
-      let filter(value, distance) = value != 0 and distance >= 5pt
-
-      show: lq.set-spine(tip: tiptoe.stealth)
-      show: lq.set-diagram(
-        xaxis: (position: 200, ),//optfilter: filter),
-        yaxis: (position: 0.9, )//filter: filter)
-      )
-      it
-    }
     #show lq.selector(lq.label): set align(top + right)
-    // #show: schoolbook-style
     #lq.diagram(
       width: 15cm, height:10cm, legend: (position: bottom + right),
       ylabel: $T$, xlabel: $S$,
-      xaxis: (format-ticks: none),
-      yaxis: (format-ticks: none),
-
+      xaxis: (format-ticks: none), yaxis: (format-ticks: none),
       cycle: (black,),
+
+      let y1 = RawITs1,
+      let y2 = RawITs2,
+      let y3 = RawTATs3,
+      let y4 = RawITs4,
     
-      let cc1 = 1/ calc.ln((TATs3/ITs2)),
-      let cc2 = 1/ calc.ln((ITs4/ITs1)),
+      let cc1 = 1 / calc.ln(y3/y2),
+      let cc2 = 1 / calc.ln(y4/y1),
       let lx = lq.linspace(1, 2),
 
-      lq.place(1,ITs1,align: right+top   )[#block(inset:2pt)[$1$]],
-      lq.place(1,ITs2,align: right+bottom)[#block(inset:2pt)[$2$]],
-      lq.place(2,TATs3,align:left+bottom )[#block(inset:2pt)[$3$]],
-      lq.place(2,ITs4,align: left+top    )[#block(inset:2pt)[$4$]],
+      lq.place(1,y1,align: right+top   )[#block(inset:2pt)[$1$]],
+      lq.place(1,y2,align: right+bottom)[#block(inset:2pt)[$2$]],
+      lq.place(2,y3,align: left+bottom )[#block(inset:2pt)[$3$]],
+      lq.place(2,y4,align: left+top    )[#block(inset:2pt)[$4$]],
 
-      lq.plot(stroke:1.5pt, (1,1),(ITs1, ITs2) ),
-      lq.plot(stroke:1.5pt, (2,2),(TATs3,ITs4) ),
+      lq.plot(stroke:1.5pt, (1,1), (y1,y2) ),
+      lq.plot(stroke:1.5pt, (2,2), (y3,y4) ),
       lq.plot(stroke:1.5pt, mark:none,
-        lx, lx.map(x => ITs2 * calc.exp((x - 1)/cc1 ))
+        lx, lx.map(x => y2 * calc.exp( (x - 1)/cc1 ))
       ),
       lq.plot(stroke:1.5pt, mark:none,
-        lx, lx.map(x => ITs1 * calc.exp((x - 1)/cc2 ))
+        lx, lx.map(x => y1 * calc.exp( (x - 1)/cc2 ))
       ),
 
     )
@@ -294,7 +283,7 @@
 
 Расчет производится по методике из пособия @PERV (с. 77-78).
 
-Зададимся параметром степени повышения давления $pi_k^* = P_2^* / P_1^* = TAπsₖ $;
+Зададимся параметром степени повышения давления $pi_к^* = P_2^* / P_1^* = TAπsₖ $;
 
 Газовая постоянная воздуха: $R_в = CORₙ "Дж"/("кг" dot "K") $;
 
@@ -311,15 +300,15 @@ $ P_1^* = sigma^*_"вх" dot P_Н = COσsᵢₙ dot TAPₙ = IPs1 "Па"; $
 $ T_1^* = T_Н = TATₙ "K;" $]
 
 Давление воздуха за компрессором:
-$ P_2^* = pi^*_k dot P_1^* = TAπsₖ dot IPs1 = IPs2 "Па"; $
+$ P_2^* = pi^*_к dot P_1^* = TAπsₖ dot IPs1 = IPs2 "Па"; $
 
 Определим $T_2^*$ (температуру воздуха за компрессором):
-$ T_2^* = T_Н^* dot (pi_k^*)^ ((k_в-1)/k_в) = TATₙ dot TAπsₖ^((COkₙ-1)/COkₙ) = ITs2 "K"; $
+$ T_2^* = T_Н^* dot (pi_к^*)^ ((k_в-1)/k_в) = TATₙ dot TAπsₖ^((COkₙ-1)/COkₙ) = ITs2 "K"; $
 
 Работа, соответствующая изоэнтропийному перепаду в компрессоре:
-$ H_"ок"^* &= C_p_в dot T_1^* dot [ (pi_k^*)^((k_в-1)/k_в) - 1 ] = \ &= COCpₙ dot ITs1 dot [ TAπsₖ^((COkₙ-1)/COkₙ) - 1 ] = IHsₒₖ "Дж/кг"; $
+$ H_"ок"^* &= C_p_в dot T_1^* dot [ (pi_к^*)^((k_в-1)/k_в) - 1 ] = \ &= COCpₙ dot ITs1 dot [ TAπsₖ^((COkₙ-1)/COkₙ) - 1 ] = IHsₒₖ "Дж/кг"; $
 
-$eta_"к ад" = COηₐ $ --- политропный КПД компрессора, его выбор для расчета обусловлен тем, что он мало зависит от степени повышения давления в компрессоре $pi_k^*$.
+$eta_"к ад" = COηₐ $ --- политропный КПД компрессора, его выбор для расчета обусловлен тем, что он мало зависит от степени повышения давления в компрессоре $pi_к^*$.
 
 Полезная работа в компрессоре:
 $ H_к = H_"ок"^* / eta_"к ад" = IHsₒₖ / COηₐ = IHₖ "Дж/кг"; $
@@ -327,7 +316,7 @@ $ H_к = H_"ок"^* / eta_"к ад" = IHsₒₖ / COηₐ = IHₖ "Дж/кг"; $
 Принимаем коэффициент потерь полного давления в камере сгорания $sigma_"кс"^* = COσsₖₛ $;
 
 Давление газа перед турбиной:
-$ P_3^* = P_2^* dot sigma_"кс"^* = IPs2 dot COσsₖₛ = IPs3 "Па"; $
+$ P_3^* = sigma_"кс"^* dot P_2^* = COσsₖₛ dot IPs2 = IPs3 "Па"; $
 
 Принимаем коэффициент потерь полного давления в выходном устройстве ГТУ $sigma^*_"вых" = COσsₒᵤₜ $;
 
@@ -338,8 +327,8 @@ $ P_4^* = P_Н^* / sigma_"вых"^* = TAPₙ / COσsₒᵤₜ = IPs4 "Па"; $]
 $ pi_т^* = P_3^* / P_4^* = IPs3 / IPs4 = Iπsₜ; $
 
 Примем следующие значения свойств газа, расширяющегося в турбине:
-- Показатель изоэнтропы $k_г = COkᵧ$;\
-- Индивидуальная газовая постоянная $R_г = CORᵧ "Дж"/("кг" dot "K")$;\
+- Показатель изоэнтропы $k_г = COkᵧ$;
+- Индивидуальная газовая постоянная $R_г = CORᵧ "Дж"/("кг" dot "K")$;
 - Теплоёмкость $C_p_г = COCpᵧ "Дж"/("кг" dot "K")$.
 
 Работа, соответствующая изоэнтропийному перепаду в турбине:
@@ -353,17 +342,13 @@ $ H_т = H_"от"^* dot eta_"т пол" = IHsₒₜ dot COηₚ = IHₜ "Дж/к
 Температура газа за турбиной $T_4^*$ определяется как:
 $ T_4^* = T_3^* dot (pi_т^*)^(- (k_г-1)/k_г) = TATs3 dot Iπsₜ^(-COk1k) = ITs4 "K;" $
 
-Примем коэффициенты механических потерь в турбине и компрессоре $eta_"мт" = COηₘₜ $, $eta_"мк" = COηₘₖ $;
-
-Расход воздуха через компрессор:
+Примем коэффициенты механических потерь в турбине и компрессоре $eta_"мт" = COηₘₜ $, $eta_"мк" = COηₘₖ $, тогда расход воздуха через компрессор:
 $ G_в = N_e / (H_т dot eta_"мт" - H_к / eta_"мк") = TAN / (IHₜ dot COηₘₜ - IHₖ / COηₘₖ) = IGₙ "кг/с"; $
 
 Теплота с учетом потерь в камере сгорания:
-$ Q'_1 &= c_p_г dot (T_3^* - T_2^*) = \ &= COCpᵧ dot (TATs3 - ITs2) =  IQ̇1 "Дж/кг"; $
+$ Q'_1 &= c_p_г dot (T_3^* - T_2^*) = \ &= COCpᵧ dot (TATs3 - ITs2) = IQ̇1 "Дж/кг"; $
 
-Примем КПД камеры сгорания $eta_"кс" = COηₖₛ $;
-
-Расход теплоты:
+Примем КПД камеры сгорания $eta_"кс" = COηₖₛ $, тогда расход теплоты:
 $ Q_1 = Q'_1 / eta_"кс" = IQ̇1 / COηₖₛ = IQ1 "Дж/кг"; $
 
 Эффективный КПД ГТУ:
@@ -408,7 +393,7 @@ $ g_"охл"^р &= 0.08 + 0.22 dot 10^(-4) dot (T_3^* - T_"ст") = \ &= 0.08 + 
 $ g_"охл" = sigma_"уг" dot (g_"охл"^с + g_"охл"^р) = COσᵤₜ dot (Igᶜc + Igᵖc) = Igc; $
 
 Относительный расход охлаждающего воздуха по отношению к расходу воздуха через компрессор:
-$ g'_"охл" = ((1+g_т) dot g_"охл") / (1+(1+g_т) dot g_"охл") = ( (1+Igₜ) dot Igc ) / ( 1 + (1+Igₜ) dot Igc ) = Iĝc; $
+$ g'_"охл" &= ((1+g_т) dot g_"охл") / (1+(1+g_т) dot g_"охл") = \ &= ( (1+Igₜ) dot Igc ) / ( 1 + (1+Igₜ) dot Igc ) = Iĝc; $
 
 #block(breakable: false)[Расход топлива:
 $ G_т &= g_т dot (1-g'_"охл") dot G_в = \  &= Igₜ dot (1-Iĝc) dot IGₙ = IGₜ "кг/с"; $]
@@ -417,7 +402,7 @@ $ G_т &= g_т dot (1-g'_"охл") dot G_в = \  &= Igₜ dot (1-Iĝc) dot IGₙ
 $ Omega_"рас" = H_"от"^* dot G_в/G_т = IHsₒₜ dot IGₙ/IGₜ = IΩᵣₐₛ "Дж/кг"; $
 
 Удельная эффективная работа ГТУ:
-$ H_e &= (1+g_т) dot (1-g'_"охл") dot H_т dot eta_"мт" - H_к / eta_"мк" = \ &= (1+Igₜ) dot (1-Iĝc) dot IHₜ dot COηₘₜ - IHₖ / COηₘₖ = IHₑ "Дж/кг"; $
+$ H_e &= (1+g_т) dot (1-g'_"охл") dot H_т dot eta_"мт" - H_к / eta_"мк" = \ &= (1+Igₜ) dot (1-Iĝc) dot IHₜ dot COηₘₜ - IHₖ / COηₘₖ = #h(40pt) \ &= IHₑ "Дж/кг"; $
 
 #block(breakable: false)[Коэффициент полезной мощности:
 $ Omega_"пол" = H_e^* dot G_в / G_т = IHₑ dot IGₙ/IGₜ = IΩₐₗₗ "Дж/кг". $]
@@ -628,31 +613,35 @@ $ h_п = (0.95 dots 1) dot h_"ср" = 1 dot COhₘ = COhₘ "Дж/кг"; $
   #lq.diagram(
     legend: (position: right),
     width: 15cm, height: 8cm,
-    xlim: (0.1,15.9), ylim: (1.7 * 10000,3.1 * 10000),
+    xlim: (0.1,15.9), ylim: (1.7e4,3.1e4),
     xlabel: $i$,      ylabel: $h,"Дж/кг"$,
-    xaxis: (tick-distance: 1,subticks:none,),
+    xaxis: (tick-distance:1, subticks:none,),
+
+    let h1 = RawCh1,
+    let h2 = RawCh2,
+    let hm = RawCOhₘ,
 
     lq.bar(
       (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
       (
-        Ch1,
-        (Ch1 + (Ch2 - Ch1)*1/6),
-        (Ch1 + (Ch2 - Ch1)*2/6),
-        (Ch1 + (Ch2 - Ch1)*3/6),
-        (Ch1 + (Ch2 - Ch1)*4/6),
-        (Ch1 + (Ch2 - Ch1)*5/6),
-        Ch2, Ch2, Ch2, Ch2, Ch2, Ch2, Ch2,
-        (Ch2 + COhₘ)/2, COhₘ
-      ), fill: aqua, //width: 0.9
+        h1,
+        (h1 + (h2 - h1)*1/6),
+        (h1 + (h2 - h1)*2/6),
+        (h1 + (h2 - h1)*3/6),
+        (h1 + (h2 - h1)*4/6),
+        (h1 + (h2 - h1)*5/6),
+        h2, h2, h2, h2, h2, h2, h2,
+        (h2 + hm)/2, hm
+      ), fill: aqua,
     ),
 
-    lq.plot( (-1,17),(Ch2,Ch2), label: $h_"ср.ст."$, mark: none,
+    lq.plot( (-1,17),(h2,h2), label: $h_"ср.ст."$, mark: none,
       stroke:(dash:(10pt, 4pt), thickness:1.5pt, paint:olive)
     ),
-    lq.plot( (-1,17),(COhₘ,COhₘ), label: $h_"ср"$, mark: none,
+    lq.plot( (-1,17),(hm,hm), label: $h_"ср"$, mark: none,
       stroke:(dash:(10pt, 4pt), thickness:1.5pt, paint:red)
     ),
-    lq.plot( (-1,17),(Ch1,Ch1), label: $h_1$, mark: none,
+    lq.plot( (-1,17),(h1,h1), label: $h_1$, mark: none,
       stroke:(dash:(10pt, 4pt), thickness:1.5pt, paint: fuchsia)
     ),
     
@@ -681,12 +670,12 @@ $ dash(h)_1 / phi = Ch̄1 / CΦ1 = Cotn; $
 Зададим степень реактивности $Omega = COΩ $ и найдем:
 $ Omega / phi = COΩ / CΦ1 = Cotm; $
 
-По графику на @otn[рисунке] находим $(dash(h)_1/phi)_(b/t=1) = CP0ᵍ; $
+// По графику на @otn[рисунке] находим $(dash(h)_1/phi)_(b/t=1) = CP0ᵍ; $
 
 Коэффициент:
 $ J = ((dash(h)_1 / phi))  / (dash(h)_1/phi)_(b/t=1) = Cotn / CP0ᵍ = CJ; $
 
-Пользуясь графиком на @J[рисунке] определяем $b/t = 1/Ctb -> t/b = Ctb.$
+// Пользуясь графиком на @J[рисунке] определяем $b/t = 1/Ctb -> t/b = Ctb.$
 
 При постоянной вдоль радиуса хорде относительный шаг у втулки первой ступени:
 $ (t/b)_"вт" = t/b dot D_"вт"_1 / D_"ср"_1 = Ctb dot CDᵥₜ1/CDₘ1 = Ctbem. $
@@ -705,10 +694,10 @@ $ (t/b)_"вт" = t/b dot D_"вт"_1 / D_"ср"_1 = Ctb dot CDᵥₜ1/CDₘ1 = Ct
         lx, lx.map(lx => 0.935 - 0.777*lx + 0.503 * lx * lx)
       ),
       lq.plot(mark:none, stroke:(dash:(10pt, 4pt), thickness: 1.5pt),
-        (Cotm,Cotm),(0.6, CP0ᵍ), label: $Omega"/"phi = Cotm$
+        (RawCotm,RawCotm),(0.6, RawCP0ᵍ), label: $Omega"/"phi = Cotm$
       ),
       lq.plot(mark:none, stroke:(dash:(10pt, 4pt), thickness: 1.5pt),
-        (0,Cotm),(CP0ᵍ,CP0ᵍ), label: $(dash(h)_1 "/" phi)_(b/t=1)=CJ$
+        (0,RawCotm),(RawCP0ᵍ,RawCP0ᵍ), label: $(dash(h)_1 "/" phi)_(b/t=1)=CJ$
       )
     )
   ],
@@ -727,10 +716,10 @@ $ (t/b)_"вт" = t/b dot D_"вт"_1 / D_"ср"_1 = Ctb dot CDᵥₜ1/CDₘ1 = Ct
       (0.6, 0.654, 0.697, 0.788, 0.94, 1, 1.194, 1.447, 1.595),
     ),
     lq.plot(mark:none, stroke: (dash: (10pt, 4pt), thickness: 2pt ),
-      (0.4,1/Ctb),(CJ, CJ), label: $J = CJ$
+      (0.4,1/RawCtb),(RawCJ, RawCJ), label: $J = CJ$
     ),
     lq.plot(mark:none, stroke: (dash: (10pt, 4pt), thickness: 2pt ),
-      (1/Ctb,1/Ctb),(0,CJ), label: $b"/"t = #calc.round(digits: 4,1/Ctb)$
+      (1/RawCtb,1/RawCtb),(0,RawCJ), label: $b"/"t = #calc.round(digits: 4,1/RawCtb)$
     )
   ),
   caption: [график зависимости коэффициента $J$ от густоты решетки]
@@ -793,7 +782,7 @@ $ epsilon = beta_2 - beta_1 = Cβ2 degree - Cβ1 degree = Cϵ degree; $
 $ phi_н = C_z_1 / u_н_1 = COcᶻ1 / Cuₙ1 = CΦₙ; $
 
 Проверка числа Маха по средней относительной скорости на внешнем диаметре первой ступени:
-$ M_W_с = u_н_1 dot sqrt(1+phi_н^2)/sqrt(k_в dot R_в dot T_1^*) = Cuₙ1 dot sqrt(1 + CΦₙ^2) / sqrt(COkₙ dot CORₙ dot CTs1) = CMʷₘ. $
+$ M_W_с = u_н_1 dot sqrt(1+phi_н^2)/sqrt(k_в dot R_в dot T_1^*) = Cuₙ1 dot sqrt(1 + CΦₙ^2) / sqrt(COkₙ dot CORₙ dot CTs1) = CMʷₘ; $
 
 Сверхзвуковое число $M_W_c$ свидетельствует о необходимости профилирования лопаточного аппарата первой ступени турбины по закону $Omega = "const"$ вдоль радиуса.
 
@@ -808,21 +797,30 @@ $ M_W_с = u_н_1 dot sqrt(1+phi_н^2)/sqrt(k_в dot R_в dot T_1^*) = Cuₙ1 do
     )
     // Variable
     let start =  150
+    let cz1 = -RawCOcᶻ1
+    let cz2 = -RawCCcᶻ2
+    let cu1 = -RawCcᵤ1
+    let cu2 = -RawCcᵤ2
+    let cu  =  RawCu
+    let a1  =  RawCα1 * 1deg
+    let a2  =  RawCα2 * 1deg
+    let b1  =  RawCβ1 * 1deg
+    let b2  =  RawCβ2 * 1deg
     
     // Оси
     line((start,0),(-start,0), mark:(end: "stealth"), name: "axisu")
     content("axisu.end", $U$, padding: 5, anchor: "north-west" )
-    line((0,0),(0,-COcᶻ1), mark:(end: "stealth"), name: "axisz")
+    line((0,0),(0,cz1), mark:(end: "stealth"), name: "axisz")
     content("axisz.end", $z$, padding: 5, anchor: "south-west" )
 
     // Треугольник 1
-    line(name:"C1", (0,0),(-Ccᵤ1  ,-COcᶻ1), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
-    line(name:"W1", (0,0),(-Ccᵤ1 + Cu, -COcᶻ1), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
+    line(name:"C1", (0,0),(cu1  ,cz1), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
+    line(name:"W1", (0,0),(cu1 + cu, cz1), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
     line(name:"U1", "W1.end","C1.end", mark:(end: "stealth", fill:red),stroke:(paint:red, thickness: 2pt))
 
     // Треугольник 2
-    line(name:"C2", (0,0),(-Ccᵤ2  ,-CCcᶻ2), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
-    line(name:"W2", (0,0),(-Ccᵤ2 + Cu, -CCcᶻ2), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
+    line(name:"C2", (0,0),(cu2, cz2), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
+    line(name:"W2", (0,0),(cu2 + cu, cz2), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
     line(name:"U2","W2.end","C2.end", mark:(end: "stealth", fill:blue),stroke:(paint:blue, thickness: 2pt))
 
     // линии для U1 и U2
@@ -834,26 +832,26 @@ $ M_W_с = u_н_1 dot sqrt(1+phi_н^2)/sqrt(k_в dot R_в dot T_1^*) = Cuₙ1 do
     line(name:"U_2", "U2s.36", "U2e.36", mark:(symbol: "stealth"))
 
     // Подписи
-    content("C1.70%", angle:Cα1 * 1deg, box(fill:white, inset:3pt)[$C_1 = Cc1 "м/с"$])
-    content("W1.70%", angle:-Cβ1 * 1deg, box(fill:white, inset:3pt)[$W_1 = Cw1 "м/с"$])
-    content("C2.70%", angle:Cα2 * 1deg, box(fill:white, inset:3pt)[$C_2 = Cc2 "м/с"$])
-    content("W2.70%", angle:-Cβ2 * 1deg, box(fill:white, inset:3pt)[$W_2 = Cw2 "м/с"$])
+    content("C1.70%", angle:  a1, box(fill:white, inset:3pt)[$C_1 = Cc1 "м/с"$])
+    content("W1.70%", angle: -b1, box(fill:white, inset:3pt)[$W_1 = Cw1 "м/с"$])
+    content("C2.70%", angle:  a2, box(fill:white, inset:3pt)[$C_2 = Cc2 "м/с"$])
+    content("W2.70%", angle: -b2, box(fill:white, inset:3pt)[$W_2 = Cw2 "м/с"$])
     content("U_1.mid", box(fill:white, inset:3pt)[$U_1 = Cu "м/с"$])
     content("U_2.mid", box(fill:white, inset:3pt)[$U_2 = Cu "м/с"$])
     content("axisz.90", angle:90deg, box(fill:white, inset:3pt)[$C_z_1 = COcᶻ1 "м/с"$], anchor: "south")
     content("axisz.90", angle:-90deg, box(fill:white, inset:3pt)[$C_z_2 = CCcᶻ2 "м/с"$], anchor: "south")
 
     // Дуги
-    arc(name:"a2", (0,0), start:180deg, stop: 180deg + Cα2 * 1deg, radius:80, anchor:"origin", mark:(symbol:"stealth"))
-    arc(name:"b2", (0,0), start:0deg, stop: -Cβ2 * 1deg , radius:45, anchor:"origin", mark:(symbol:"stealth"))
-    arc(name:"a1", (0,0), start:-180deg, stop: -180deg + Cα1 * 1deg, radius:45, anchor:"origin", mark:(symbol:"stealth"))
-    arc(name:"b1", (0,0), start:0deg, stop: 0deg - Cβ1 * 1deg, radius:80, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"a2", (0,0), start:180deg, stop: 180deg + a2, radius:80, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"b2", (0,0), start:0deg, stop: -b2, radius:45, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"a1", (0,0), start:-180deg, stop: -180deg + a1, radius:45, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"b1", (0,0), start:0deg, stop: 0deg - b1, radius:80, anchor:"origin", mark:(symbol:"stealth"))
 
     // Подписи дуг
-    content("a1.50%", angle: Cα1 * 1deg * 0.5, box(fill:white, inset:3pt)[$alpha_1 = Cα1 degree $])
-    content("b1.30%", angle: -Cβ1 * 1deg * 0.3, box(fill:white, inset:3pt)[$beta_1 = Cβ1 degree$])
-    content("a2.30%", angle: Cα2 * 1deg * 0.3, box(fill:white, inset:3pt)[$alpha_2 = Cα2 degree$])
-    content("b2.50%", angle: -Cβ2 * 1deg * 0.5, box(fill:white, inset:3pt)[$beta_2 = Cβ2 degree$])
+    content("a1.50%", angle: a1 * 0.5, box(fill:white, inset:3pt)[$alpha_1 = Cα1 degree $])
+    content("b1.30%", angle: -b1 * 0.3, box(fill:white, inset:3pt)[$beta_1 = Cβ1 degree$])
+    content("a2.30%", angle: a2 * 0.3, box(fill:white, inset:3pt)[$alpha_2 = Cα2 degree$])
+    content("b2.50%", angle: -b2 * 0.5, box(fill:white, inset:3pt)[$beta_2 = Cβ2 degree$])
   })],
   caption: text(size:14pt)[Треугольник скоростей на среднем диаметре первой ступени компрессора]
 ) <Tri>
