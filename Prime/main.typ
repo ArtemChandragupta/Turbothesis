@@ -63,7 +63,6 @@
   linebreak()
 }
 
-
 #align(center)[
   #text(13pt, hyphenate:false)[ ФЕДЕРАЛЬНОЕ ГОСУДАРСТВЕННОЕ АВТОНОМНОЕ ОБРАЗОВАТЕЛЬНОЕ УЧРЕЖДЕНИЕ ВЫСШЕГО ОБРАЗОВАНИЯ «САНКТ-ПЕТЕРБУРГСКИЙ ПОЛИТЕХНИЧЕСКИЙ УНИВЕРСИТЕТ ПЕТРА ВЕЛИКОГО» ] 
   
@@ -116,9 +115,7 @@
   show heading: set block(above: 1.4em, below: 1em)
   it
 }
-#outline(
-  title: "СОДЕРЖАНИЕ",
-)
+#outline(title: "СОДЕРЖАНИЕ")
 
 #show heading:it => {
   set text(hyphenate:false, size:14pt)
