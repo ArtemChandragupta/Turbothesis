@@ -216,10 +216,10 @@
       let cc2 = 1 / calc.ln(y4/y1),
       let lx = lq.linspace(1, 2),
 
-      lq.place(1,y1,align: right+top   )[#block(inset:2pt)[$1$]],
-      lq.place(1,y2,align: right+bottom)[#block(inset:2pt)[$2$]],
-      lq.place(2,y3,align: left+bottom )[#block(inset:2pt)[$3$]],
-      lq.place(2,y4,align: left+top    )[#block(inset:2pt)[$4$]],
+      lq.place(1,y1,align: right+top,   block(inset:2pt)[$1$]),
+      lq.place(1,y2,align: right+bottom,block(inset:2pt)[$2$]),
+      lq.place(2,y3,align: left+bottom, block(inset:2pt)[$3$]),
+      lq.place(2,y4,align: left+top,    block(inset:2pt)[$4$]),
 
       lq.plot(stroke:1.5pt, (1,1), (y1,y2) ),
       lq.plot(stroke:1.5pt, (2,2), (y3,y4) ),
@@ -557,8 +557,8 @@ $ h_1 = (0.6 dots 0.7) dot h_"ср" = COk1 dot COhₘ = Ch1 "Дж/кг"; $
 Теоретический напор в средних ступенях:
 $ h_"ср. ст." = (1.1 dots 1.2) dot h_"ср" = Ckₘ dot COhₘ = Ch2 "Дж/кг"; $
 
-Теоретический напор в последней ступени:
-$ h_п = (0.95 dots 1) dot h_"ср" = 1 dot COhₘ = COhₘ "Дж/кг"; $
+#block(breakable: false)[Теоретический напор в последней ступени:
+$ h_п = (0.95 dots 1) dot h_"ср" = 1 dot COhₘ = COhₘ "Дж/кг"; $]
 
 Считая рост напора в ступенях от и его падение в ступенях линейным, изобразим распределение напора на @Ras[рисунке]:
 
@@ -616,8 +616,8 @@ $ u_"ср"_1 = (pi dot D_"ср"_1 dot n)/60 = (pi dot CDₘ1 dot TAn)/60 = Cuₘ
 
 Производим расчет первой ступени по среднему диаметру:
 
-Коэффициент расхода на среднем диаметре:
-$ phi = C_z_1 / u_"ср"_1 = COcᶻ1 / Cuₘ1 = CΦ1; $
+#block(breakable: false)[Коэффициент расхода на среднем диаметре:
+$ phi = C_z_1 / u_"ср"_1 = COcᶻ1 / Cuₘ1 = CΦ1; $]
 
 Коэффициент теоретического напора:
 $ dash(h)_1 = h_1/u^2_"ср"_1 = Ch1 / Cuₘ1^2 = Ch̄1; $
@@ -628,12 +628,12 @@ $ dash(h)_1 / phi = Ch̄1 / CΦ1 = Cotn; $
 Зададим степень реактивности $Omega = COΩ $ и найдем:
 $ Omega / phi = COΩ / CΦ1 = Cotm; $
 
-// По графику на @otn[рисунке] находим $(dash(h)_1/phi)_(b/t=1) = CP0ᵍ; $
+По графику на @otn[рисунке] находим $(dash(h)_1/phi)_(b/t=1) = CP0ᵍ; $
 
 Коэффициент:
 $ J = ((dash(h)_1 / phi))  / (dash(h)_1/phi)_(b/t=1) = Cotn / CP0ᵍ = CJ; $
 
-// Пользуясь графиком на @J[рисунке] определяем $b/t = 1/Ctb -> t/b = Ctb.$
+Пользуясь графиком на @J[рисунке] определяем $b/t = 1/Ctb -> t/b = Ctb.$
 
 При постоянной вдоль радиуса хорде относительный шаг у втулки первой ступени:
 $ (t/b)_"вт" = t/b dot D_"вт"_1 / D_"ср"_1 = Ctb dot CDᵥₜ1/CDₘ1 = Ctbem. $
@@ -747,14 +747,13 @@ $ M_W_с = u_н_1 dot sqrt(1+phi_н^2)/sqrt(k_в dot R_в dot T_1^*) = Cuₙ1 do
 На @Tri[рисунке] приведён построенный по полученным данным треугольник скоростей:
 
 #figure(
-  text(size: 12pt)[#cetz.canvas(length:0.05cm, {
+  text(size: 12pt, cetz.canvas(length:0.05cm, {
     import cetz.draw: *
     set-style(
       mark: (transform-shape: false, fill: black),
       stroke: (cap: "round")
     )
-    // Variable
-    let start =  150
+    // Variables
     let cz1 = -RawCOcᶻ1
     let cz2 = -RawCCcᶻ2
     let cu1 = -RawCcᵤ1
@@ -764,6 +763,7 @@ $ M_W_с = u_н_1 dot sqrt(1+phi_н^2)/sqrt(k_в dot R_в dot T_1^*) = Cuₙ1 do
     let a2  =  RawCα2 * 1deg
     let b1  =  RawCβ1 * 1deg
     let b2  =  RawCβ2 * 1deg
+    let start = calc.max( calc.abs(cu1), calc.abs(cu2) )
     
     // Оси
     line((start,0),(-start,0), mark:(end: "stealth"), name: "axisu")
@@ -806,11 +806,11 @@ $ M_W_с = u_н_1 dot sqrt(1+phi_н^2)/sqrt(k_в dot R_в dot T_1^*) = Cuₙ1 do
     arc(name:"b1", (0,0), start:0deg, stop: 0deg - b1, radius:80, anchor:"origin", mark:(symbol:"stealth"))
 
     // Подписи дуг
-    content("a1.50%", angle: a1 * 0.5, box(fill:white, inset:3pt)[$alpha_1 = Cα1 degree $])
-    content("b1.30%", angle: -b1 * 0.3, box(fill:white, inset:3pt)[$beta_1 = Cβ1 degree$])
-    content("a2.30%", angle: a2 * 0.3, box(fill:white, inset:3pt)[$alpha_2 = Cα2 degree$])
-    content("b2.50%", angle: -b2 * 0.5, box(fill:white, inset:3pt)[$beta_2 = Cβ2 degree$])
-  })],
+    content("a1.50%", angle: a1/2, box(fill:white, inset:3pt, $alpha_1 = Cα1 degree $))
+    content("b1.33%", angle: -b1/3, box(fill:white, inset:3pt, $beta_1 = Cβ1 degree$))
+    content("a2.33%", angle: a2/3, box(fill:white, inset:3pt, $alpha_2 = Cα2 degree$))
+    content("b2.50%", angle: -b2/2, box(fill:white, inset:3pt, $beta_2 = Cβ2 degree$))
+  })),
   caption: text(size:14pt)[Треугольник скоростей на среднем диаметре первой ступени компрессора]
 ) <Tri>
 
@@ -926,7 +926,6 @@ $ Y = sqrt( (sum u_2^2) / (2 H_"от")) = sqrt( (4 dot Tu2^2) / (2 dot THₒₜ)
 #noind что соответствует рекомендованным значениям $(0.5 dots 0.6)$.
 
 #set heading(numbering: none)
-
 = ЗАКЛЮЧЕНИЕ
 
 В данной работе проведен расчет параметров ГТУ: тепловой расчет, расчет компрессорной части, расчет турбинной части.
