@@ -1,7 +1,7 @@
 #import "@preview/physica:0.9.5": *
 #import "@preview/cetz:0.4.1"
 #import "@preview/fletcher:0.5.8" as fletcher: diagram, node, edge
-#import fletcher.shapes:parallelogram, trapezium
+#import fletcher.shapes: trapezium
 #import "@preview/tiptoe:0.3.1"
 #import "@preview/lilaq:0.4.0" as lq
 
@@ -21,6 +21,7 @@
 
 // Отступы
 #let ind = 1.25cm
+#let noind = h(-ind)
 #set par(
   justify: true,
   first-line-indent:( 
@@ -28,29 +29,40 @@
     all: true
   )
 )
-#let noind = h(-ind)
+#set enum(indent: ind)
 
 // Приводит межстрочное состояние в соответствие с вордом
 #let leading = 1.5em - 0.75em
 #set block(spacing: leading)
 #set par(spacing: leading, leading: leading)
 
+// Сепараторы
 #set figure.caption(separator: [ --- ])
 #set list(marker: [ --- ])
 
+// Настройки иллюстраций и таблиц
 #set figure(
   supplement: [Рисунок],
   numbering: (..num) => numbering("1.1", counter(heading).get().first(), num.pos().last())
 )
-
 #show figure.where(kind: "table"): set figure.caption(position: top)
 #show figure.caption.where(kind: "table"): it => align(left, it)
-
 #show figure: it => {
   linebreak()
   it
   linebreak()
 }
+
+// Настройки уравнений
+#set math.equation(
+  numbering: (..num) => numbering("(1.1)", counter(heading).get().first(), num.pos().first())
+)
+#show math.equation.where(block: true): it => {
+  linebreak()
+  it
+  linebreak()
+}
+
 
 #align(center)[
   #text(13pt, hyphenate:false)[ ФЕДЕРАЛЬНОЕ ГОСУДАРСТВЕННОЕ АВТОНОМНОЕ ОБРАЗОВАТЕЛЬНОЕ УЧРЕЖДЕНИЕ ВЫСШЕГО ОБРАЗОВАНИЯ «САНКТ-ПЕТЕРБУРГСКИЙ ПОЛИТЕХНИЧЕСКИЙ УНИВЕРСИТЕТ ПЕТРА ВЕЛИКОГО» ] 
@@ -96,45 +108,6 @@
   Санкт-Петербург --- 2024
 ]
 
-// #text()[
-//   #pagebreak()
-//   #align(center, [*Санкт-Петербургский политехнический университет Петра Великого*])
-
-//   #align(center, [*Высшая школа энергетического машиностроения*])
-
-//   #align(center, [*ЗАДАНИЕ*])
-
-//   #align(center, [*НА ВЫПОЛНЕНИЕ КУРСОВОГО ПРОЕКТА*])
-
-//   #align(center, [Студенту Дмитриеву Артему Константиновичу группы 3231303/21201 п/г-2])
-
-//   #align(center, [*Дисциплина: "Газотурбинные установки".*])
-
-//   *Тема проекта:* Газотурбинная установка мощностью 65 МВт
-
-//   #emph[*Срок сдачи студентом законченной работы: декабрь 2024 г.*]
-
-//   + #emph[*Исходные данные к проекту:*]
-//     - Эффективная мощность ГТУ: $65$ МВт;
-//     - Температура газа за турбиной:
-//     - Температура газа перед турбиной:
-//     - Параметры наружного воздуха:
-//     - Топливо: природный газ;
-//     - Прототип установки: ГТЭ-65.
-
-//   + #emph[*Содержание пояснительной записки:*]
-
-//   + #emph[*Перечень графического материала:*]
-//     - Схема установки;
-//     - Рабочий процесс в T-S-диаграмме;
-//     - Графики зависимостей;
-//     - Чертеж прототипа ГТУ.
-  
-//   #noind *Литература*
-
-// ]
-
-// #counter(page).update(0)
 #set page(numbering: "1")
 
 #show outline: it => {
@@ -145,33 +118,18 @@
 }
 #outline(
   title: "СОДЕРЖАНИЕ",
-  indent: auto
 )
 
 #show heading:it => {
-  set text(hyphenate: false,
-    size: 14pt,
-    weight: "semibold"
-  )
+  set text(hyphenate:false, size:14pt)
   set block(above: 1.4em, below: 28pt)
-  pad(x: 1.25cm, it)
+  pad(x: ind, it)
 }
 #show heading.where(level: 1): it => {
   counter(math.equation).update(0)
   counter(figure.where(kind: image)).update(0)
   pagebreak()
   it
-}
-
-#set enum(indent: 1.25cm)
-
-#set math.equation(
-  numbering: (..num) => numbering("(1.1)", counter(heading).get().first(), num.pos().first())
-)
-#show math.equation.where(block: true): it => {
-  linebreak()
-  it
-  linebreak()
 }
 
 = ВВЕДЕНИЕ
