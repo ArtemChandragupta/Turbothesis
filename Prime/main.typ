@@ -161,8 +161,8 @@
 Рассматриваемая установка является одновальной ГТУ простого типа, тепловая схема такой установки изображена на @HeatScheme[рисунке], цикл --- на @HeatGraph[рисунке].
 
 #figure(
-  [
-    #diagram(
+  {
+    diagram(
       node-stroke: 1.5pt,
       let inset-turb = 30pt,
       let radius-ks = 13pt,
@@ -190,15 +190,15 @@
       node((2.5,0.3),[КС], stroke:none)
     )
     
-    #text(size:12pt)[К --- компрессор, КС --- камера сгорания, Т --- газовая турбина]
-  ],
+    text(size:12pt)[\ К --- компрессор, КС --- камера сгорания, Т --- газовая турбина]
+  },
   caption: [Тепловая схема одновальной ГТУ]
 ) <HeatScheme>
 
 #figure(
-  [
-    #show lq.selector(lq.label): set align(top + right)
-    #lq.diagram(
+  {
+    show lq.selector(lq.label): set align(top + right)
+    lq.diagram(
       width: 15cm, height:10cm, legend: (position: bottom + right),
       ylabel: $T$, xlabel: $S$,
       xaxis: (format-ticks: none), yaxis: (format-ticks: none),
@@ -229,8 +229,8 @@
 
     )
     
-    #text(hyphenate: false, size:12pt)[1-2 --- адиабатное сжатие в компрессоре, 2-3 --- изобарный подвод теплоты в камере сгорания, 3-4 --- адиабатное расширение продуктов сгорания на лопатках газовой турбины, 4-1 --- изобарный отвод теплоты от продуктов сгорания в атмосферу]
-  ],
+    text(hyphenate: false, size:12pt)[\ 1-2 --- адиабатное сжатие в компрессоре, 2-3 --- изобарный подвод теплоты в камере сгорания, 3-4 --- адиабатное расширение продуктов сгорания на лопатках газовой турбины, 4-1 --- изобарный отвод теплоты от продуктов сгорания в атмосферу]
+  },
   caption: [Цикл одновальной ГТУ простого типа в T-S-диаграмме]
 ) <HeatGraph>
 
@@ -320,13 +320,13 @@ $ g_в &= ( Q_p^н dot eta_"кс" + h_т + L_0 dot c_p_в dot t_2^* - (L_0 + 1) 
   column-gutter: 0.2em,
   row-gutter: leading,
   align: (right, left),
-  [$Q_н^p -$],
+  $Q_н^p -$,
     [низшая теплота сгорания топлива ($Q_p^н = COQₙₚ "Дж/K"$);],
-  [$h_т -$],
+  $h_т -$,
     [энтальпия топлива (пренебрежимо мала);],
-  [$(C_p_г)_(a=1) -$],
+  $(C_p_г)_(a=1) -$,
     [удельная теплоемкость газа при $alpha=1$ ($(C_p_г)_(a=1) = COCpₐ "Дж/кг"$);],
-  [$L_0 -$],
+  $L_0 -$,
     [стехиометрический коэффициент (принимаем $L_0 = 15$).],
 ))] \
 
@@ -405,7 +405,7 @@ $ Omega_"пол" = H_e^* dot G_в / G_т = IHₑ dot IGₙ/IGₜ = IΩₐₗₗ 
     ),
     ..for i in range(csv_data.len()) {
       let Tt = 1543 + 50 * i
-      (lq.plot(pik,KPD.at(i), stroke:1.5pt, mark-size: 5pt, smooth:true, label:[$T_3^* = Tt "K "$]),)
+      (lq.plot(pik,KPD.at(i), stroke:1.5pt, mark-size: 5pt, smooth:true, label:$T_3^* = Tt "K "$),)
     }
   ),
   caption: [Зависимость эффективного КПД ГТУ от степени повышения давления в компрессоре, при различных значениях температуры]
@@ -423,7 +423,7 @@ $ Omega_"пол" = H_e^* dot G_в / G_т = IHₑ dot IGₙ/IGₜ = IΩₐₗₗ 
     ),
     ..for i in range(csv_data.len()) {
       let Tt = 1543 + 50 * i
-      (lq.plot(pik,He.at(i), stroke:1.5pt, mark-size: 5pt, smooth:true, label:[$T_3^* = Tt "K "$]),)
+      (lq.plot(pik,He.at(i), stroke:1.5pt, mark-size: 5pt, smooth:true, label:$T_3^* = Tt "K "$),)
     }
   ),
   caption: [Зависимость коэффициента полезной работы ГТУ от степени повышения давления в компрессоре, при различных значениях температуры]
@@ -441,7 +441,7 @@ $ Omega_"пол" = H_e^* dot G_в / G_т = IHₑ dot IGₙ/IGₜ = IΩₐₗₗ 
     ),
     ..for i in range(csv_data.len()) {
       let Tt = 1543 + 50 * i
-      (lq.plot(pik,Phi.at(i), stroke:1.5pt, mark-size: 5pt, smooth:true, label:[$T_3^* = Tt "K "$]),)
+      (lq.plot(pik,Phi.at(i), stroke:1.5pt, mark-size: 5pt, smooth:true, label:$T_3^* = Tt "K "$),)
     }
   ),
   caption: [Зависимость эффективной удельной работы ГТУ от степени повышения давления в компрессоре, при различных значениях температуры]
@@ -636,9 +636,9 @@ $ J = ((dash(h)_1 / phi))  / (dash(h)_1/phi)_(b/t=1) = Cotn / CP0ᵍ = CJ; $
 $ (t/b)_"вт" = t/b dot D_"вт"_1 / D_"ср"_1 = Ctb dot CDᵥₜ1/CDₘ1 = Ctbem. $
 
 #figure(
-  [
-    #show lq.selector(lq.legend): set grid(row-gutter: 8pt)
-    #lq.diagram(
+  {
+    show lq.selector(lq.legend): set grid(row-gutter: 8pt)
+    lq.diagram(
       legend: (inset:10pt),
       width: 15cm, height: 9cm, ylim: (0.6, 0.87), xlim: (0, 1.5),
       xlabel: $Omega"/"phi$, ylabel: $(dash(h)_1"/"phi)_(b/t=1)$,
@@ -655,7 +655,7 @@ $ (t/b)_"вт" = t/b dot D_"вт"_1 / D_"ср"_1 = Ctb dot CDᵥₜ1/CDₘ1 = Ct
         (0,RawCotm),(RawCP0ᵍ,RawCP0ᵍ), label: $(dash(h)_1 "/" phi)_(b/t=1)=CJ$
       )
     )
-  ],
+  },
   caption: [график зависимости $(dash(h)_1/phi)_(b/t=1)$ от $Omega/phi$]
 ) <otn>
 
@@ -787,14 +787,14 @@ $ M_W_с = u_н_1 dot sqrt(1+phi_н^2)/sqrt(k_в dot R_в dot T_1^*) = Cuₙ1 do
     line(name:"U_2", "U2s.36", "U2e.36", mark:(symbol: "stealth"))
 
     // Подписи
-    content("C1.70%", angle:  a1, box(fill:white, inset:3pt)[$C_1 = Cc1 "м/с"$])
-    content("W1.70%", angle: -b1, box(fill:white, inset:3pt)[$W_1 = Cw1 "м/с"$])
-    content("C2.70%", angle:  a2, box(fill:white, inset:3pt)[$C_2 = Cc2 "м/с"$])
-    content("W2.70%", angle: -b2, box(fill:white, inset:3pt)[$W_2 = Cw2 "м/с"$])
-    content("U_1.mid", box(fill:white, inset:3pt)[$U_1 = Cu "м/с"$])
-    content("U_2.mid", box(fill:white, inset:3pt)[$U_2 = Cu "м/с"$])
-    content("axisz.90", angle:90deg, box(fill:white, inset:3pt)[$C_z_1 = COcᶻ1 "м/с"$], anchor: "south")
-    content("axisz.90", angle:-90deg, box(fill:white, inset:3pt)[$C_z_2 = CCcᶻ2 "м/с"$], anchor: "south")
+    content("C1.70%", angle:  a1, box(fill:white, inset:3pt, $C_1 = Cc1 "м/с"$))
+    content("W1.70%", angle: -b1, box(fill:white, inset:3pt, $W_1 = Cw1 "м/с"$))
+    content("C2.70%", angle:  a2, box(fill:white, inset:3pt, $C_2 = Cc2 "м/с"$))
+    content("W2.70%", angle: -b2, box(fill:white, inset:3pt, $W_2 = Cw2 "м/с"$))
+    content("U_1.mid", box(fill:white, inset:3pt, $U_1 = Cu "м/с"$))
+    content("U_2.mid", box(fill:white, inset:3pt, $U_2 = Cu "м/с"$))
+    content("axisz.90", angle: 90deg, box(fill:white, inset:3pt, $C_z_1 = COcᶻ1 "м/с"$), anchor: "south")
+    content("axisz.90", angle:-90deg, box(fill:white, inset:3pt, $C_z_2 = CCcᶻ2 "м/с"$), anchor: "south")
 
     // Дуги
     arc(name:"a2", (0,0), start:180deg, stop: 180deg + a2, radius:80, anchor:"origin", mark:(symbol:"stealth"))
@@ -803,10 +803,10 @@ $ M_W_с = u_н_1 dot sqrt(1+phi_н^2)/sqrt(k_в dot R_в dot T_1^*) = Cuₙ1 do
     arc(name:"b1", (0,0), start:0deg, stop: 0deg - b1, radius:80, anchor:"origin", mark:(symbol:"stealth"))
 
     // Подписи дуг
-    content("a1.50%", angle: a1/2, box(fill:white, inset:3pt, $alpha_1 = Cα1 degree $))
-    content("b1.33%", angle: -b1/3, box(fill:white, inset:3pt, $beta_1 = Cβ1 degree$))
-    content("a2.33%", angle: a2/3, box(fill:white, inset:3pt, $alpha_2 = Cα2 degree$))
-    content("b2.50%", angle: -b2/2, box(fill:white, inset:3pt, $beta_2 = Cβ2 degree$))
+    content("a1.50%", angle: a1/2, box(fill:white, inset:3pt, $alpha_1 = Cα1 degree$) )
+    content("b1.33%", angle: -b1/3, box(fill:white, inset:3pt, $beta_1 = Cβ1 degree$) )
+    content("a2.33%", angle: a2/3, box(fill:white, inset:3pt, $alpha_2 = Cα2 degree$) )
+    content("b2.50%", angle: -b2/2, box(fill:white, inset:3pt, $beta_2 = Cβ2 degree$) )
   })),
   caption: text(size:14pt)[Треугольник скоростей на среднем диаметре первой ступени компрессора]
 ) <Tri>
@@ -825,9 +825,9 @@ $ M_W_с = u_н_1 dot sqrt(1+phi_н^2)/sqrt(k_в dot R_в dot T_1^*) = Cuₙ1 do
     column-gutter: 0.2em,
     row-gutter: leading,
     align: (right, left),
-    [$P_к^* -$],
+    $P_к^* -$,
       [давление на выходе из компрессора (найдено в разделе 2, \ $P_к^* = CPsₖ "Па"$);],
-    [$sigma_"кс" -$],
+    $sigma_"кс" -$,
       [коэффициент потерь полного давления в камере сгорания, \ заданное при расчете в программе A2GTP ($sigma_"кс" = COσsₖₛ$);],
   ))
   
