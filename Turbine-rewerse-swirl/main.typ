@@ -43,8 +43,15 @@
   supplement: [Рисунок],
   numbering: (..num) => numbering("1.1", counter(heading).get().first(), num.pos().first())
 )
-#show figure.where(kind: "table"): set figure.caption(position: top)
-#show figure.caption.where(kind: "table"): it => align(left, it)
+#show figure.where(kind: table): it => {
+  set figure.caption(position: top)
+  show figure.caption: it => align(left, it)
+  set block(breakable: true)
+  set text(size: 10pt)
+  show figure.caption: set text(size:14pt)
+  set math.equation(numbering: none, supplement: [table-eq])
+  it
+}
 #show figure: it => {
   linebreak()
   it
@@ -56,9 +63,11 @@
   numbering: (..num) => numbering("(1.1)", counter(heading).get().first(), num.pos().first())
 )
 #show math.equation.where(block: true): it => {
-  linebreak()
-  it
-  linebreak()
+  if it.supplement != [table-eq] {
+    linebreak()
+    it
+    linebreak()
+  } else {it}
 }
 
 #align(center)[
@@ -152,7 +161,7 @@
 
 #figure(
   {
-    image("assets/GTE-65_2.png", width: 100%)
+    image("assets/GTE-65.png", width: 100%)
     text(size:12pt)[1 --- 16-ступенчатый компрессор, 2 --- 4-ступенчатая турбина, 3 --- кольцевая камера сгорания, 4 --- выходной диффузор, 5 --- входной подшипник, 6 --- выходной подшипник, \ 7 --- коаксиальные корпуса для охлаждающего воздуха ]
   },
   caption: [Продольный разрез ГТЭ-65]
@@ -265,123 +274,111 @@ $ Y = u_2 dot sqrt(m / (2 H_(0 T) ) ) = Iu2 dot sqrt( TAm / (2 dot IH0T) ) = IY,
     [Направляющая лопатка, $l_1$, м], $P1l1$, $P2l1$, $P3l1$, $P4l1$,
     [Сопловая лопатка, $l_2$, м],     $P1l2$, $P2l2$, $P3l2$, $P4l2$,
   ),
-  caption: text(size: 14pt)[Высоты лопаток],
-  kind: "table",
-  supplement: text(size: 14pt)[Таблица]
+  caption: [Высоты лопаток],
+  supplement: [Таблица]
 ) <Loop>
 
 = Расчет турбины по среднему диаметру
 
 В @S[таблице] показаны результаты расчета по среднему диаметру.
 
-#show figure: set block(breakable: true)
-#set math.equation(numbering: none)
-#set text(size: 10pt)
 #figure(
   table(
     columns: (auto, auto, auto, auto, auto, auto),
     align: center,
     [Величина], [Ед. из.], [Сечение 1], [Сечение 2], [Сечение 3], [Сечение 4],
-    [$ p_0^* = p^*_(2(i-1)) $],[Па],
+    $ p_0^* = p^*_(2(i-1)) $,[Па],
       [#S1ps0],[#S2ps0],[#S3ps0],[#S4ps0],
-    [$ T_0^* = T^*_(2(i-1)) $],[К],
+    $ T_0^* = T^*_(2(i-1)) $,[К],
       [#S1Ts0],[#S2Ts0],[#S3Ts0],[#S4Ts0],
-    [$ H_0 = C_p dot T^*_0 dot (1- (p_2/p_0^*)^((k-1)/k) ) $],[Дж/кг],
+    $ H_0 = C_p dot T^*_0 dot (1- (p_2/p_0^*)^((k-1)/k) ) $,[Дж/кг],
       [#S1H0],[#S2H0],[#S3H0],[#S4H0],
-    [$ T_(2 t t) = T_0^* - H_0 / C_p $],[К],
+    $ T_(2 t t) = T_0^* - H_0 / C_p $,[К],
       [#S1T2tt],[#S2T2tt],[#S3T2tt],[#S4T2tt],
-    [$ p_2 $],[Па],
+    $ p_2 $,[Па],
       [#S1p2],[#S2p2],[#S3p2],[#S4p2],
-    [$ c_(1 t) = sqrt(2 (1- rho_(t "ср") ) dot H_0) $],[м/с],
+    $ c_(1 t) = sqrt(2 (1- rho_(t "ср") ) dot H_0) $,[м/с],
       [#S1c1t],[#S2c1t],[#S3c1t],[#S4c1t],
-    [$ c_1 = c_(1 t) dot Phi $],[м/с],
+    $ c_1 = c_(1 t) dot Phi $,[м/с],
       [#S1c1],[#S2c1],[#S3c1],[#S4c1],
-    [$ T_(1 t) = T_0^* - c_(1 t)^2 / (2 C_p) $],[К],
+    $ T_(1 t) = T_0^* - c_(1 t)^2 / (2 C_p) $,[К],
       [#S1T1t],[#S2T1t],[#S3T1t],[#S4T1t],
-    [$ p_1 = p_0^* dot (T_(1 t)/T_0^*)^(k/(k-1)) $],[Па],
+    $ p_1 = p_0^* dot (T_(1 t)/T_0^*)^(k/(k-1)) $,[Па],
       [#S1p1],[#S2p1],[#S3p1],[#S4p1],
-    [$ T_1 = T_0^* - c_1^2 / (2 C_p) $],[К],
+    $ T_1 = T_0^* - c_1^2 / (2 C_p) $,[К],
       [#S1T1],[#S2T1],[#S3T1],[#S4T1],
-    [$ rho_1 = p_1 / (R dot T_1) $],[кг/$м^3$],
+    $ rho_1 = p_1 / (R dot T_1) $,[кг/$м^3$],
       [#S1ρ1],[#S2ρ1],[#S3ρ1],[#S4ρ1],
-    [$ F_(1 r) = (G dot R dot T_1) / (p_1 dot c_1) $],[$м^2$],
+    $ F_(1 r) = (G dot R dot T_1) / (p_1 dot c_1) $,[$м^2$],
       [#S1F1r],[#S2F1r],[#S3F1r],[#S4F1r],
-    [$ F_1 = pi dot d_(1 "ср") dot l_1 $],[$м^2$],
+    $ F_1 = pi dot d_(1 "ср") dot l_1 $,[$м^2$],
       [#S1F1],[#S2F1],[#S3F1],[#S4F1],
-    [$ alpha_1 = arcsin(F_(1 r)/F_1) $],[град],
+    $ alpha_1 = arcsin(F_(1 r)/F_1) $,[град],
       [#S1α1],[#S2α1],[#S3α1],[#S4α1],
-    [$ c_(1 u) = c_1 dot cos(alpha_1) $],[м/с],
+    $ c_(1 u) = c_1 dot cos(alpha_1) $,[м/с],
       [#S1c1u],[#S2c1u],[#S3c1u],[#S4c1u],
-    [$ c_(1 z) = c_1 dot sin(alpha_1) $],[м/с],
+    $ c_(1 z) = c_1 dot sin(alpha_1) $,[м/с],
       [#S1c1z],[#S2c1z],[#S3c1z],[#S4c1z],
-    [$ u_1 = pi dot d_(1 c) dot n/60 $],[м/с],
+    $ u_1 = pi dot d_(1 c) dot n/60 $,[м/с],
       [#S1u1],[#S2u1],[#S3u1],[#S4u1],
-    [$ u_2 = pi dot d_(2 c) dot n/60 $],[м/с],
+    $ u_2 = pi dot d_(2 c) dot n/60 $,[м/с],
       [#S1u2],[#S2u2],[#S3u2],[#S4u2],
-    [$ w_(1 u) = c_(1 u) - u_1 $],[м/с],
+    $ w_(1 u) = c_(1 u) - u_1 $,[м/с],
       [#S1w1u],[#S2w1u],[#S3w1u],[#S4w1u],
-    [$ w_1 =sqrt(c_(1 z)^2 + w_(1 u)^2) $],[м/с],
+    $ w_1 =sqrt(c_(1 z)^2 + w_(1 u)^2) $,[м/с],
       [#S1w1],[#S2w1],[#S3w1],[#S4w1],
-    [$ beta_1 = arctan(c_(1 z)/w_(1 u)) $],[град],
+    $ beta_1 = arctan(c_(1 z)/w_(1 u)) $,[град],
       [#S1β1],[#S2β1],[#S3β1],[#S4β1],
-    [$ T^*_w_1 = T_1 + w_1^2 / (2 C_p) $],[К],
+    $ T^*_w_1 = T_1 + w_1^2 / (2 C_p) $,[К],
       [#S1Tsw1],[#S2Tsw1],[#S3Tsw1],[#S4Tsw1],
-    [$ p^*_w_1 = p_1 dot (T^*_w_1 / T_1)^(k/(k-1)) $],[Па],
+    $ p^*_w_1 = p_1 dot (T^*_w_1 / T_1)^(k/(k-1)) $,[Па],
       [#S1psw1],[#S2psw1],[#S3psw1],[#S4psw1],
-    [$ T^*_w_2 = T^*_w_1 - (u_1^2 - u_2^2)/(2 C_p) $],[К],
+    $ T^*_w_2 = T^*_w_1 - (u_1^2 - u_2^2)/(2 C_p) $,[К],
       [#S1Tsw2],[#S2Tsw2],[#S3Tsw2],[#S4Tsw2],
-    [$ p^*_(w_2 t) = p^*_w_1 dot (T^*_w_2 / T^*_w_1)^(k/(k-1)) $],[Па],
+    $ p^*_(w_2 t) = p^*_w_1 dot (T^*_w_2 / T^*_w_1)^(k/(k-1)) $,[Па],
       [#S1psw2t],[#S2psw2t],[#S3psw2t],[#S4psw2t],
-    [$ H^*_2 = C_p dot T^*_w_2 dot (1 - (p_2 / p^*_(w_2 t))^((k-1)/k) ) $],[Дж/кг],
+    $ H^*_2 = C_p dot T^*_w_2 dot (1 - (p_2 / p^*_(w_2 t))^((k-1)/k) ) $,[Дж/кг],
       [#S1Hs2],[#S2Hs2],[#S3Hs2],[#S4Hs2],
-    [$ w_(2 t) = sqrt(2 H^*_2) $],[м/с],
+    $ w_(2 t) = sqrt(2 H^*_2) $,[м/с],
       [#S1w2t],[#S2w2t],[#S3w2t],[#S4w2t],
-    [$ w_2 = w_(2 t) dot Psi $],[м/с],
+    $ w_2 = w_(2 t) dot Psi $,[м/с],
       [#S1w2],[#S2w2],[#S3w2],[#S4w2],
-    [$ T_2 = T^*_w_1 - w_2^2 / (2 C_p) $],[К],
+    $ T_2 = T^*_w_1 - w_2^2 / (2 C_p) $,[К],
       [#S1T2],[#S2T2],[#S3T2],[#S4T2],
-    [$ F_(2 r) = (G dot R dot T_2) / (p_2 dot w_2) $],[$м^2$],
+    $ F_(2 r) = (G dot R dot T_2) / (p_2 dot w_2) $,[$м^2$],
       [#S1F2r],[#S2F2r],[#S3F2r],[#S4F2r],
-    [$ F_2 = pi dot d_(2 "ср") dot l_2 $],[$м^2$],
+    $ F_2 = pi dot d_(2 "ср") dot l_2 $,[$м^2$],
       [#S1F2],[#S2F2],[#S3F2],[#S4F2],
-    [$ beta_2^* = arcsin( F_(2 r)/F_2) $],[град],
+    $ beta_2^* = arcsin( F_(2 r)/F_2) $,[град],
       [#S1βs2],[#S2βs2],[#S3βs2],[#S4βs2],
-    [$ w_(2 u) = w_2 dot cos(beta_2^*) $],[м/с],
+    $ w_(2 u) = w_2 dot cos(beta_2^*) $,[м/с],
       [#S1w2u],[#S2w2u],[#S3w2u],[#S4w2u],
-    [$ c_(2 z) = w_(2 z) = u_2 dot sin(beta_2^*) $],[м/с],
+    $ c_(2 z) = w_(2 z) = u_2 dot sin(beta_2^*) $,[м/с],
       [#S1c2z],[#S2c2z],[#S3c2z],[#S4c2z],
-    [$ c_(2 z) = u_2 dot sin(beta_2^*) $],[м/с],
+    $ c_(2 z) = u_2 dot sin(beta_2^*) $,[м/с],
       [#S1c2u],[#S2c2u],[#S3c2u],[#S4c2u],
-    [$ alpha_2 = arctan(c_(2 z)/c_(2 u)) $],[град],
+    $ alpha_2 = arctan(c_(2 z)/c_(2 u)) $,[град],
       [#S1α2],[#S2α2],[#S3α2],[#S4α2],
-    [$ c_2 = sqrt(c_(2 z)^2 + c_(2 u)^2) $],[м/с],
+    $ c_2 = sqrt(c_(2 z)^2 + c_(2 u)^2) $,[м/с],
       [#S1c2],[#S2c2],[#S3c2],[#S4c2],
-    [$ T^*_2 = T_2 + c_2^2 / (2 C_p) $],[К],
+    $ T^*_2 = T_2 + c_2^2 / (2 C_p) $,[К],
       [#S1Ts2],[#S2Ts2],[#S3Ts2],[#S4Ts2],
-    [$ p_2^* = p_2 dot (T_2^* / T_2)^((k-1)/k) $],[Па],
+    $ p_2^* = p_2 dot (T_2^* / T_2)^((k-1)/k) $,[Па],
       [#S1ps2],[#S2ps2],[#S3ps2],[#S4ps2],
-    [$ M_c_1 = c_1 / sqrt(k dot R dot T_1) $],[ ],
+    $ M_c_1 = c_1 / sqrt(k dot R dot T_1) $,[ ],
       [#S1Mc1],[#S2Mc1],[#S3Mc1],[#S4Mc1],
-    [$ M_w_2 = w_2 / sqrt(k dot R dot T_2) $],[ ],
+    $ M_w_2 = w_2 / sqrt(k dot R dot T_2) $,[ ],
       [#S1Mw2],[#S2Mw2],[#S3Mw2],[#S4Mw2],
-    [$ T^*_(2 t t) = T_(2 t t) dot (p_2^* / p_2)^((k-1)/k) $],[К ],
+    $ T^*_(2 t t) = T_(2 t t) dot (p_2^* / p_2)^((k-1)/k) $,[К ],
       [#S1Ts2tt],[#S2Ts2tt],[#S3Ts2tt],[#S4Ts2tt],
-    [$ eta_u = (T^*_0 - T^*_2) / (T^*_0 - T_(2 t t)) $],[],
+    $ eta_u = (T^*_0 - T^*_2) / (T^*_0 - T_(2 t t)) $,[],
       [#S1ηᵤ],[#S2ηᵤ],[#S3ηᵤ],[#S4ηᵤ],
-    [$ eta_u^* = (T^*_0 - T^*_2) / (T^*_0 - T^*_(2 t t)) $],[],
+    $ eta_u^* = (T^*_0 - T^*_2) / (T^*_0 - T^*_(2 t t)) $,[],
       [#S1ηsᵤ],[#S2ηsᵤ],[#S3ηsᵤ],[#S4ηsᵤ],
   ),
-  caption: text(size: 14pt)[Расчет параметров по среднему диаметру],
-  kind: "table",
-  supplement: text(size: 14pt)[Таблица]
+  caption: [Расчет параметров по среднему диаметру],
+  supplement: [Таблица]
 ) <S>
-
-#show figure: set block(breakable: false)
-#counter(math.equation).update(0)
-#set math.equation(
-  numbering: (..num) => numbering("(1.1)", counter(heading).get().first(), num.pos().first())
-)
-#set text(size: 14pt)
 
 = Расчет закрутки потока
 
@@ -443,9 +440,6 @@ $
 
 Результаты расчета закрутки на последней ступени по обратному закону для пяти сечений представлены в @R[таблице].
 
-#show figure: set block(breakable: true)
-#set math.equation(numbering: none)
-#set text(size: 10pt)
 #figure(
   table(
     columns: (auto, auto, auto, auto, auto, auto, auto),
@@ -523,17 +517,9 @@ $
     [$Delta ρ_k = ρ_"kп" - rho_K  $], [],
       [#R1Δρ], [#R2Δρ], [ #calc.round(digits: 4, R3Δρ)], [#R4Δρ], [#R5Δρ],
   ),
-  caption: text(size: 14pt)[Расчет закрутки для последней ступени],
-  kind: "table",
-  supplement: text(size: 14pt)[Таблица]
+  caption: [Расчет закрутки для последней ступени],
+  supplement: [Таблица]
 ) <R>
-
-#show figure: set block(breakable: false)
-#counter(math.equation).update(0)
-#set math.equation(
-  numbering: (..num) => numbering("(1.1)", counter(heading).get().first(), num.pos().first())
-)
-#set text(size: 14pt)
 
 = Проектирование рабочего колеса последней ступени
 
@@ -818,6 +804,7 @@ $ z_"расч" = l_"пер" / t_"опт" = 61.64; hat(z) = 62. $
   caption: [Полученный продольный разрез]
 ) <Sbor3>
 
+#set heading(numbering: none)
 = Заключение
 
 В результате выполнения курсовой работы по исходным данным была спроектирована последняя ступень турбины (рабочее колесо и сопловой аппарат) для газотурбинной установки мощностью 65 МВт, прототипом которой является ГТЭ-65. Были достигнуты следующие расчетные характеристики последней ступени турбины:
