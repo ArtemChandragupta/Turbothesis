@@ -315,6 +315,21 @@ function find_Gopt(P₂, Φ, Ψ)
 	(Gₒₚₜ, al, 𝓖)
 end
 
+# ╔═╡ 8110d01d-5e36-46b1-9651-a844bacb33a2
+begin
+	P₂     = (900_000, 480_000, 230_000, 97_500)
+	(Φ, ψ̄) = (0.95753, 0.94)
+	Ψ      = (ψ̄, ψ̄, ψ̄, ψ̄)
+	
+	(Gₒₚₜ, al, 𝓖) = find_Gopt(P₂, Φ, Ψ)
+	
+	I = calc_prime(Gₒₚₜ)
+	P = stage_params(I, P₂, Φ, Ψ)
+	S = calc_stages(Gₒₚₜ, I, P)
+
+	md"### Первичный расчет и расчет по ступеням"
+end
+
 # ╔═╡ 017b13e3-a0cb-412a-90d9-533cb959da56
 function find_valid_parameters_threaded(α₁, β⃰₂, F_range, ρK_range)
     T = @NamedTuple{F::Float64, ρK::Float64, α₂::Float64, Δ::Float64}
@@ -329,7 +344,7 @@ function find_valid_parameters_threaded(α₁, β⃰₂, F_range, ρK_range)
             RR, a, b, c, ɤ = swirl_reverse(P[4], S[4], I, SP)
             ΔR = RR[1].Δρ + RR[2].Δρ + RR[3].Δρ + RR[4].Δρ + RR[5].Δρ
 
-            if abs(ΔR) < 5
+            if abs(ΔR) < 0.1
                 if all(RR[i].p₂ < RR[i+1].p₂ for i in 1:4)
                     result = (F=F, ρK=ρK, α₂=RR[5].α₂, Δ=ΔR)
                     push!(local_valid, result)
@@ -341,75 +356,23 @@ function find_valid_parameters_threaded(α₁, β⃰₂, F_range, ρK_range)
     return reduce(vcat, valid_parts)
 end
 
-# ╔═╡ 074b966f-6318-414d-8b1c-b0eb6d112df2
-function plot_valid_points(valid_params, F_range, ρK_range)
-    # Создаем матрицу для α₂, заполненную NaN
-    α₂_matrix = fill(NaN, (length(ρK_range), length(F_range)))
-    
-    # Заполняем матрицу значениями α₂ из валидных параметров
-    for param in valid_params
-        i = findfirst(==(param.F), F_range)
-        j = findfirst(==(param.ρK), ρK_range)
-        if i !== nothing && j !== nothing
-            α₂_matrix[j, i] = param.α₂
-        end
-    end
-    
-    # Создаем график
-    fig = Figure()
-    ax = Axis(fig[1, 1], 
-			  ylabel = L"F",
-			  xlabel = L"\rho_K",
-			  title = L"Допустимые \ значения \ параметров \ \rho_K \ и \ F \ (\alpha_1 = %$(Cα₁); \ \beta^*_2 = %$(Cβ⃰₂))",
-			  xminorticksvisible = true,
-			  xminorgridvisible = true,
-			  xminorticks = IntervalsBetween(10),
-			  yminorticksvisible = true,
-			  yminorgridvisible = true,
-			  yminorticks = IntervalsBetween(10),
-    )
-    
-    hm = heatmap!(ax, ρK_range, F_range, α₂_matrix, colormap = :auerbach)
-    
-    Colorbar(fig[1, 2], hm, label = L"\alpha_2")
-    
-    return fig
-end
+# ╔═╡ caf250da-aee4-4b8a-8bdd-abd118df3817
+@bind Yα₁ PlutoUI.NumberField(26:66, default=63)
 
-# ╔═╡ 707b7fd3-4840-4821-972b-14e483c3e0ed
-function plot_valid_points1(valid_params, F_range, ρK_range)
-    # Создаем матрицу для α₂, заполненную NaN
-    matrix = fill(NaN, (length(ρK_range), length(F_range)))
-    
-    # Заполняем матрицу значениями α₂ из валидных параметров
-    for param in valid_params
-        i = findfirst(==(param.F), F_range)
-        j = findfirst(==(param.ρK), ρK_range)
-        if i !== nothing && j !== nothing
-            matrix[j, i] = param.Δ
-        end
-    end
-    
-    # Создаем график
-    fig = Figure()
-    ax = Axis(fig[1, 1], 
-			  ylabel = L"F",
-			  xlabel = L"\rho_K",
-			  title = L"Допустимые \ значения \ параметров \ \rho_K \ и \ F \ (\alpha_1 = %$(Cα₁); \ \beta^*_2 = %$(Cβ⃰₂))",
-			  #title = L"Допустимые значения параметров $\rho_K$ и $F$ ($\alpha_1 = %$(Cα₁)$)",
-			  xminorticksvisible = true,
-			  xminorgridvisible = true,
-			  xminorticks = IntervalsBetween(10),
-			  yminorticksvisible = true,
-			  yminorgridvisible = true,
-			  yminorticks = IntervalsBetween(10)
-    )
-    
-    hm = heatmap!(ax, ρK_range, F_range, matrix, colormap = :auerbach)
-    
-    Colorbar(fig[1, 2], hm, label = "Δ")
-    
-    return fig
+# ╔═╡ 92106f8d-eaba-41aa-85e4-55d935e289de
+@bind Yβ⃰₂ PlutoUI.NumberField(30:130, default=77)
+
+# ╔═╡ 7266af5e-2f62-43a6-9472-a0ed6bf064ca
+begin
+	Cα₁ = Yα₁/2
+	Cβ⃰₂ = Yβ⃰₂/2
+	
+	F_range  = range(-0.5, 0  , length=500)
+	ρK_range = range(0.2 , 0.5, length=500)
+	
+	valid_combinations = find_valid_parameters_threaded(Cα₁, Cβ⃰₂, F_range, ρK_range)
+	filtered = filter(p -> p.α₂ > 86, valid_combinations)
+	#min_delta_entry = argmin(p -> abs(p.Δ), filtered)
 end
 
 # ╔═╡ db399188-9bde-4ed3-a930-ecbbda7bace0
@@ -475,40 +438,6 @@ function plot_combined(valid_params, F_range, ρK_range)
     return fig
 end
 
-# ╔═╡ 8110d01d-5e36-46b1-9651-a844bacb33a2
-begin
-	P₂     = (900_000, 480_000, 230_000, 97_500)
-	(Φ, ψ̄) = (0.95753, 0.94)
-	Ψ      = (ψ̄, ψ̄, ψ̄, ψ̄)
-	
-	(Gₒₚₜ, al, 𝓖) = find_Gopt(P₂, Φ, Ψ)
-	
-	I = calc_prime(Gₒₚₜ)
-	P = stage_params(I, P₂, Φ, Ψ)
-	S = calc_stages(Gₒₚₜ, I, P)
-
-	md"### Первичный расчет и расчет по ступеням"
-end
-
-# ╔═╡ caf250da-aee4-4b8a-8bdd-abd118df3817
-@bind Yα₁ PlutoUI.NumberField(26:66, default=63)
-
-# ╔═╡ 92106f8d-eaba-41aa-85e4-55d935e289de
-@bind Yβ⃰₂ PlutoUI.NumberField(30:130, default=77)
-
-# ╔═╡ 7266af5e-2f62-43a6-9472-a0ed6bf064ca
-begin
-	Cα₁ = Yα₁/2
-	Cβ⃰₂ = Yβ⃰₂/2
-	
-	F_range  = range(-0.5, 0  , length=500)
-	ρK_range = range(0.2 , 0.5, length=500)
-	
-	valid_combinations = find_valid_parameters_threaded(Cα₁, Cβ⃰₂, F_range, ρK_range)
-	filtered = filter(p -> p.α₂ > 86, valid_combinations)
-	#min_delta_entry = argmin(p -> abs(p.Δ), filtered)
-end
-
 # ╔═╡ 773bdd95-c9fe-41c4-806d-8330de487dab
 plot_combined(valid_combinations, F_range, ρK_range)
 #figa = plot_valid_points(valid_combinations, F_range, ρK_range)
@@ -529,15 +458,6 @@ begin
 	
 	md"### Обратная закрутка"
 end
-
-# ╔═╡ efcb8b17-5e63-4079-9aa8-520097bb602d
-a
-
-# ╔═╡ b659a54b-6a51-4e69-a58b-431c6b94c14d
-b
-
-# ╔═╡ f42cf4d5-a321-43f0-8bad-bfe92a80712d
-c
 
 # ╔═╡ 80f53296-aa6f-42a4-acdc-a4b5589dc291
 begin
@@ -584,41 +504,6 @@ begin
 	
 	colgap!(subgrid, 50)
 	fig
-end
-
-# ╔═╡ ad0558e9-e053-41bf-b59f-b36ee4e2d388
-begin
-	figr = Figure(size = (600, 400))
-		
-		# Первый график
-		axr = Axis(figr[1, 1],
-				   xlabel = L"G, \ кг/с",
-				   ylabel = L"\alpha_2",
-		)
-		lines!(axr, 𝓖, al, color = :black)
-		vlines!(axr, [Gₒₚₜ], color = :red, label = LaTeXString("G_{opt}^{calc}"))
-		vlines!(axr, [TASK.G_A2GTP], color = :blue, linestyle = :dot, label = L"G_{A2GTP}")
-		
-		axislegend(axr)
-		ylims!(axr, (-90, 90))
-
-	save("assets/Gplot.svg", figr)
-	figr
-end
-
-# ╔═╡ e976cf30-08a0-4edb-aacb-9102a0be0b70
-begin
-	figl = Figure(size = (600, 400))
-		
-		# Первый график
-		axl = Axis(figl[1, 1],
-				   xlabel = L"r, \ м",
-				   ylabel = L"p_2, \ Па",
-		)
-		lines!(axl, [r.r for r in R], [r.p₂ for r in R])
-
-	save("assets/Pplot.svg", figl)
-	figl
 end
 
 # ╔═╡ 8972e246-fc70-42be-b02a-f8aef83bbc91
@@ -681,84 +566,132 @@ B[1].Lᵒ/88 *100
 # ╔═╡ 8371bd2d-285f-46bb-9453-ceba4ec700ca
 R
 
-# ╔═╡ b230ef79-3a5f-4f24-9827-446fa1f5a9e0
+# ╔═╡ baa31527-d5b8-49d0-9917-ca1c8b77913a
+md"# Приложение"
+
+# ╔═╡ af2d0b3c-48ff-4989-b2e7-f22e83df8efa
 begin
-	Î = map(x -> round(x; sigdigits=4), I)
+	function typst_vars(nt; prefix = "")
+	    modified_nt = add_suffix_to_names(replace_letters_in_names(nt), prefix)
+
+	    lines = ["#let $k = num($(v)) \n#let Raw$k = $(v)" for (k, v) in pairs(modified_nt)]
+	    join(lines, "\n")
+	end
 	
+	function replace_letters_in_names(nt::NamedTuple)
+	    new_names = [Symbol(replace(String(name), 
+									"₁"   => "1", 
+									"₂"   => "2",
+									"₃"   => "3",
+									"₄"   => "4",
+									"₅"   => "5",
+									"₆"   => "6",
+									"₇"   => "7",
+									"₈"   => "8",
+									"₉"   => "9",
+									"₀"   => "0",
+									"⃰"    => "s",
+									"_"   => "",
+									"ₒₚₜ" => "0",
+									"¹"   => "1",
+									"²"   => "2",
+								   )) for name in keys(nt)]
+	    return NamedTuple{Tuple(new_names)}(values(nt))
+	end
+
+	function add_suffix_to_names(nt::NamedTuple, prefix::String)
+    	new_names = [Symbol(prefix * String(name)) for name in keys(nt)]
+    	return NamedTuple{Tuple(new_names)}(values(nt))
+	end
+end
+
+# ╔═╡ 4649b9ca-8e7b-4a0f-a8e0-55b78524149e
+begin
+
+	open("vars.typ", "w") do file
+		write(file,
+			  "#import \"lib.typ\": * \n \n",
+			  typst_vars(I; prefix ="I"),   "\n",
+			  typst_vars(S[1]; prefix ="S1"), "\n",
+			  typst_vars(S[2]; prefix ="S2"), "\n",
+			  typst_vars(S[3]; prefix ="S3"), "\n",
+			  typst_vars(S[4]; prefix ="S4"), "\n \n",
+			  
+			  typst_vars(R[1]; prefix ="R1"), "\n",
+			  typst_vars(R[2]; prefix ="R2"), "\n",
+			  typst_vars(R[3]; prefix ="R3"), "\n",
+			  typst_vars(R[4]; prefix ="R4"), "\n",
+			  typst_vars(R[5]; prefix ="R5"), "\n \n",
+			  
+			  typst_vars(TASK; prefix ="TA"),   "\n",
+			  typst_vars(CONST; prefix ="CO"),  "\n",
+			  typst_vars((; Gₒₚₜ); prefix =""), "\n \n",
+			  
+			  typst_vars(ɤ; prefix ="SI"),    "\n",
+			  typst_vars(P[1]; prefix ="P1"), "\n",
+			  typst_vars(P[2]; prefix ="P2"), "\n",
+			  typst_vars(P[3]; prefix ="P3"), "\n",
+			  typst_vars(P[4]; prefix ="P4")
+			 )
+	end
+
+	
+	md"## Файлы с переменными"
+end
+
+# ╔═╡ e531c079-9b6d-446c-9946-2708b5993e9f
+function table_swirl()
+	#r̂1 = map(x -> round(x; sigdigits=4), R1)
+	#r̂2 = map(x -> round(x; sigdigits=4), R2)
+	#r̂3 = map(x -> round(x; sigdigits=4), R3)
+	#r̂4 = map(x -> round(x; sigdigits=4), R4)
+	#r̂5 = map(x -> round(x; sigdigits=4), R5)
+
 	md"""
-	# Входные условия для _ГТЭ 65_
-	| Величина                 | Значения       | Комментарии               |
-	|:-------------------------|:--------------:|:--------------------------|
-	| $P_0, \text{Па}$         | $(TASK.P⃰₀)     | Давление перед турбиной   |
-	| $T_0, С$                 | $(TASK.T⃰₀)     | Температура перед турбиной|
-	| $N, Вт$                  | $(TASK.N)      | Мощность (общая)          |
-	| $n, \text{мин}^{-1}$     | $(TASK.n)      | Обороты                   |
-	| $\alpha, ^0$             | $(TASK.α)      | Угол выхода из 4 ступени  |
-	| $m$                      | $(TASK.m)      | Число ступеней            |
-	| $G_{A2GTP}, \text{кг/с}$ | $(TASK.G_A2GTP)| Расход из A2GTP           |
-	| $Gₒₚₜ,      \text{кг/с}$ | $(Gₒₚₜ)        | Эвристика                 |
-	| $d_{mid},   \text{м}$    | $(TASK.d_mid)  | Средний диаметр. У меня был расчет по $u/C_0$ |
-
-	### константы:
-	| Величина         | Значения      | Комментарии                      |
-	|:-----------------|:-------------:|---------------------------------:|
-	| $K_{газ}$        | $(CONST.Kгаз) | Коэффициент политропы газа       |
-	| $R, \text{Па}$   | $(CONST.R)    | Универсальная газовая постоянная |
-	| $\lambda$        | $(CONST.λ)    | Лямбда?                          |
-	| $\eta_{ад}$      | $(CONST.ηад)  | Адиабатный КПД                   |
-
-	# Первичный расчет
-	| Величина                   | Значения   | Комментарии                    |
-	|:---------------------------|:----------:|:-------------------------------|
-	| $C_p, \text{Па}$           | $(Î.Cp)    | Изобарная теплоёмкость газа    |
-	| $H_u T, \text{Дж/кг}$      | $(Î.HuT)   | У Аделины есть kN, другой метод|
-	| $\Delta T^*_T, К$          | $(Î.ΔtT)   | Температура торможения за р.л. |
-	| $T_{2T}, К$                | $(Î.T⃰₂T)   |                                |
-	| $a_{кр2}, \text{м/с}$      | $(Î.a_kr)  | Критическая скорость           |
-	| $c_{2T}, \text{м/с}$       | $(Î.c₂T)   |                                |
-	| $H_{адт}, \text{Дж/кг}$    | $(Î.H_adt) |                                |
-	| $H_{0T}, \text{Дж/кг}$     | $(Î.H₀T)   |                                |
-	| $T^*_{2T}, К$              | $(Î.T₂tT)  |                                |
-	| $p_{2T}, \text{Па}$        | $(Î.p₂T)   |                                |
-	| $T_{2T}, К$                | $(Î.T₂T)   |                                |
-	| $\rho_{2T}, \text{кг}/м^3$ | $(Î.ρ₂T)   |                                |
-	| $F_{2T}, м^2$              | $(Î.F₂T)   | Площадь на выходе из турбины   |
-	| $\sigma p, \text{МПа}$     | $(Î.σ_p)   | Напряжение в корневом сечении  |
-	| $u_2, \text{м/с}$          | $(Î.u₂)    | Окружная скорость              |
-	| $l_2, м$                   | $(Î.l₂)    | Длина рабочей лопатки          |
-	| $d_{2T}/l_2$               | $(Î.d₂Tl₂) | Отношение фигней               |
-	| $Y$                        | $(Î.Y)     | Это $u/C_0$                    |
+	# Обратная закрутка
+	| Величина                |Сечение 1 |Сечение 2 |Сечение 3 |Сечение 4 |Сечение 5 |
+	|:------------------------|:--------:|:--------:|:--------:|:--------:|:--------:|
+	| $r, м$                  |$(r̂1.r)   |$(r̂2.r)   |$(r̂3.r)   |$(r̂4.r)   |$(r̂5.r)   |
+	| $\gamma_1, \degree$     |$(r̂1.γ₁)  |$(r̂2.γ₁)  |$(r̂3.γ₁)  |$(r̂4.γ₁)  |$(r̂5.γ₁)  |
+	| $\gamma_2, \degree$     |$(r̂1.γ₂)  |$(r̂2.γ₂)  |$(r̂3.γ₂)  |$(r̂4.γ₂)  |$(r̂5.γ₂)  |
+	| $c_1, \text{м/с}$       |$(r̂1.c₁)  |$(r̂2.c₁)  |$(r̂3.c₁)  |$(r̂4.c₁)  |$(r̂5.c₁)  |
+	| $\alpha_1, \degree$     |$(r̂1.α₁)  |$(r̂2.α₁)  |$(r̂3.α₁)  |$(r̂4.α₁)  |$(r̂5.α₁)  |
+	| $c_{1u}, \text{м/с}$    |$(r̂1.c₁u) |$(r̂2.c₁u) |$(r̂3.c₁u) |$(r̂4.c₁u) |$(r̂5.c₁u) |
+	| $c_{1z}, \text{м/с}$    |$(r̂1.c₁z) |$(r̂2.c₁z) |$(r̂3.c₁z) |$(r̂4.c₁z) |$(r̂5.c₁z) |
+	| $c_{1r}, \text{м/с}$    |$(r̂1.c₁r) |$(r̂2.c₁r) |$(r̂3.c₁r) |$(r̂4.c₁r) |$(r̂5.c₁r) |
+	| $u_1, \text{м/с}$       |$(r̂1.u₁)  |$(r̂2.u₁)  |$(r̂3.u₁)  |$(r̂4.u₁)  |$(r̂5.u₁)  |
+	| $u_2, \text{м/с}$       |$(r̂1.u₂)  |$(r̂2.u₂)  |$(r̂3.u₂)  |$(r̂4.u₂)  |$(r̂5.u₂)  |
+	| $\beta_1, \degree$      |$(r̂1.β₁)  |$(r̂2.β₁)  |$(r̂3.β₁)  |$(r̂4.β₁)  |$(r̂5.β₁)  |
+	| $w_1, \text{м/с}$       |$(r̂1.w₁)  |$(r̂2.w₁)  |$(r̂3.w₁)  |$(r̂4.w₁)  |$(r̂5.w₁)  |
+	| $w_{1u}, \text{м/с}$    |$(r̂1.w₁u) |$(r̂2.w₁u) |$(r̂3.w₁u) |$(r̂4.w₁u) |$(r̂5.w₁u) |
+	| $w_{2u}, \text{м/с}$    |$(r̂1.w₂u) |$(r̂2.w₂u) |$(r̂3.w₂u) |$(r̂4.w₂u) |$(r̂5.w₂u) |
+	| $c_{2u}, \text{м/с}$    |$(r̂1.c₂u) |$(r̂2.c₂u) |$(r̂3.c₂u) |$(r̂4.c₂u) |$(r̂5.c₂u) |
+	| $c_{2z}, \text{м/с}$    |$(r̂1.c₂z) |$(r̂2.c₂z) |$(r̂3.c₂z) |$(r̂4.c₂z) |$(r̂5.c₂z) |
+	| $c_2, \text{м/с}$       |$(r̂1.c₂)  |$(r̂2.c₂)  |$(r̂3.c₂)  |$(r̂4.c₂)  |$(r̂5.c₂)  |
+	| $c_{2r}, \text{м/с}$    |$(r̂1.c₂r) |$(r̂2.c₂r) |$(r̂3.c₂r) |$(r̂4.c₂r) |$(r̂5.c₂r) |
+	| $\alpha_2, \degree$     |$(r̂1.α₂)  |$(r̂2.α₂)  |$(r̂3.α₂)  |$(r̂4.α₂)  |$(r̂5.α₂)  |
+	| $\beta^*_2, \degree$    |$(r̂1.β⃰₂)  |$(r̂2.β⃰₂)  |$(r̂3.β⃰₂)  |$(r̂4.β⃰₂)  |$(r̂5.β⃰₂)  |
+	| $w_2, \text{м/с}$       |$(r̂1.w₂)  |$(r̂2.w₂)  |$(r̂3.w₂)  |$(r̂4.w₂)  |$(r̂5.w₂)  |
+	| $T_1, \degree C$        |$(r̂1.T₁)  |$(r̂2.T₁)  |$(r̂3.T₁)  |$(r̂4.T₁)  |$(r̂5.T₁)  |
+	| $p_1, \text{мПа}$       |$(r̂1.p₁)  |$(r̂2.p₁)  |$(r̂3.p₁)  |$(r̂4.p₁)  |$(r̂5.p₁)  |
+	| $\rho_1, \text{кг}/м^3$ |$(r̂1.ρ₁)  |$(r̂2.ρ₁)  |$(r̂3.ρ₁)  |$(r̂4.ρ₁)  |$(r̂5.ρ₁)  |
+	| $T^*_{w1}, \degree C$   |$(r̂1.T⃰w₁) |$(r̂2.T⃰w₁) |$(r̂3.T⃰w₁) |$(r̂4.T⃰w₁) |$(r̂5.T⃰w₁) |
+	| $T_2, \degree C$        |$(r̂1.T₂)  |$(r̂2.T₂)  |$(r̂3.T₂)  |$(r̂4.T₂)  |$(r̂5.T₂)  |
+	| $p_2, \text{мПа}$       |$(r̂1.p₂)  |$(r̂2.p₂)  |$(r̂3.p₂)  |$(r̂4.p₂)  |$(r̂5.p₂)  |
+	| $\rho_2, \text{кг}/м^3$ |$(r̂1.ρ₂)  |$(r̂2.ρ₂)  |$(r̂3.ρ₂)  |$(r̂4.ρ₂)  |$(r̂5.ρ₂)  |
+	| $2\pi\rho_1 c_{1z}r$    |$(r̂1.πρc₁)|$(r̂2.πρc₁)|$(r̂3.πρc₁)|$(r̂4.πρc₁)|$(r̂5.πρc₁)|
+	| $2\pi\rho_2 c_{2z}r$    |$(r̂1.πρc₂)|$(r̂2.πρc₂)|$(r̂3.πρc₂)|$(r̂4.πρc₂)|$(r̂5.πρc₂)|
+	| $\rho_T$                |$(r̂1.ρT)  |$(r̂2.ρT)  |$(r̂3.ρT)  |$(r̂4.ρT)  |$(r̂5.ρT)  |
+	| $H_p, \text{Дж}$        |$(r̂1.Hp)  |$(r̂2.Hp)  |$(r̂3.Hp)  |$(r̂4.Hp)  |$(r̂5.Hp)  |
+	| $H_u, \text{Дж}$        |$(r̂1.Hu)  |$(r̂2.Hu)  |$(r̂3.Hu)  |$(r̂4.Hu)  |$(r̂5.Hu)  |
+	| $\rho_k$                |$(r̂1.ρK)  |$(r̂2.ρK)  |$(r̂3.ρK)  |$(r̂4.ρK)  |$(r̂5.ρK)  |
+	| $\rho_\text{k полин}$   |$(r̂1.ρKp) |$(r̂2.ρKp) |$(r̂3.ρKp) |$(r̂4.ρKp) |$(r̂5.ρKp) |
+	| $\Delta \rho_k$         |$(r̂1.Δρ)  |$(r̂2.Δρ)  |$(r̂3.Δρ)  |$(r̂4.Δρ)  |$(r̂5.Δρ)  |
 	"""
 end
 
-# ╔═╡ 2d7dfada-ba1c-46be-b572-0c07dfb38e32
-begin
-	p̂1 = map(x -> round(x; sigdigits=4), P[1])
-	p̂2 = map(x -> round(x; sigdigits=4), P[2])
-	p̂3 = map(x -> round(x; sigdigits=4), P[3])
-	p̂4 = map(x -> round(x; sigdigits=4), P[4])
-
-	md"""
-	### Параметры для расчета по среднему диаметру
-	| Величина    | 1 ступень | 2 ступень | 3 ступень | 4 ступень | Комментарии |
-	|:------------|:---------:|:---------:|:---------:|:---------:|:------------|
-	| $d_{1c}, м$ | $(p̂1.d₁c) | $(p̂2.d₁c) | $(p̂3.d₁c) | $(p̂4.d₁c) | с.д. направляющей лопатки  |
-	| $d_{2c}, м$ | $(p̂1.d₂c) | $(p̂2.d₂c) | $(p̂3.d₂c) | $(p̂4.d₂c) | с.д. рабочей лопатки       |
-	| $l_1, м$    | $(p̂1.l₁)  | $(p̂2.l₁)  | $(p̂3.l₁)  | $(p̂4.l₁)  | длина направляющей лопатки |
-	| $l_2, м$    | $(p̂1.l₂)  | $(p̂2.l₂)  | $(p̂3.l₂)  | $(p̂4.l₂)  | длина рабочей лопатки      |
-	| $p_2, \text{Па}$|$(p̂1.p₂)|$(p̂2.p₂)  | $(p̂3.p₂)  | $(p̂4.p₂)  | давление за ступенью       |
-	| $\rho_{Tk}$ | $(p̂1.ρTk) | $(p̂2.ρTk) | $(p̂3.ρTk) | $(p̂4.ρTk) |  |
-	| $\rho_{Tc}$ | $(p̂1.ρTc) | $(p̂2.ρTc) | $(p̂3.ρTc) | $(p̂4.ρTc) |  |
-	| $n$         | $(p̂1.n)   | $(p̂2.n)   | $(p̂3.n)   | $(p̂4.n)   |  |
-	| $\Phi$      | $(p̂1.Φ)   | $(p̂2.Φ)   | $(p̂3.Φ)   | $(p̂4.Φ)   |  |
-	| $\Psi$      | $(p̂1.Ψ)   | $(p̂2.Ψ)   | $(p̂3.Ψ)   | $(p̂4.Ψ)   |  |
-	| $rk$        | $(p̂1.rk)  | $(p̂2.rk)  | $(p̂3.rk)  | $(p̂4.rk)  |  |
-	| $rc$        | $(p̂1.rc)  | $(p̂2.rc)  | $(p̂3.rc)  | $(p̂4.rc)  |  |
-	"""
-end
-
-# ╔═╡ 17ffd557-07e8-4473-9566-0a60fdbb3a27
-begin
+# ╔═╡ 86c4bec4-9260-4789-a64c-22691b07e3cb
+function table_mid()
 
 	ŝ1 = map(x -> round(x; sigdigits=4), S[1])
 	ŝ2 = map(x -> round(x; sigdigits=4), S[2])
@@ -816,161 +749,81 @@ begin
 """
 end
 
-# ╔═╡ a30b8973-7152-433a-9ebf-0a9ed90883e1
-begin
-	#r̂1 = map(x -> round(x; sigdigits=4), R1)
-	#r̂2 = map(x -> round(x; sigdigits=4), R2)
-	#r̂3 = map(x -> round(x; sigdigits=4), R3)
-	#r̂4 = map(x -> round(x; sigdigits=4), R4)
-	#r̂5 = map(x -> round(x; sigdigits=4), R5)
+# ╔═╡ 24fc33b8-2852-458e-8258-5454ec11e5bc
+function table_mid_params()
+	p̂1 = map(x -> round(x; sigdigits=4), P[1])
+	p̂2 = map(x -> round(x; sigdigits=4), P[2])
+	p̂3 = map(x -> round(x; sigdigits=4), P[3])
+	p̂4 = map(x -> round(x; sigdigits=4), P[4])
 
 	md"""
-	# Обратная закрутка
-	| Величина                |Сечение 1 |Сечение 2 |Сечение 3 |Сечение 4 |Сечение 5 |
-	|:------------------------|:--------:|:--------:|:--------:|:--------:|:--------:|
-	| $r, м$                  |$(r̂1.r)   |$(r̂2.r)   |$(r̂3.r)   |$(r̂4.r)   |$(r̂5.r)   |
-	| $\gamma_1, \degree$     |$(r̂1.γ₁)  |$(r̂2.γ₁)  |$(r̂3.γ₁)  |$(r̂4.γ₁)  |$(r̂5.γ₁)  |
-	| $\gamma_2, \degree$     |$(r̂1.γ₂)  |$(r̂2.γ₂)  |$(r̂3.γ₂)  |$(r̂4.γ₂)  |$(r̂5.γ₂)  |
-	| $c_1, \text{м/с}$       |$(r̂1.c₁)  |$(r̂2.c₁)  |$(r̂3.c₁)  |$(r̂4.c₁)  |$(r̂5.c₁)  |
-	| $\alpha_1, \degree$     |$(r̂1.α₁)  |$(r̂2.α₁)  |$(r̂3.α₁)  |$(r̂4.α₁)  |$(r̂5.α₁)  |
-	| $c_{1u}, \text{м/с}$    |$(r̂1.c₁u) |$(r̂2.c₁u) |$(r̂3.c₁u) |$(r̂4.c₁u) |$(r̂5.c₁u) |
-	| $c_{1z}, \text{м/с}$    |$(r̂1.c₁z) |$(r̂2.c₁z) |$(r̂3.c₁z) |$(r̂4.c₁z) |$(r̂5.c₁z) |
-	| $c_{1r}, \text{м/с}$    |$(r̂1.c₁r) |$(r̂2.c₁r) |$(r̂3.c₁r) |$(r̂4.c₁r) |$(r̂5.c₁r) |
-	| $u_1, \text{м/с}$       |$(r̂1.u₁)  |$(r̂2.u₁)  |$(r̂3.u₁)  |$(r̂4.u₁)  |$(r̂5.u₁)  |
-	| $u_2, \text{м/с}$       |$(r̂1.u₂)  |$(r̂2.u₂)  |$(r̂3.u₂)  |$(r̂4.u₂)  |$(r̂5.u₂)  |
-	| $\beta_1, \degree$      |$(r̂1.β₁)  |$(r̂2.β₁)  |$(r̂3.β₁)  |$(r̂4.β₁)  |$(r̂5.β₁)  |
-	| $w_1, \text{м/с}$       |$(r̂1.w₁)  |$(r̂2.w₁)  |$(r̂3.w₁)  |$(r̂4.w₁)  |$(r̂5.w₁)  |
-	| $w_{1u}, \text{м/с}$    |$(r̂1.w₁u) |$(r̂2.w₁u) |$(r̂3.w₁u) |$(r̂4.w₁u) |$(r̂5.w₁u) |
-	| $w_{2u}, \text{м/с}$    |$(r̂1.w₂u) |$(r̂2.w₂u) |$(r̂3.w₂u) |$(r̂4.w₂u) |$(r̂5.w₂u) |
-	| $c_{2u}, \text{м/с}$    |$(r̂1.c₂u) |$(r̂2.c₂u) |$(r̂3.c₂u) |$(r̂4.c₂u) |$(r̂5.c₂u) |
-	| $c_{2z}, \text{м/с}$    |$(r̂1.c₂z) |$(r̂2.c₂z) |$(r̂3.c₂z) |$(r̂4.c₂z) |$(r̂5.c₂z) |
-	| $c_2, \text{м/с}$       |$(r̂1.c₂)  |$(r̂2.c₂)  |$(r̂3.c₂)  |$(r̂4.c₂)  |$(r̂5.c₂)  |
-	| $c_{2r}, \text{м/с}$    |$(r̂1.c₂r) |$(r̂2.c₂r) |$(r̂3.c₂r) |$(r̂4.c₂r) |$(r̂5.c₂r) |
-	| $\alpha_2, \degree$     |$(r̂1.α₂)  |$(r̂2.α₂)  |$(r̂3.α₂)  |$(r̂4.α₂)  |$(r̂5.α₂)  |
-	| $\beta^*_2, \degree$    |$(r̂1.β⃰₂)  |$(r̂2.β⃰₂)  |$(r̂3.β⃰₂)  |$(r̂4.β⃰₂)  |$(r̂5.β⃰₂)  |
-	| $w_2, \text{м/с}$       |$(r̂1.w₂)  |$(r̂2.w₂)  |$(r̂3.w₂)  |$(r̂4.w₂)  |$(r̂5.w₂)  |
-	| $T_1, \degree C$        |$(r̂1.T₁)  |$(r̂2.T₁)  |$(r̂3.T₁)  |$(r̂4.T₁)  |$(r̂5.T₁)  |
-	| $p_1, \text{мПа}$       |$(r̂1.p₁)  |$(r̂2.p₁)  |$(r̂3.p₁)  |$(r̂4.p₁)  |$(r̂5.p₁)  |
-	| $\rho_1, \text{кг}/м^3$ |$(r̂1.ρ₁)  |$(r̂2.ρ₁)  |$(r̂3.ρ₁)  |$(r̂4.ρ₁)  |$(r̂5.ρ₁)  |
-	| $T^*_{w1}, \degree C$   |$(r̂1.T⃰w₁) |$(r̂2.T⃰w₁) |$(r̂3.T⃰w₁) |$(r̂4.T⃰w₁) |$(r̂5.T⃰w₁) |
-	| $T_2, \degree C$        |$(r̂1.T₂)  |$(r̂2.T₂)  |$(r̂3.T₂)  |$(r̂4.T₂)  |$(r̂5.T₂)  |
-	| $p_2, \text{мПа}$       |$(r̂1.p₂)  |$(r̂2.p₂)  |$(r̂3.p₂)  |$(r̂4.p₂)  |$(r̂5.p₂)  |
-	| $\rho_2, \text{кг}/м^3$ |$(r̂1.ρ₂)  |$(r̂2.ρ₂)  |$(r̂3.ρ₂)  |$(r̂4.ρ₂)  |$(r̂5.ρ₂)  |
-	| $2\pi\rho_1 c_{1z}r$    |$(r̂1.πρc₁)|$(r̂2.πρc₁)|$(r̂3.πρc₁)|$(r̂4.πρc₁)|$(r̂5.πρc₁)|
-	| $2\pi\rho_2 c_{2z}r$    |$(r̂1.πρc₂)|$(r̂2.πρc₂)|$(r̂3.πρc₂)|$(r̂4.πρc₂)|$(r̂5.πρc₂)|
-	| $\rho_T$                |$(r̂1.ρT)  |$(r̂2.ρT)  |$(r̂3.ρT)  |$(r̂4.ρT)  |$(r̂5.ρT)  |
-	| $H_p, \text{Дж}$        |$(r̂1.Hp)  |$(r̂2.Hp)  |$(r̂3.Hp)  |$(r̂4.Hp)  |$(r̂5.Hp)  |
-	| $H_u, \text{Дж}$        |$(r̂1.Hu)  |$(r̂2.Hu)  |$(r̂3.Hu)  |$(r̂4.Hu)  |$(r̂5.Hu)  |
-	| $\rho_k$                |$(r̂1.ρK)  |$(r̂2.ρK)  |$(r̂3.ρK)  |$(r̂4.ρK)  |$(r̂5.ρK)  |
-	| $\rho_\text{k полин}$   |$(r̂1.ρKp) |$(r̂2.ρKp) |$(r̂3.ρKp) |$(r̂4.ρKp) |$(r̂5.ρKp) |
-	| $\Delta \rho_k$         |$(r̂1.Δρ)  |$(r̂2.Δρ)  |$(r̂3.Δρ)  |$(r̂4.Δρ)  |$(r̂5.Δρ)  |
+	### Параметры для расчета по среднему диаметру
+	| Величина    | 1 ступень | 2 ступень | 3 ступень | 4 ступень | Комментарии |
+	|:------------|:---------:|:---------:|:---------:|:---------:|:------------|
+	| $d_{1c}, м$ | $(p̂1.d₁c) | $(p̂2.d₁c) | $(p̂3.d₁c) | $(p̂4.d₁c) | с.д. направляющей лопатки  |
+	| $d_{2c}, м$ | $(p̂1.d₂c) | $(p̂2.d₂c) | $(p̂3.d₂c) | $(p̂4.d₂c) | с.д. рабочей лопатки       |
+	| $l_1, м$    | $(p̂1.l₁)  | $(p̂2.l₁)  | $(p̂3.l₁)  | $(p̂4.l₁)  | длина направляющей лопатки |
+	| $l_2, м$    | $(p̂1.l₂)  | $(p̂2.l₂)  | $(p̂3.l₂)  | $(p̂4.l₂)  | длина рабочей лопатки      |
+	| $p_2, \text{Па}$|$(p̂1.p₂)|$(p̂2.p₂)  | $(p̂3.p₂)  | $(p̂4.p₂)  | давление за ступенью       |
+	| $\rho_{Tk}$ | $(p̂1.ρTk) | $(p̂2.ρTk) | $(p̂3.ρTk) | $(p̂4.ρTk) |  |
+	| $\rho_{Tc}$ | $(p̂1.ρTc) | $(p̂2.ρTc) | $(p̂3.ρTc) | $(p̂4.ρTc) |  |
+	| $n$         | $(p̂1.n)   | $(p̂2.n)   | $(p̂3.n)   | $(p̂4.n)   |  |
+	| $\Phi$      | $(p̂1.Φ)   | $(p̂2.Φ)   | $(p̂3.Φ)   | $(p̂4.Φ)   |  |
+	| $\Psi$      | $(p̂1.Ψ)   | $(p̂2.Ψ)   | $(p̂3.Ψ)   | $(p̂4.Ψ)   |  |
+	| $rk$        | $(p̂1.rk)  | $(p̂2.rk)  | $(p̂3.rk)  | $(p̂4.rk)  |  |
+	| $rc$        | $(p̂1.rc)  | $(p̂2.rc)  | $(p̂3.rc)  | $(p̂4.rc)  |  |
 	"""
 end
 
-# ╔═╡ baa31527-d5b8-49d0-9917-ca1c8b77913a
-md"# Приложение"
-
-# ╔═╡ cd0ecd07-a2ce-409b-ad29-0e809f6110cf
-begin
-	function namedtuple_to_typst(nt; prefix = "")
-	    modified_nt = add_suffix_to_names(replace_letters_in_names(nt), prefix)
-
-	    lines = ["#let $k = $(v)" for (k, v) in pairs(modified_nt)]
-	    join(lines, "\n")
-	end
+# ╔═╡ 80c384f4-8c69-4514-abcf-d0e2d01cb915
+function table_prime()
+	Î = map(x -> round(x; sigdigits=4), I)
 	
-	function replace_letters_in_names(nt::NamedTuple)
-	    new_names = [Symbol(replace(String(name), 
-									"₁" => "1", 
-									"₂" => "2",
-									"₃" => "3",
-									"₄" => "4",
-									"₅" => "5",
-									"₆" => "6",
-									"₇" => "7",
-									"₈" => "8",
-									"₉" => "9",
-									"₀" => "0",
-									"⃰" => "s",
-									"_" => "",
-									"ₒₚₜ" => "0",
-									"¹" => "1",
-									"²" => "2",
-								   )) for name in keys(nt)]
-	    return NamedTuple{Tuple(new_names)}(values(nt))
-	end
+	md"""
+	# Входные условия для _ГТЭ 65_
+	| Величина                 | Значения       | Комментарии               |
+	|:-------------------------|:--------------:|:--------------------------|
+	| $P_0, \text{Па}$         | $(TASK.P⃰₀)     | Давление перед турбиной   |
+	| $T_0, С$                 | $(TASK.T⃰₀)     | Температура перед турбиной|
+	| $N, Вт$                  | $(TASK.N)      | Мощность (общая)          |
+	| $n, \text{мин}^{-1}$     | $(TASK.n)      | Обороты                   |
+	| $\alpha, ^0$             | $(TASK.α)      | Угол выхода из 4 ступени  |
+	| $m$                      | $(TASK.m)      | Число ступеней            |
+	| $G_{A2GTP}, \text{кг/с}$ | $(TASK.G_A2GTP)| Расход из A2GTP           |
+	| $Gₒₚₜ,      \text{кг/с}$ | $(Gₒₚₜ)        | Эвристика                 |
+	| $d_{mid},   \text{м}$    | $(TASK.d_mid)  | Средний диаметр. У меня был расчет по $u/C_0$ |
 
-	function add_suffix_to_names(nt::NamedTuple, prefix::String)
-    	new_names = [Symbol(prefix * String(name)) for name in keys(nt)]
-    	return NamedTuple{Tuple(new_names)}(values(nt))
-	end
+	### константы:
+	| Величина         | Значения      | Комментарии                      |
+	|:-----------------|:-------------:|---------------------------------:|
+	| $K_{газ}$        | $(CONST.Kгаз) | Коэффициент политропы газа       |
+	| $R, \text{Па}$   | $(CONST.R)    | Универсальная газовая постоянная |
+	| $\lambda$        | $(CONST.λ)    | Лямбда?                          |
+	| $\eta_{ад}$      | $(CONST.ηад)  | Адиабатный КПД                   |
+
+	# Первичный расчет
+	| Величина                   | Значения   | Комментарии                    |
+	|:---------------------------|:----------:|:-------------------------------|
+	| $C_p, \text{Па}$           | $(Î.Cp)    | Изобарная теплоёмкость газа    |
+	| $H_u T, \text{Дж/кг}$      | $(Î.HuT)   | У Аделины есть kN, другой метод|
+	| $\Delta T^*_T, К$          | $(Î.ΔtT)   | Температура торможения за р.л. |
+	| $T_{2T}, К$                | $(Î.T⃰₂T)   |                                |
+	| $a_{кр2}, \text{м/с}$      | $(Î.a_kr)  | Критическая скорость           |
+	| $c_{2T}, \text{м/с}$       | $(Î.c₂T)   |                                |
+	| $H_{адт}, \text{Дж/кг}$    | $(Î.H_adt) |                                |
+	| $H_{0T}, \text{Дж/кг}$     | $(Î.H₀T)   |                                |
+	| $T^*_{2T}, К$              | $(Î.T₂tT)  |                                |
+	| $p_{2T}, \text{Па}$        | $(Î.p₂T)   |                                |
+	| $T_{2T}, К$                | $(Î.T₂T)   |                                |
+	| $\rho_{2T}, \text{кг}/м^3$ | $(Î.ρ₂T)   |                                |
+	| $F_{2T}, м^2$              | $(Î.F₂T)   | Площадь на выходе из турбины   |
+	| $\sigma p, \text{МПа}$     | $(Î.σ_p)   | Напряжение в корневом сечении  |
+	| $u_2, \text{м/с}$          | $(Î.u₂)    | Окружная скорость              |
+	| $l_2, м$                   | $(Î.l₂)    | Длина рабочей лопатки          |
+	| $d_{2T}/l_2$               | $(Î.d₂Tl₂) | Отношение фигней               |
+	| $Y$                        | $(Î.Y)     | Это $u/C_0$                    |
+	"""
 end
-
-# ╔═╡ c947aec2-5307-4a10-9596-817e7d6a429c
-begin
-
-	open("vars/Prime.typ", "w") do file
-    	write(file, namedtuple_to_typst(Î; prefix ="I"))
-		write(file, "\n" )
-	end
-
-	open("vars/Stages.typ", "w") do file
-    	write(file, namedtuple_to_typst(ŝ1; prefix ="S1"))
-		write(file, "\n" )
-		write(file, namedtuple_to_typst(ŝ2; prefix ="S2"))
-		write(file, "\n" )
-		write(file, namedtuple_to_typst(ŝ3; prefix ="S3"))
-		write(file, "\n" )
-		write(file, namedtuple_to_typst(ŝ4; prefix ="S4"))
-	end
-
-	open("vars/R.typ", "w") do file
-    	write(file, namedtuple_to_typst(r̂1; prefix ="R1"))
-		write(file, "\n" )
-		write(file, namedtuple_to_typst(r̂2; prefix ="R2"))
-		write(file, "\n" )
-		write(file, namedtuple_to_typst(r̂3; prefix ="R3"))
-		write(file, "\n" )
-		write(file, namedtuple_to_typst(r̂4; prefix ="R4"))
-		write(file, "\n" )
-		write(file, namedtuple_to_typst(r̂4; prefix ="R5"))
-	end
-
-	open("vars/CONST.typ", "w") do file
-    	write(file, namedtuple_to_typst(TASK; prefix ="TA"))
-		write(file, "\n" )
-		write(file, namedtuple_to_typst(CONST; prefix ="CO"))
-		write(file, "\n" )
-	end
-
-	GGG = round(Gₒₚₜ; sigdigits=4)
-	SSS = map(x -> round(x; sigdigits=4), ɤ)
-
-	open("vars/PAR.typ", "w") do file
-    	write(file, namedtuple_to_typst((; GGG); prefix =""))
-		write(file, "\n" )
-		write(file, namedtuple_to_typst(SSS; prefix ="SI"))
-		write(file, "\n" )
-		write(file, namedtuple_to_typst(p̂1; prefix ="P1"))
-		write(file, "\n" )
-		write(file, namedtuple_to_typst(p̂2; prefix ="P2"))
-		write(file, "\n" )
-		write(file, namedtuple_to_typst(p̂3; prefix ="P3"))
-		write(file, "\n" )
-		write(file, namedtuple_to_typst(p̂4; prefix ="P4"))
-	end
-
-	md"## Файлы с переменными"
-end
-
-# ╔═╡ a5a6333e-3a74-4c63-9978-c5fa0256e0a0
-md"# Старые добрые значения"
-
-	#Φ = coords[1] * 0.04 + 0.935
-	#f = coords[2] * 0.04 + 0.935
-	#P₂ = (900_000, 480_000, 230_000, 100_000) #Φ = 0.969588 #f = 0.94
-#F  = coords[2] * (-1) * 0.5
-	#ρK = coords[1] * (1) * 0.5
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -989,7 +842,7 @@ PlutoUI = "~0.7.62"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.5"
+julia_version = "1.11.6"
 manifest_format = "2.0"
 project_hash = "301f9c36f6fae660861067c4579f4b843ec546cd"
 
@@ -2526,42 +2379,34 @@ version = "3.6.0+0"
 
 # ╔═╡ Cell order:
 # ╟─cf901c9a-5552-4de7-b4fb-1cf9451e526a
-# ╠═5072912f-e96c-4894-b37b-15c805d99dc8
-# ╠═744a686c-6b35-4b5d-bd7d-77ea0ad561ed
-# ╠═beb5dc3a-a6fd-42f9-8e71-5c47120c0bca
-# ╠═2b3ff95e-629c-42a0-b0d4-453f18ac64b9
-# ╠═1307a1b3-21ee-471d-80da-4fef86063430
-# ╠═39f2ed09-2a95-49a7-a0d0-d62414051b22
+# ╟─5072912f-e96c-4894-b37b-15c805d99dc8
+# ╟─744a686c-6b35-4b5d-bd7d-77ea0ad561ed
+# ╟─beb5dc3a-a6fd-42f9-8e71-5c47120c0bca
+# ╟─2b3ff95e-629c-42a0-b0d4-453f18ac64b9
+# ╟─1307a1b3-21ee-471d-80da-4fef86063430
+# ╟─39f2ed09-2a95-49a7-a0d0-d62414051b22
 # ╠═017b13e3-a0cb-412a-90d9-533cb959da56
-# ╠═074b966f-6318-414d-8b1c-b0eb6d112df2
-# ╠═707b7fd3-4840-4821-972b-14e483c3e0ed
-# ╠═db399188-9bde-4ed3-a930-ecbbda7bace0
-# ╠═8110d01d-5e36-46b1-9651-a844bacb33a2
+# ╟─db399188-9bde-4ed3-a930-ecbbda7bace0
+# ╟─8110d01d-5e36-46b1-9651-a844bacb33a2
 # ╟─caf250da-aee4-4b8a-8bdd-abd118df3817
 # ╟─92106f8d-eaba-41aa-85e4-55d935e289de
-# ╠═7266af5e-2f62-43a6-9472-a0ed6bf064ca
+# ╟─7266af5e-2f62-43a6-9472-a0ed6bf064ca
 # ╟─773bdd95-c9fe-41c4-806d-8330de487dab
 # ╟─a4631d01-8153-4b37-8233-c1a9ad650faf
 # ╠═7d5a8d73-94ea-4d52-8c74-12f4f2d1fe13
-# ╠═efcb8b17-5e63-4079-9aa8-520097bb602d
-# ╠═b659a54b-6a51-4e69-a58b-431c6b94c14d
-# ╠═f42cf4d5-a321-43f0-8bad-bfe92a80712d
 # ╟─80f53296-aa6f-42a4-acdc-a4b5589dc291
-# ╟─ad0558e9-e053-41bf-b59f-b36ee4e2d388
-# ╟─e976cf30-08a0-4edb-aacb-9102a0be0b70
 # ╟─8972e246-fc70-42be-b02a-f8aef83bbc91
 # ╟─c77e3589-c71f-46d1-aa94-5e320e21a523
 # ╟─4c8032e7-d526-4c0a-ae32-68098530071d
 # ╟─05b8e026-848a-4f7c-af26-50a4814847ab
 # ╟─2f99ed37-9fd7-43aa-9458-fbf1379ea61e
 # ╟─8371bd2d-285f-46bb-9453-ceba4ec700ca
-# ╟─b230ef79-3a5f-4f24-9827-446fa1f5a9e0
-# ╟─2d7dfada-ba1c-46be-b572-0c07dfb38e32
-# ╟─17ffd557-07e8-4473-9566-0a60fdbb3a27
-# ╟─a30b8973-7152-433a-9ebf-0a9ed90883e1
-# ╟─c947aec2-5307-4a10-9596-817e7d6a429c
+# ╟─4649b9ca-8e7b-4a0f-a8e0-55b78524149e
 # ╟─baa31527-d5b8-49d0-9917-ca1c8b77913a
-# ╟─cd0ecd07-a2ce-409b-ad29-0e809f6110cf
-# ╟─a5a6333e-3a74-4c63-9978-c5fa0256e0a0
+# ╟─af2d0b3c-48ff-4989-b2e7-f22e83df8efa
+# ╟─e531c079-9b6d-446c-9946-2708b5993e9f
+# ╟─86c4bec4-9260-4789-a64c-22691b07e3cb
+# ╟─24fc33b8-2852-458e-8258-5454ec11e5bc
+# ╟─80c384f4-8c69-4514-abcf-d0e2d01cb915
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
