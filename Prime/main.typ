@@ -320,7 +320,7 @@ $ g_в &= ( Q_p^н dot eta_"кс" + h_т + L_0 dot c_p_в dot t_2^* - (L_0 + 1) 
   column-gutter: 0.2em,
   row-gutter: leading,
   align: (right, left),
-  $Q_н^p -$,
+  $Q_p^н -$,
     [низшая теплота сгорания топлива ($Q_p^н = COQₙₚ "Дж/K"$);],
   $h_т -$,
     [энтальпия топлива (пренебрежимо мала);],
