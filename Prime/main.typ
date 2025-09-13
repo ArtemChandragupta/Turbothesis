@@ -558,47 +558,47 @@ $ h_п = (0.95 dots 1) dot h_"ср" = 1 dot COhₘ = COhₘ "Дж/кг"; $]
 Считая рост напора в ступенях от и его падение в ступенях линейным, изобразим распределение напора на @Ras[рисунке]:
 
 #figure(
-  text(size:14pt)[
+  text()[
+    #show: lq.cond-set(lq.grid.with(kind: "x"), stroke:none)
+    #show lq.selector(lq.label): set align(top + right)
   
-  #show: lq.cond-set(lq.grid.with(kind: "x"), stroke:none)
-  #show lq.selector(lq.label): set align(top + right)
-  
-  #lq.diagram(
-    legend: (position: right),
-    width: 15cm, height: 8cm,
-    xlim: (0.1,15.9), ylim: (1.7e4,3.1e4),
-    xlabel: $i$,      ylabel: $h,"Дж/кг"$,
-    xaxis: (tick-distance:1, subticks:none,),
+    #lq.diagram(
+      legend: (position: right + bottom),
+      width: 15cm, height: 8cm,
+      xlim: (0.1,16.9), ylim: (1.5e4,3.1e4),
+      xlabel: $i$,      ylabel: $h,"Дж/кг"$,
+      xaxis: (tick-distance:1, subticks:none,),
 
-    let h1 = RawCh1,
-    let h2 = RawCh2,
-    let hm = RawCOhₘ,
+      let h1 = RawCh1,
+      let h2 = RawCh2,
+      let hm = RawCOhₘ,
 
-    lq.bar(
-      (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
-      (
-        h1,
-        (h1 + (h2 - h1)*1/6),
-        (h1 + (h2 - h1)*2/6),
-        (h1 + (h2 - h1)*3/6),
-        (h1 + (h2 - h1)*4/6),
-        (h1 + (h2 - h1)*5/6),
-        h2, h2, h2, h2, h2, h2, h2,
-        (h2 + hm)/2, hm
-      ), fill: aqua,
-    ),
+      lq.bar(
+        (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16),
+        (
+          h1,
+          (h1 + (h2 - h1)*1/7),
+          (h1 + (h2 - h1)*2/7),
+          (h1 + (h2 - h1)*3/7),
+          (h1 + (h2 - h1)*4/7),
+          (h1 + (h2 - h1)*5/7),
+          (h1 + (h2 - h1)*6/7),
+          h2, h2, h2, h2, h2, h2, h2,
+          (h2 + hm)/2, hm
+        ), fill: aqua,
+      ),
 
-    lq.plot( (-1,17),(h2,h2), label: $h_"ср.ст."$, mark: none,
-      stroke:(dash:(10pt, 4pt), thickness:1.5pt, paint:olive)
-    ),
-    lq.plot( (-1,17),(hm,hm), label: $h_"ср"$, mark: none,
-      stroke:(dash:(10pt, 4pt), thickness:1.5pt, paint:red)
-    ),
-    lq.plot( (-1,17),(h1,h1), label: $h_1$, mark: none,
-      stroke:(dash:(10pt, 4pt), thickness:1.5pt, paint: fuchsia)
-    ),
-    
-  )],
+      lq.plot( (-1,17),(h2,h2), label: $h_"ср.ст."$, mark: none,
+        stroke:(dash:(10pt, 4pt), thickness:1.5pt, paint:olive)
+      ),
+      lq.plot( (-1,17),(hm,hm), label: $h_"ср"$, mark: none,
+        stroke:(dash:(10pt, 4pt), thickness:1.5pt, paint:red)
+      ),
+      lq.plot( (-1,17),(h1,h1), label: $h_1$, mark: none,
+        stroke:(dash:(10pt, 4pt), thickness:1.5pt, paint: fuchsia)
+      ),
+    )
+  ],
   caption: [Распределение теоретического напора по ступеням компрессора]
 ) <Ras>
 
@@ -623,7 +623,7 @@ $ dash(h)_1 / phi = Ch̄1 / CΦ1 = Cotn; $
 Зададим степень реактивности $Omega = COΩ $ и найдем:
 $ Omega / phi = COΩ / CΦ1 = Cotm; $
 
-По графику на @otn[рисунке] находим $(dash(h)_1/phi)_(b/t=1) = CP0ᵍ; $
+По графику на @otn[рисунке] находим $(dash(h)_1/phi)_(b/t=1) = CP0ᵍ;$
 
 Коэффициент:
 $ J = ((dash(h)_1 / phi))  / (dash(h)_1/phi)_(b/t=1) = Cotn / CP0ᵍ = CJ; $
@@ -661,8 +661,6 @@ $ (t/b)_"вт" = t/b dot D_"вт"_1 / D_"ср"_1 = Ctb dot CDᵥₜ1/CDₘ1 = Ct
   lq.diagram(
     width: 15cm, height: 9cm, ylim: (0.6, 1.7), xlim:(0.4,2),
     xlabel: $b"/"t$, ylabel: $J$,
-
-    let lx = lq.linspace(0.11, 1.368),
 
     lq.plot(mark: none, stroke: 2pt,
       (0.5, 0.551, 0.6  , 0.7  , 0.9 , 1, 1.279, 1.653, 1.886),
@@ -851,7 +849,7 @@ $ M_W_с = u_н_1 dot sqrt(1+phi_н^2)/sqrt(k_в dot R_в dot T_1^*) = Cuₙ1 do
 
 + Адиабатный КПД процесса расширения $ eta_"ад. т." = COηₐₜ$;
 
-+ Безразмерная скорость потока за турбиной $lambda_(c_(2т)) = COλ2ₜ $;
++ Безразмерная скорость потока за турбиной $lambda_(c_(2т)) = COλ2ₜ$;
 
 + Угол выхода потока из последней ступени турбины $alpha_(2 т) = COå degree $;
 
@@ -927,15 +925,14 @@ $ Y = sqrt( (sum u_2^2) / (2 H_"от")) = sqrt( (4 dot Tu2^2) / (2 dot THₒₜ)
 
 В результате теплового расчета была выявлена оптимальная температура перед турбиной $T_3^* = AATs0 "K."$ Были получены оптимальные параметры \ $eta_e = 0.36$ и $pi_k^* = AAπsₖ$.
 
-После проведения расчета был получен 15-ступенчатый компрессор со степенью сжатия $pi^*_к = AAπsₖ $, габаритными параметрами $D_"ср"_1 = #calc.round(RawCDₘ1 * 1000) "мм,"$ \ $D_н_1 = #calc.round(RawCD1 * 1000) "мм,"$ $D_"вт" = #calc.round(RawCDᵥₜ1 * 1000) "мм."$ Для наглядности был построен треугольник скоростей для последней ступени компрессора.
+После проведения расчета был получен #{Ci}-ступенчатый компрессор со степенью сжатия $pi^*_к = AAπsₖ $, габаритными параметрами $D_"ср"_1 = #calc.round(RawCDₘ1 * 1000) "мм,"$ \ $D_н_1 = #calc.round(RawCD1 * 1000) "мм,"$ $D_"вт" = #calc.round(RawCDᵥₜ1 * 1000) "мм."$ Для наглядности был построен треугольник скоростей для последней ступени компрессора.
 
 Подводя итог расчета турбинной части, была получена 4-ступенчатая турбина. Высота последней лопатки $l_2 = #calc.round(RawTl2 * 1000) "мм."$ Средний диаметр рабочих лопаток $d_(2т) = COd2ₘ "м."$
 
 #bibliography(
   "ref.bib",
-  style:"gost-r-705-2008-numeric",
+  style: "gost-r-705-2008-numeric",
   title: "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ",
-  full: true
 )
 
 = ПРИЛОЖЕНИЕ А
@@ -950,14 +947,12 @@ $ Y = sqrt( (sum u_2^2) / (2 H_"от")) = sqrt( (4 dot Tu2^2) / (2 dot THₒₜ)
 = ПРИЛОЖЕНИЕ Б
 
 #let printA2GTP(file) = align(center)[
-  #block(align(left)[
+  #block(align(left, text(size: 9pt, font: "JetBrainsMono NF")[
     #set par(first-line-indent: 0pt)
-    #text(size:9pt, font: "JetBrainsMono NF")[
-      #for line in file.split("\n").slice(0, 46) [#line \ ]
-      #colbreak()
-      #for line in file.split("\n").slice(47, 95) [#line \ ]
-    ]
-  ])
+    #for line in file.split("\n").slice(0, 46) [#line \ ]
+    #colbreak()
+    #for line in file.split("\n").slice(47, 95) [#line \ ]
+  ]))
   #pagebreak(weak: true)
 ]
 
