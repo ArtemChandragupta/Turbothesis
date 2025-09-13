@@ -7,8 +7,6 @@
 
 #import "vars.typ": *
 
-// LTeX: enabled=false
-
 #set text(
   font: "Times New Roman",
   size: 14pt,
