@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.16
+# v0.20.18
 
 using Markdown
 using InteractiveUtils
@@ -429,9 +429,6 @@ function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
     return reduce(vcat, valid_parts)
 end
 
-# ╔═╡ fa89fa27-743a-4c68-82c0-8670105f83f0
-#plot_Ḡ(Ḡ, Φ, Ψ)
-
 # ╔═╡ caf250da-aee4-4b8a-8bdd-abd118df3817
 @bind Yα₁ PlutoUI.NumberField(26:66, default=63)
 
@@ -618,10 +615,15 @@ function plot_Ḡ(Ḡ, Φ, Ψ)
 
 		contour!(Gax, Φ_range,Ψ_range,G_matrix, levels=[TASK.G_A2GTP], color=:red)
 		scatter!(Gax, Φ, Ψ, color=:red, markersize=8)
+
+		save("assets/G.svg", Gfig)
 	
 		Gfig
 	end
 end
+
+# ╔═╡ fa89fa27-743a-4c68-82c0-8670105f83f0
+plot_Ḡ(Ḡ, Φ, Ψ)
 
 # ╔═╡ b57ee049-1fea-491a-9b35-6ee771b89cdf
 function plot_combined_new(valid_params, F_range, ρK_range, filtered_FρK)
@@ -2529,12 +2531,12 @@ version = "3.6.0+0"
 # ╠═36c608cb-a140-4b01-bbc1-c4ccfb073bc6
 # ╟─017b13e3-a0cb-412a-90d9-533cb959da56
 # ╠═8110d01d-5e36-46b1-9651-a844bacb33a2
-# ╟─fa89fa27-743a-4c68-82c0-8670105f83f0
+# ╠═fa89fa27-743a-4c68-82c0-8670105f83f0
 # ╟─caf250da-aee4-4b8a-8bdd-abd118df3817
 # ╟─92106f8d-eaba-41aa-85e4-55d935e289de
-# ╟─7266af5e-2f62-43a6-9472-a0ed6bf064ca
+# ╠═7266af5e-2f62-43a6-9472-a0ed6bf064ca
 # ╟─773bdd95-c9fe-41c4-806d-8330de487dab
-# ╟─7d5a8d73-94ea-4d52-8c74-12f4f2d1fe13
+# ╠═7d5a8d73-94ea-4d52-8c74-12f4f2d1fe13
 # ╟─80f53296-aa6f-42a4-acdc-a4b5589dc291
 # ╟─c77e3589-c71f-46d1-aa94-5e320e21a523
 # ╟─4c8032e7-d526-4c0a-ae32-68098530071d
@@ -2544,7 +2546,7 @@ version = "3.6.0+0"
 # ╟─4649b9ca-8e7b-4a0f-a8e0-55b78524149e
 # ╟─baa31527-d5b8-49d0-9917-ca1c8b77913a
 # ╟─af2d0b3c-48ff-4989-b2e7-f22e83df8efa
-# ╟─d28bccea-bd00-4248-b772-611f4ef2684c
+# ╠═d28bccea-bd00-4248-b772-611f4ef2684c
 # ╠═b57ee049-1fea-491a-9b35-6ee771b89cdf
 # ╟─db399188-9bde-4ed3-a930-ecbbda7bace0
 # ╟─8972e246-fc70-42be-b02a-f8aef83bbc91
