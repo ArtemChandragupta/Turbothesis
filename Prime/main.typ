@@ -411,7 +411,7 @@ $ Omega_"пол" = H_e^* dot G_в / G_т = IHₑ dot IGₙ/IGₜ = IΩₐₗₗ 
 #figure(
   lq.diagram(
     width: 15cm, height:10cm, legend: (position: bottom),
-    ylabel: $phi$, xlabel: $pi_k^*$,
+    ylabel: $H_e$, xlabel: $pi_k^*$,
     cycle: (
       (color: red,    mark: "o"),
       (color: orange, mark: "^"),
@@ -424,12 +424,12 @@ $ Omega_"пол" = H_e^* dot G_в / G_т = IHₑ dot IGₙ/IGₜ = IΩₐₗₗ 
       (lq.plot(pik,He.at(i), stroke:1.5pt, mark-size: 5pt, smooth:true, label:$T_3^* = Tt "K "$),)
     }
   ),
-  caption: [Зависимость коэффициента полезной работы ГТУ от степени повышения давления в компрессоре, при различных значениях температуры]
+  caption: [Зависимость эффективной удельной работы ГТУ от степени повышения давления в компрессоре, при различных значениях температуры]
 ) <phi>
 #figure(
   lq.diagram(
     width: 15cm, height:8cm,
-    ylabel: $H_e$, xlabel: $pi_k^*$,
+    ylabel: $phi$, xlabel: $pi_k^*$,
     cycle: (
       (color: red,    mark: "o"),
       (color: orange, mark: "^"),
@@ -442,7 +442,7 @@ $ Omega_"пол" = H_e^* dot G_в / G_т = IHₑ dot IGₙ/IGₜ = IΩₐₗₗ 
       (lq.plot(pik,Phi.at(i), stroke:1.5pt, mark-size: 5pt, smooth:true, label:$T_3^* = Tt "K "$),)
     }
   ),
-  caption: [Зависимость эффективной удельной работы ГТУ от степени повышения давления в компрессоре, при различных значениях температуры]
+  caption: [Зависимость коэффициента полезной работы ГТУ от степени повышения давления в компрессоре, при различных значениях температуры]
 ) <He>
 
 == Выбор степени повышения давления в компрессоре и начальной температуры газа перед турбиной
@@ -962,7 +962,7 @@ $ Y = sqrt( (sum u_2^2) / (2 H_"от")) = sqrt( (4 dot Tu2^2) / (2 dot THₒₜ)
 3) $T_3^* = 1643 "K:" $
 #printA2GTP(read("A2GTP/3.txt"))
 
-4) $T_3^* = 1694 "K:" $
+4) $T_3^* = 1693 "K:" $
 #printA2GTP(read("A2GTP/4.txt"))
 
 5) $T_3^* = 1743 "K:" $
