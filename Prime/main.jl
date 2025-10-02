@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.16
+# v0.20.18
 
 using Markdown
 using InteractiveUtils
@@ -65,7 +65,7 @@ begin
 		k₁   = 0.65,
 
 		# Константы для турбины
-		kₙₜ  = 1.0185,
+		kₙₜ  = 1.02,
 		λ₂ₜ  = 0.5,
 		ηₐₜ  = 0.91,
 		å    = 90,
@@ -205,7 +205,7 @@ begin
 
 	# Результат A2GTP
 	π⃰ₖ  = 16
-	T⃰₀  = 1693
+	T⃰₀  = 1643
 	
 	C = calc_comp(I, π⃰ₖ)
 	T = calc_turb(I, C, π⃰ₖ, T⃰₀)
@@ -569,9 +569,9 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─6799a962-4b97-11f0-09c5-a3dd1bde673a
-# ╠═dab0fc69-515a-4784-acea-e020259f25c2
-# ╠═f8608c64-aead-49cb-809e-bf60b383ff1c
-# ╠═fe821429-f573-4fb8-9268-54aeb6be6e49
+# ╟─dab0fc69-515a-4784-acea-e020259f25c2
+# ╟─f8608c64-aead-49cb-809e-bf60b383ff1c
+# ╟─fe821429-f573-4fb8-9268-54aeb6be6e49
 # ╟─d4a9d15f-df48-456b-9bc7-ff88a61d634f
 # ╠═ced360e6-6a20-462b-862f-bb68fed673cd
 # ╟─f39cfba9-db24-43ef-9cc6-dc294456a177
