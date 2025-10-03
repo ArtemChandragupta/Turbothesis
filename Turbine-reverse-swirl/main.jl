@@ -29,12 +29,12 @@ begin
 	const TASK = (
 		P⃰₀      = 1.6e6,
 		T⃰₀      = 1643,
-		N       = 118e6,
+		N       = 124e6,
 		n       = 5441,
 		α       = 90,
 		m       = 4,
-		G_A2GTP = 153.6,
-		d_mid   = 1.255
+		G_A2GTP = 159.3,
+		d_mid   = 1.308
 	)
 
 	const CONST = (
@@ -395,11 +395,11 @@ end
 
 # ╔═╡ caf250da-aee4-4b8a-8bdd-abd118df3817
 #@bind Yα₁ PlutoUI.NumberField(26:66, default=63) # double
-@bind Yα₁ PlutoUI.NumberField(13:33, default=32) # single
+@bind Yα₁ PlutoUI.NumberField(13:33, default=30) # single
 
 # ╔═╡ 92106f8d-eaba-41aa-85e4-55d935e289de
 #@bind Yβ⃰₂ PlutoUI.NumberField(30:130, default=77) # double
-@bind Yβ⃰₂ PlutoUI.NumberField(15:65, default=44) # single
+@bind Yβ⃰₂ PlutoUI.NumberField(15:65, default=38) # single
 
 # ╔═╡ 7266af5e-2f62-43a6-9472-a0ed6bf064ca
 begin
@@ -624,7 +624,7 @@ function plot_combined_new(valid_params, F_range, ρK_range, filtered_FρK)
             yminorgridvisible = true,
             yminorticks = IntervalsBetween(10),
         )
-        hm1 = heatmap!(Ωax1, ρK_range, F_range, SSE_matrix)
+        hm1 = heatmap!(Ωax1, ρK_range, F_range, SSE_matrix, rasterize=true)
         Colorbar(Ωfig[1, 2], hm1, label="SSE", width=15)
 		scatter!(Ωax1, filtered_FρK[2], filtered_FρK[1], color=:red, markersize=8)
 
@@ -639,7 +639,7 @@ function plot_combined_new(valid_params, F_range, ρK_range, filtered_FρK)
             yminorgridvisible = true,
             yminorticks = IntervalsBetween(10),
         )
-        hm2 = heatmap!(Ωax2, ρK_range, F_range, Δ_matrix)
+        hm2 = heatmap!(Ωax2, ρK_range, F_range, Δ_matrix, rasterize=true)
         Colorbar(Ωfig[1, 4], hm2, label=L"\Delta", width=15)
 		scatter!(Ωax2, filtered_FρK[2], filtered_FρK[1], color=:red, markersize=8)
 
