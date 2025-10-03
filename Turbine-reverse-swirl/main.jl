@@ -87,8 +87,8 @@ function stage_params(𝜤, P₂, Φ, Ψ, 𝒯 = TASK)
 	rc = @. d₂c / 2
 
 	ρTk = 0.07
-	#ρTc = @. 1 - (1 - ρTk) * (rk/rc)^(2n) * Φ^2
-	ρTc = (0.35, 0.35, 0.35, 0.35)
+	ρTc = @. 1 - (1 - ρTk) * (rk/rc)^(2n) * Φ^2
+	#ρTc = (0.35, 0.35, 0.35, 0.35)
 
 	stages = [
 		(n   = n,
@@ -101,7 +101,7 @@ function stage_params(𝜤, P₂, Φ, Ψ, 𝒯 = TASK)
 		 d₂c = d₂c[i],
 		 Φ   = Φ,
 		 Ψ   = Ψ[i],
-		 ρTk = ρTk,
+		 #ρTk = ρTk,
 		 ρTc = ρTc[i]
 		) for i in 1:4
 	]
@@ -200,8 +200,8 @@ begin
 	end
 
 	function calc_ɤ(𝒫, 𝓜, swirl_params, 𝒞 = CONST)
-		γ₁ = 16
-		γ₂ = 16
+		γ₁ = 20
+		γ₂ = 20
 		α₁ = swirl_params.α₁
 		β⃰₂ = swirl_params.β⃰₂
 		F  = swirl_params.F
@@ -345,35 +345,6 @@ function find_GΦΨ(Φ_range, Ψ_range, P₂)
 	(best_result, results)
 end
 
-# ╔═╡ 017b13e3-a0cb-412a-90d9-533cb959da56
-# ╠═╡ disabled = true
-#=╠═╡
-function find_FρK_threaded_old(α₁, β⃰₂, F_range, ρK_range)
-    T = @NamedTuple{F::Float64, ρK::Float64, α₂::Float64, Δ::Float64}
-    valid_parts = [T[] for _ in 1:Threads.nthreads()]
-    
-    Threads.@threads for F in F_range
-        tid = Threads.threadid()
-        local_valid = valid_parts[tid]
-        
-        for ρK in ρK_range
-            SP = (; α₁, F, ρK, β⃰₂)
-            RR, a, b, c, ɤ = swirl_reverse(P[4], S[4], I, SP)
-            ΔR = RR[1].Δρ + RR[2].Δρ + RR[3].Δρ + RR[4].Δρ + RR[5].Δρ
-
-            if abs(ΔR) < 0.1
-                if all(RR[i].p₂ < RR[i+1].p₂ for i in 1:4)
-                    result = (F=F, ρK=ρK, α₂=RR[5].α₂, Δ=ΔR)
-                    push!(local_valid, result)
-                end
-            end
-        end
-    end
-    
-    return reduce(vcat, valid_parts)
-end
-  ╠═╡ =#
-
 # ╔═╡ 8110d01d-5e36-46b1-9651-a844bacb33a2
 begin
 	P₂     = (900_000, 480_000, 230_000, 97_500)
@@ -391,15 +362,8 @@ end
 
 # ╔═╡ 36c608cb-a140-4b01-bbc1-c4ccfb073bc6
 function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
-    T = @NamedTuple{F::Float64, ρK::Float64, SSE::Float64, Δ::Float64}  # Убрали α₂, добавили SSE
+    T = @NamedTuple{F::Float64, ρK::Float64, SSE::Float64, Δ::Float64}
     valid_parts = [T[] for _ in 1:Threads.nthreads()]
-
-	function linregress(x, y)
-   		n = length(x)
-    	A = [x ones(n)]
-    	coeffs = A \ y
-    	return (slope=coeffs[1], intercept=coeffs[2])
-	end
     
     Threads.@threads for F in F_range
         tid = Threads.threadid()
@@ -408,20 +372,17 @@ function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
         for ρK in ρK_range
             SP = (; α₁, F, ρK, β⃰₂)
             RR, a, b, c, ɤ = swirl_reverse(P[4], S[4], I, SP)
-            ΔR = RR[1].Δρ + RR[2].Δρ + RR[3].Δρ + RR[4].Δρ + RR[5].Δρ
+			ΔR = sum(r.Δρ for r in RR)
+			p̄  = [r.p₂ for r in RR]
 
-            if abs(ΔR) < 0.1
-                if all(RR[i].p₂ < RR[i+1].p₂ for i in 1:4)
-					if all( (RR[i+1].p₂-RR[i].p₂) / (RR[i+1].r-RR[i].r) < (RR[i+2].p₂-RR[i+1].p₂) / (RR[i+2].r-RR[i+1].r) for i in 1:3 )
-						sse = abs(
-							abs((RR[2].p₂-RR[1].p₂) / (RR[2].r-RR[1].r) -(RR[3].p₂-RR[2].p₂) / (RR[3].r-RR[2].r)) 
-								- 
-								abs(abs((RR[4].p₂-RR[3].p₂) / (RR[4].r-RR[3].r) -(RR[5].p₂-RR[4].p₂) / (RR[5].r-RR[4].r)))
-						)
-                    	result = (F=F, ρK=ρK, SSE=sse, Δ=ΔR)
-                    	push!(local_valid, result)
-					end
-                end
+            if abs(ΔR) < 0.1 &&
+			all(p̄[i] < p̄[i+1] for i in 1:4) &&
+			RR[1].ρT < RR[5].ρT &&
+			RR[1].ρK < RR[5].ρK &&
+			all( (p̄[i+1] - p̄[i]) < (p̄[i+2] - p̄[i+1]) for i in 1:3 )
+				sse = abs( abs(2p̄[2]-p̄[1]-p̄[3]) - abs(2p̄[4]-p̄[3]-p̄[5]) )
+                result = (F=F, ρK=ρK, SSE=sse, Δ=ΔR)
+                push!(local_valid, result)
             end
         end
     end
@@ -429,23 +390,28 @@ function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
     return reduce(vcat, valid_parts)
 end
 
+# ╔═╡ fa89fa27-743a-4c68-82c0-8670105f83f0
+#plot_Ḡ(Ḡ, Φ, Ψ)
+
 # ╔═╡ caf250da-aee4-4b8a-8bdd-abd118df3817
-@bind Yα₁ PlutoUI.NumberField(26:66, default=63)
+#@bind Yα₁ PlutoUI.NumberField(26:66, default=63) # double
+@bind Yα₁ PlutoUI.NumberField(13:33, default=32) # single
 
 # ╔═╡ 92106f8d-eaba-41aa-85e4-55d935e289de
-@bind Yβ⃰₂ PlutoUI.NumberField(30:130, default=77)
+#@bind Yβ⃰₂ PlutoUI.NumberField(30:130, default=77) # double
+@bind Yβ⃰₂ PlutoUI.NumberField(15:65, default=44) # single
 
 # ╔═╡ 7266af5e-2f62-43a6-9472-a0ed6bf064ca
 begin
-	Cα₁ = Yα₁/2
-	Cβ⃰₂ = Yβ⃰₂/2
+	Cα₁ = Yα₁#/2
+	Cβ⃰₂ = Yβ⃰₂#/2
 	
-	F_range  = range(-0.5, 0  , length=500)
-	ρK_range = range(0.2 , 0.5, length=500)
+	F_range  = range(-0.5, 0  , length=1000)
+	ρK_range = range(0.2 , 0.5, length=1000)
 	
 	valid_FρK = find_FρK_threaded(Cα₁, Cβ⃰₂, F_range, ρK_range)
 	#filtered_FρK = filter(p -> abs(p.Δ) < 0.0001, valid_FρK)
-	filtered_FρK = argmin(p -> p.SSE, filter(p -> abs(p.Δ) < 0.001, valid_FρK))
+	filtered_FρK = argmin(p -> p.SSE, filter(p -> abs(p.Δ) < 0.01, valid_FρK))
 end
 
 # ╔═╡ 7d5a8d73-94ea-4d52-8c74-12f4f2d1fe13
@@ -462,10 +428,9 @@ begin
 end
 
 # ╔═╡ 80f53296-aa6f-42a4-acdc-a4b5589dc291
-begin
-	fig = Figure(size = (1200, 600))
+begin	
+	fig = Figure(size = (1200, 400))
 
-	# График плотностей
 	ax2 = Axis(fig[1, 1],
 	    title = LaTeXString("Σ Δρ_k = $(round(sum(r.Δρ for r in R), digits=2))"),
 	    xlabel = "r",
@@ -474,11 +439,11 @@ begin
 	
 	# Линии для ρK и ρT
 	lines!(ax2, [r.r for r in R], [r.ρK for r in R],
-	    label = "ρK, $(round(ρK, digits=2)), F = $(round(F, digits=2))")
+	    label = "ρK, ρK = $(round(ρK, digits=2)), F = $(round(F, digits=2))")
 	lines!(ax2, [r.r for r in R], [r.ρT for r in R], label = "ρT")
 	axislegend(ax2)
 	
-	# График давлений (Gp)
+	# График давлений
 	ax3 = Axis(fig[1, 2],
 	    title = L"p_2 \ при \ обратной \ закрутке",
 	    xlabel = "r",
@@ -622,9 +587,6 @@ function plot_Ḡ(Ḡ, Φ, Ψ)
 	end
 end
 
-# ╔═╡ fa89fa27-743a-4c68-82c0-8670105f83f0
-plot_Ḡ(Ḡ, Φ, Ψ)
-
 # ╔═╡ b57ee049-1fea-491a-9b35-6ee771b89cdf
 function plot_combined_new(valid_params, F_range, ρK_range, filtered_FρK)
     # Матрица для SSE
@@ -637,7 +599,7 @@ function plot_combined_new(valid_params, F_range, ρK_range, filtered_FρK)
         end
     end
 
-    # Матрица для Δ (оставляем как есть)
+    # Матрица для Δ
     Δ_matrix = fill(NaN, (length(ρK_range), length(F_range)))
     for param in valid_params
         i = findfirst(==(param.F), F_range)
@@ -662,7 +624,7 @@ function plot_combined_new(valid_params, F_range, ρK_range, filtered_FρK)
             yminorgridvisible = true,
             yminorticks = IntervalsBetween(10),
         )
-        hm1 = heatmap!(Ωax1, ρK_range, F_range, SSE_matrix, rasterize=true)
+        hm1 = heatmap!(Ωax1, ρK_range, F_range, SSE_matrix)
         Colorbar(Ωfig[1, 2], hm1, label="SSE", width=15)
 		scatter!(Ωax1, filtered_FρK[2], filtered_FρK[1], color=:red, markersize=8)
 
@@ -677,7 +639,7 @@ function plot_combined_new(valid_params, F_range, ρK_range, filtered_FρK)
             yminorgridvisible = true,
             yminorticks = IntervalsBetween(10),
         )
-        hm2 = heatmap!(Ωax2, ρK_range, F_range, Δ_matrix, rasterize=true)
+        hm2 = heatmap!(Ωax2, ρK_range, F_range, Δ_matrix)
         Colorbar(Ωfig[1, 4], hm2, label=L"\Delta", width=15)
 		scatter!(Ωax2, filtered_FρK[2], filtered_FρK[1], color=:red, markersize=8)
 
@@ -690,72 +652,6 @@ end
 
 # ╔═╡ 773bdd95-c9fe-41c4-806d-8330de487dab
 plot_combined_new(valid_FρK, F_range, ρK_range, filtered_FρK)
-
-# ╔═╡ db399188-9bde-4ed3-a930-ecbbda7bace0
-# ╠═╡ disabled = true
-#=╠═╡
-function plot_combined(valid_params, F_range, ρK_range)
-    # Подготовка матрицы для α₂
-    α₂_matrix = fill(NaN, (length(ρK_range), length(F_range)))
-    for param in valid_params
-        i = findfirst(==(param.F), F_range)
-        j = findfirst(==(param.ρK), ρK_range)
-        if i !== nothing && j !== nothing
-            α₂_matrix[j, i] = abs(param.α₂)
-        end
-    end
-
-    # Подготовка матрицы для Δ
-    Δ_matrix = fill(NaN, (length(ρK_range), length(F_range)))
-    for param in valid_params
-        i = findfirst(==(param.F), F_range)
-        j = findfirst(==(param.ρK), ρK_range)
-        if i !== nothing && j !== nothing
-            Δ_matrix[j, i] = param.Δ
-        end
-    end
-
-    with_theme(theme_latexfonts()) do
-	    Ωfig = Figure(size=(800, 400))
-
-	    # Первый график: α₂
-    	Ωax1 = Axis(Ωfig[1, 1],
-	        ylabel = L"F",
-    	    xlabel = L"\rho_K",
-        	title = L"$\alpha_2$ ($\alpha_1 = %$(Cα₁)$, $\beta^*_2 = %$(Cβ⃰₂)$)",
-	        xminorticksvisible = true,
-    	    xminorgridvisible = true,
-        	xminorticks = IntervalsBetween(10),
-	        yminorticksvisible = true,
-    	    yminorgridvisible = true,
-        	yminorticks = IntervalsBetween(10),
-    	)
-	    hm1 = heatmap!(Ωax1, ρK_range, F_range, α₂_matrix, colormap=:rainbow, rasterize = true,)
-    	Colorbar(Ωfig[1, 2], hm1, label=L"\alpha_2", width=15)
-
-	    # Второй график: Δ
-    	Ωax2 = Axis(Ωfig[1, 3],
-        	xlabel = L"\rho_K",
-	        title = L"$\Delta$ ($\alpha_1 = %$(Cα₁)$, $\beta^*_2 = %$(Cβ⃰₂)$)",
-    	    xminorticksvisible = true,
-        	xminorgridvisible = true,
-	        xminorticks = IntervalsBetween(10),
-    	    yminorticksvisible = true,
-        	yminorgridvisible = true,
-        	yminorticks = IntervalsBetween(10),
-    	)
-	    hm2 = heatmap!(Ωax2, ρK_range, F_range, Δ_matrix, colormap=:rainbow, rasterize = true,)
-    	Colorbar(Ωfig[1, 4], hm2, label=L"\Delta", width=15)
-
-	    # Расстояние между графиками и colorbar
-    	colgap!(Ωfig.layout, 1, 10)
-    	colgap!(Ωfig.layout, 3, 10)
-		save("assets/var.svg",Ωfig)
-
-		return Ωfig
-	end
-end
-  ╠═╡ =#
 
 # ╔═╡ 8972e246-fc70-42be-b02a-f8aef83bbc91
 function table_swirl_short()
@@ -779,6 +675,9 @@ function table_swirl_short()
 	| $w_2, \text{м/с}$       |$(r̂1.w₂)  |$(r̂2.w₂)  |$(r̂3.w₂)  |$(r̂4.w₂)  |$(r̂5.w₂)  |
 	"""
 end
+
+# ╔═╡ 8191ff73-b2e4-4c3a-be5d-abd90d94ff65
+table_swirl_short()
 
 # ╔═╡ e531c079-9b6d-446c-9946-2708b5993e9f
 function table_swirl()
@@ -984,7 +883,7 @@ PlutoUI = "~0.7.62"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.6"
+julia_version = "1.11.7"
 manifest_format = "2.0"
 project_hash = "ca2c0b1da1ea405bd300e2ac72c0a325e2740391"
 
@@ -2521,23 +2420,23 @@ version = "3.6.0+0"
 
 # ╔═╡ Cell order:
 # ╟─cf901c9a-5552-4de7-b4fb-1cf9451e526a
-# ╟─5072912f-e96c-4894-b37b-15c805d99dc8
-# ╟─744a686c-6b35-4b5d-bd7d-77ea0ad561ed
-# ╟─beb5dc3a-a6fd-42f9-8e71-5c47120c0bca
+# ╠═5072912f-e96c-4894-b37b-15c805d99dc8
+# ╠═744a686c-6b35-4b5d-bd7d-77ea0ad561ed
+# ╠═beb5dc3a-a6fd-42f9-8e71-5c47120c0bca
 # ╟─2b3ff95e-629c-42a0-b0d4-453f18ac64b9
-# ╠═1307a1b3-21ee-471d-80da-4fef86063430
+# ╟─1307a1b3-21ee-471d-80da-4fef86063430
 # ╟─39f2ed09-2a95-49a7-a0d0-d62414051b22
 # ╟─dad00772-609e-4b37-8a6e-1c76f8a5bb10
 # ╠═36c608cb-a140-4b01-bbc1-c4ccfb073bc6
-# ╟─017b13e3-a0cb-412a-90d9-533cb959da56
-# ╠═8110d01d-5e36-46b1-9651-a844bacb33a2
+# ╟─8110d01d-5e36-46b1-9651-a844bacb33a2
 # ╠═fa89fa27-743a-4c68-82c0-8670105f83f0
 # ╟─caf250da-aee4-4b8a-8bdd-abd118df3817
 # ╟─92106f8d-eaba-41aa-85e4-55d935e289de
-# ╠═7266af5e-2f62-43a6-9472-a0ed6bf064ca
+# ╟─7266af5e-2f62-43a6-9472-a0ed6bf064ca
 # ╟─773bdd95-c9fe-41c4-806d-8330de487dab
-# ╠═7d5a8d73-94ea-4d52-8c74-12f4f2d1fe13
-# ╟─80f53296-aa6f-42a4-acdc-a4b5589dc291
+# ╟─7d5a8d73-94ea-4d52-8c74-12f4f2d1fe13
+# ╠═80f53296-aa6f-42a4-acdc-a4b5589dc291
+# ╟─8191ff73-b2e4-4c3a-be5d-abd90d94ff65
 # ╟─c77e3589-c71f-46d1-aa94-5e320e21a523
 # ╟─4c8032e7-d526-4c0a-ae32-68098530071d
 # ╟─05b8e026-848a-4f7c-af26-50a4814847ab
@@ -2546,9 +2445,8 @@ version = "3.6.0+0"
 # ╟─4649b9ca-8e7b-4a0f-a8e0-55b78524149e
 # ╟─baa31527-d5b8-49d0-9917-ca1c8b77913a
 # ╟─af2d0b3c-48ff-4989-b2e7-f22e83df8efa
-# ╠═d28bccea-bd00-4248-b772-611f4ef2684c
+# ╟─d28bccea-bd00-4248-b772-611f4ef2684c
 # ╠═b57ee049-1fea-491a-9b35-6ee771b89cdf
-# ╟─db399188-9bde-4ed3-a930-ecbbda7bace0
 # ╟─8972e246-fc70-42be-b02a-f8aef83bbc91
 # ╟─e531c079-9b6d-446c-9946-2708b5993e9f
 # ╟─86c4bec4-9260-4789-a64c-22691b07e3cb
