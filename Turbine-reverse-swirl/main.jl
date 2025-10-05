@@ -33,8 +33,10 @@ begin
 		n       = 5441,
 		α       = 90,
 		m       = 4,
-		G_A2GTP = 159.3,
-		d_mid   = 1.308
+		G_A2GTP = 159,
+		d_mid   = 1.333, # Средний диаметр последней ступени турбины
+		l       = 0.3, # Высота  лопатки последней ступени турбины
+		γ       = 17     # Угол раскрытия  турбины
 	)
 
 	const CONST = (
@@ -43,9 +45,52 @@ begin
 		kk_1 = 1.33 / (1.33 - 1),
 		k_1k = (1.33 - 1) / 1.33,
 		λ    = 0.6,
-		ηад  = 0.93,
-		αN   = 1.0185
+		ηад  = 0.91,
+		αN   = 1.04,
 	)
+end
+
+# ╔═╡ 3c524531-95a0-456e-ba4e-a919c09422b2
+function build_geometry(T = TASK)
+	ah = 4 # отношение высоты лопатки к её толщине
+	aw = 3 # отношение толщины лопатки к расстоянию между двумя лопатками
+
+	ll₁ = zeros(8)
+	xl₁ = zeros(8)
+	ll₂ = zeros(8)
+	xl₂ = zeros(8)
+
+	# Сопловые лопатки 1 и рабочие лопатки 2 состоят из 2-х ребер, поэтому всего точек 8, а не 4, как ступеней.
+
+	# Задняя кромка последней рабочей лопатки
+	ll₂[8] = T.l
+	xl₂[8] = 0
+
+	for n in 4:-1:1
+		# Передняя кромка n-ной рабочей лопатки
+		xl₂[2n-1] = xl₂[2n] - ll₂[2n] / ah
+		ll₂[2n-1] =  ll₂[8] + tand(T.γ) * xl₂[2n-1]
+		# Задняя кромка n-ной сопловой лопатки
+		xl₁[2n] = xl₂[2n-1] + (xl₂[2n-1] - xl₂[2n]) / aw
+		ll₁[2n] = ll₂[8] + tand(T.γ) * xl₁[2n]
+		# Передняя кромка n-ной сопловой лопатки
+		xl₁[2n-1] = xl₁[2n] - ll₁[2n] / ah
+		ll₁[2n-1] = ll₂[8] + tand(T.γ) * xl₁[2n-1]
+
+		# Задняя кромка n-1-ой рабочей лопатки. На первой ступени такой нет
+		if n>1
+			xl₂[2n-2] = xl₁[2n-1] - (xl₁[2n] - xl₁[2n-1]) / aw
+			ll₂[2n-2] = ll₂[8] + tand(T.γ) * xl₂[2n-2]	
+		end
+	end
+
+	# Переворачиваем координаты на натуральные
+	xl₂ .-= xl₁[1]
+	xl₁ .-= xl₁[1]
+
+	
+
+	(; ll₁, xl₁, ll₂, xl₂)
 end
 
 # ╔═╡ 744a686c-6b35-4b5d-bd7d-77ea0ad561ed
@@ -73,9 +118,9 @@ function calc_prime(G; 𝒞 = CONST, 𝒯 = TASK)
     end
 
 # ╔═╡ beb5dc3a-a6fd-42f9-8e71-5c47120c0bca
-function stage_params(𝜤, P₂, Φ, Ψ, 𝒯 = TASK)
-	l₁ = (0.119, 0.159, 0.208, 0.267)
-	l₂ = (0.136, 0.183, 0.234, 0.300)
+function stage_params(𝜤, P₂, Φ, Ψ, l̄, 𝒯 = TASK)
+	l₁ = (l̄.ll₁[2], l̄.ll₁[4], l̄.ll₁[6], l̄.ll₁[8])
+	l₂ = (l̄.ll₂[2], l̄.ll₂[4], l̄.ll₂[6], l̄.ll₂[8])
 	p₂ = P₂
 
 	d₁c = @. 𝒯.d_mid - 𝜤.l₂ + l₁
@@ -166,6 +211,53 @@ begin
 	
 		(; p⃰₀, T⃰₀, p₂, H₀, T₂tt, c₁t, c₁, T₁t, p₁, T₁, ρ₁, F₁r, F₁, α₁, c₁u, c₁z, u₁, u₂, w₁u, w₁, β₁, T⃰w₁, p⃰w₁, T⃰w₂, p⃰w₂t, H⃰₂, w₂t, w₂, T₂, F₂r, F₂, β⃰₂, w₂u, c₂z, c₂u, α₂, c₂, T⃰₂, p⃰₂, Mc₁, Mw₂, T⃰₂tt, ηᵤ, η⃰ᵤ)
 	end
+end
+
+# ╔═╡ 39f2ed09-2a95-49a7-a0d0-d62414051b22
+function find_Gopt(P₂, Φ, Ψ, l̄)
+	
+	𝓖 = range(TASK.G_A2GTP - 40,TASK.G_A2GTP + 40, length = 1000)
+	Im = calc_prime.(𝓖)
+	Params = [stage_params(I, P₂, Φ, Ψ, l̄) for I in Im]
+    𝒮 = calc_stages.(𝓖, Im, Params)
+    𝒮4 = [s[4] for s in 𝒮]
+	al = [s.α₂ for s in 𝒮4]
+
+	iₘₐₓ = argmax(al)
+	iₘᵢₙ = argmin(al)
+
+	Gₒₚₜ = (𝓖[iₘₐₓ] + 𝓖[iₘᵢₙ])/2
+
+	(Gₒₚₜ, al, 𝓖)
+end
+
+# ╔═╡ dad00772-609e-4b37-8a6e-1c76f8a5bb10
+function find_GΦΨ(Φ_range, Ψ_range, P₂, l̄)
+	results = []
+	good_results = []
+
+	for Φtmp in Φ_range
+		for Ψtmp in Ψ_range
+			(Gₒₚₜtmp, altmp, 𝓖tmp) = find_Gopt(P₂, Φtmp, (Ψtmp, Ψtmp, Ψtmp, Ψtmp),l̄)
+			if abs(Gₒₚₜtmp - TASK.G_A2GTP) < 0.01
+				push!(good_results, (Gₒₚₜtmp, Φtmp, Ψtmp))
+			end
+			push!(results, (Gₒₚₜtmp, Φtmp, Ψtmp))
+		end
+	end
+
+	max_sum = -Inf
+	best_result = nothing
+
+	for res in good_results
+    	current_sum = res[2] + res[3]
+    	if current_sum > max_sum
+        	max_sum = current_sum
+        	best_result = res
+    	end
+	end
+
+	(best_result, results)
 end
 
 # ╔═╡ 1307a1b3-21ee-471d-80da-4fef86063430
@@ -298,63 +390,17 @@ begin
 	end
 end
 
-# ╔═╡ 39f2ed09-2a95-49a7-a0d0-d62414051b22
-function find_Gopt(P₂, Φ, Ψ)
-	
-	𝓖 = range(TASK.G_A2GTP - 40,TASK.G_A2GTP + 40, length = 1000)
-	Im = calc_prime.(𝓖)
-	Params = [stage_params(I, P₂, Φ, Ψ) for I in Im]
-    𝒮 = calc_stages.(𝓖, Im, Params)
-    𝒮4 = [s[4] for s in 𝒮]
-	al = [s.α₂ for s in 𝒮4]
-
-	iₘₐₓ = argmax(al)
-	iₘᵢₙ = argmin(al)
-
-	Gₒₚₜ = (𝓖[iₘₐₓ] + 𝓖[iₘᵢₙ])/2
-
-	(Gₒₚₜ, al, 𝓖)
-end
-
-# ╔═╡ dad00772-609e-4b37-8a6e-1c76f8a5bb10
-function find_GΦΨ(Φ_range, Ψ_range, P₂)
-	results = []
-	good_results = []
-
-	for Φtmp in Φ_range
-		for Ψtmp in Ψ_range
-			(Gₒₚₜtmp, altmp, 𝓖tmp) = find_Gopt(P₂, Φtmp, (Ψtmp, Ψtmp, Ψtmp, Ψtmp))
-			if abs(Gₒₚₜtmp - TASK.G_A2GTP) < 0.01
-				push!(good_results, (Gₒₚₜtmp, Φtmp, Ψtmp))
-			end
-			push!(results, (Gₒₚₜtmp, Φtmp, Ψtmp))
-		end
-	end
-
-	max_sum = -Inf
-	best_result = nothing
-
-	for res in good_results
-    	current_sum = res[2] + res[3]
-    	if current_sum > max_sum
-        	max_sum = current_sum
-        	best_result = res
-    	end
-	end
-
-	(best_result, results)
-end
-
 # ╔═╡ 8110d01d-5e36-46b1-9651-a844bacb33a2
 begin
-	P₂     = (900_000, 480_000, 230_000, 97_500)
+	P₂      = (900_000, 480_000, 230_000, 97_500)
 	Φ_range = range(0.94, 0.98, length=100)
 	Ψ_range = range(0.94, 0.98, length=100)
 
-	((Gₒₚₜ, Φ, Ψ), Ḡ) = find_GΦΨ(Φ_range, Ψ_range, P₂)
+	l̄ = build_geometry()
+	((Gₒₚₜ, Φ, Ψ), Ḡ) = find_GΦΨ(Φ_range, Ψ_range, P₂, l̄)
 	
 	I = calc_prime(Gₒₚₜ)
-	P = stage_params(I, P₂, Φ, (Ψ,Ψ,Ψ,Ψ))
+	P = stage_params(I, P₂, Φ, (Ψ,Ψ,Ψ,Ψ), l̄)
 	S = calc_stages(Gₒₚₜ, I, P)
 
 	md"### Первичный расчет и расчет по ступеням"
@@ -390,9 +436,6 @@ function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
     return reduce(vcat, valid_parts)
 end
 
-# ╔═╡ fa89fa27-743a-4c68-82c0-8670105f83f0
-#plot_Ḡ(Ḡ, Φ, Ψ)
-
 # ╔═╡ caf250da-aee4-4b8a-8bdd-abd118df3817
 #@bind Yα₁ PlutoUI.NumberField(26:66, default=63) # double
 @bind Yα₁ PlutoUI.NumberField(13:33, default=30) # single
@@ -425,33 +468,6 @@ begin
 	R, a, b, c, ɤ = swirl_reverse(P[4], S[4], I, swirl_params)
 	
 	md"### Обратная закрутка"
-end
-
-# ╔═╡ 80f53296-aa6f-42a4-acdc-a4b5589dc291
-begin	
-	fig = Figure(size = (1200, 400))
-
-	ax2 = Axis(fig[1, 1],
-	    title = LaTeXString("Σ Δρ_k = $(round(sum(r.Δρ for r in R), digits=2))"),
-	    xlabel = "r",
-	    ylabel = "ρ"
-	)
-	
-	# Линии для ρK и ρT
-	lines!(ax2, [r.r for r in R], [r.ρK for r in R],
-	    label = "ρK, ρK = $(round(ρK, digits=2)), F = $(round(F, digits=2))")
-	lines!(ax2, [r.r for r in R], [r.ρT for r in R], label = "ρT")
-	axislegend(ax2)
-	
-	# График давлений
-	ax3 = Axis(fig[1, 2],
-	    title = L"p_2 \ при \ обратной \ закрутке",
-	    xlabel = "r",
-	    ylabel = "p₂"
-	)
-	lines!(ax3, [r.r for r in R], [r.p₂ for r in R], label = "p₂")
-
-	fig
 end
 
 # ╔═╡ c77e3589-c71f-46d1-aa94-5e320e21a523
@@ -564,6 +580,36 @@ begin
 	md"## Файлы с переменными"
 end
 
+# ╔═╡ d7815a7f-ffa3-4306-bb5a-0213b45154ae
+md"### Графики"
+
+# ╔═╡ 54df4190-d684-4f14-bb8c-cd088dac8c0e
+function plot_geometry(l̄)
+	with_theme(theme_latexfonts()) do
+		fig = Figure(size=(800, 400))
+		ax = Axis(fig[1,1],aspect = DataAspect(), title = "Продольное сечение")
+		
+		for i in 1:Int(length(l̄.ll₁)/2)
+			poly!(ax, color = :blue, Point2f[
+				(l̄.xl₁[2i  ], 0          ), (l̄.xl₁[2i  ], l̄.ll₁[2i]), 
+				(l̄.xl₁[2i-1], l̄.ll₁[2i-1]), (l̄.xl₁[2i-1], 0        )
+			])
+		end
+
+		for i in 1:Int(length(l̄.ll₁)/2)
+			poly!(ax, color = :red, Point2f[
+				(l̄.xl₂[2i  ], 0          ), (l̄.xl₂[2i  ], l̄.ll₂[2i]),
+				(l̄.xl₂[2i-1], l̄.ll₂[2i-1]), (l̄.xl₂[2i-1], 0        )
+			])
+		end
+
+		fig
+	end
+end
+
+# ╔═╡ 1e3efbe2-2470-4deb-882c-658994a4b3d7
+plot_geometry(l̄)
+
 # ╔═╡ d28bccea-bd00-4248-b772-611f4ef2684c
 function plot_Ḡ(Ḡ, Φ, Ψ)
 	with_theme(theme_latexfonts()) do
@@ -575,7 +621,7 @@ function plot_Ḡ(Ḡ, Φ, Ψ)
 	
 		Gfig = Figure()
 		Gax = Axis(Gfig[1, 1], xlabel="Φ", ylabel="Ψ")
-		hm = heatmap!(Gax, Φ_range, Ψ_range, G_matrix)
+		hm = heatmap!(Gax, Φ_range, Ψ_range, G_matrix, rasterize=true)
 		Colorbar(Gfig[1, 2], hm, label=L"G_{opt}")
 
 		contour!(Gax, Φ_range,Ψ_range,G_matrix, levels=[TASK.G_A2GTP], color=:red)
@@ -587,71 +633,101 @@ function plot_Ḡ(Ḡ, Φ, Ψ)
 	end
 end
 
-# ╔═╡ b57ee049-1fea-491a-9b35-6ee771b89cdf
-function plot_combined_new(valid_params, F_range, ρK_range, filtered_FρK)
-    # Матрица для SSE
-    SSE_matrix = fill(NaN, (length(ρK_range), length(F_range)))
-    for param in valid_params
-        i = findfirst(==(param.F), F_range)
-        j = findfirst(==(param.ρK), ρK_range)
-        if i !== nothing && j !== nothing
-            SSE_matrix[j, i] = param.SSE
+# ╔═╡ fa89fa27-743a-4c68-82c0-8670105f83f0
+plot_Ḡ(Ḡ, Φ, Ψ)
+
+# ╔═╡ 6e4149dd-ba84-419d-b242-260ca055c9a0
+function plot_tooth(valid_params, F_range, ρK_range, filtered_FρK)
+
+    function fill_matrix(field)
+        matrix = fill(NaN, (length(ρK_range), length(F_range)))
+        for param in valid_params
+            i = findfirst(==(param.F), F_range)
+            j = findfirst(==(param.ρK), ρK_range)
+            if i !== nothing && j !== nothing
+                matrix[j, i] = getfield(param, field)
+            end
         end
+        return matrix
     end
 
-    # Матрица для Δ
-    Δ_matrix = fill(NaN, (length(ρK_range), length(F_range)))
-    for param in valid_params
-        i = findfirst(==(param.F), F_range)
-        j = findfirst(==(param.ρK), ρK_range)
-        if i !== nothing && j !== nothing
-            Δ_matrix[j, i] = param.Δ
-        end
-    end
+    SSE_matrix = fill_matrix(:SSE)
+    Δ_matrix = fill_matrix(:Δ)
 
     with_theme(theme_latexfonts()) do
-        Ωfig = Figure(size=(800, 400))
+        fig = Figure(size=(800, 400))
 
-        # График для SSE
-        Ωax1 = Axis(Ωfig[1, 1],
+        # Общие настройки для осей
+        axis_settings = (
+            xminorticksvisible = true, xminorgridvisible = true,
+            xminorticks = IntervalsBetween(10),
+            yminorticksvisible = true, yminorgridvisible = true,
+            yminorticks = IntervalsBetween(10),
+        )
+
+        # График для среднеквадратичного отклонения
+        ax1 = Axis(fig[1, 1];
             ylabel = L"F",
             xlabel = L"\rho_K",
             title = L"SSE ($\alpha_1 = %$(Cα₁)$, $\beta^*_2 = %$(Cβ⃰₂)$)",
-            xminorticksvisible = true,
-            xminorgridvisible = true,
-            xminorticks = IntervalsBetween(10),
-            yminorticksvisible = true,
-            yminorgridvisible = true,
-            yminorticks = IntervalsBetween(10),
+            axis_settings...
         )
-        hm1 = heatmap!(Ωax1, ρK_range, F_range, SSE_matrix, rasterize=true)
-        Colorbar(Ωfig[1, 2], hm1, label="SSE", width=15)
-		scatter!(Ωax1, filtered_FρK[2], filtered_FρK[1], color=:red, markersize=8)
+        hm1 = heatmap!(ax1, ρK_range, F_range, SSE_matrix, rasterize=true)
+        Colorbar(fig[1, 2], hm1, label="SSE", width=15)
+        scatter!(ax1, filtered_FρK[2], filtered_FρK[1], color=:red, markersize=8)
 
-        # График для Δ
-        Ωax2 = Axis(Ωfig[1, 3],
+        # График для разницы полиномиальной и нормальной степени реактивности
+        ax2 = Axis(fig[1, 3];
             xlabel = L"\rho_K",
             title = L"$\Delta$ ($\alpha_1 = %$(Cα₁)$, $\beta^*_2 = %$(Cβ⃰₂)$)",
-            xminorticksvisible = true,
-            xminorgridvisible = true,
-            xminorticks = IntervalsBetween(10),
-            yminorticksvisible = true,
-            yminorgridvisible = true,
-            yminorticks = IntervalsBetween(10),
+            axis_settings...
         )
-        hm2 = heatmap!(Ωax2, ρK_range, F_range, Δ_matrix, rasterize=true)
-        Colorbar(Ωfig[1, 4], hm2, label=L"\Delta", width=15)
-		scatter!(Ωax2, filtered_FρK[2], filtered_FρK[1], color=:red, markersize=8)
+        hm2 = heatmap!(ax2, ρK_range, F_range, Δ_matrix, rasterize=true)
+        Colorbar(fig[1, 4], hm2, label=L"\Delta", width=15)
+        scatter!(ax2, filtered_FρK[2], filtered_FρK[1], color=:red, markersize=8)
 
-        colgap!(Ωfig.layout, 1, 10)
-        colgap!(Ωfig.layout, 3, 10)
-        save("assets/var.svg", Ωfig)
-        return Ωfig
+        colgap!(fig.layout, 1, 10)
+        colgap!(fig.layout, 3, 10)
+        save("assets/var.svg", fig)
+        return fig
     end
 end
 
 # ╔═╡ 773bdd95-c9fe-41c4-806d-8330de487dab
-plot_combined_new(valid_FρK, F_range, ρK_range, filtered_FρK)
+plot_tooth(valid_FρK, F_range, ρK_range, filtered_FρK)
+
+# ╔═╡ f52085c1-4478-4beb-8ed0-47c7c5e58c75
+function plot_goodies(R)
+	with_theme(theme_latexfonts()) do
+		fig = Figure(size = (1200, 400))
+
+		ax1 = Axis(fig[1, 1],
+			title = LaTeXString("Σ Δρ_k = $(round(sum(r.Δρ for r in R), digits=2))"),
+	    	xlabel = "r", ylabel = "ρ"
+		)
+	
+		# Линии для ρK и ρT
+		lines!(ax1, [r.r for r in R], [r.ρK for r in R],
+		    label = "ρK, ρK = $(round(ρK, digits=2)), F = $(round(F, digits=2))")
+		lines!(ax1, [r.r for r in R], [r.ρT for r in R], label = "ρT")
+		axislegend(ax1)
+	
+		# График давлений
+		ax2 = Axis(fig[1, 2],
+				   title = L"p_2  при  обратной  закрутке",
+				   xlabel = "r", ylabel = "p₂"
+				  )
+		lines!(ax2, [r.r for r in R], [r.p₂ for r in R], label = "p₂")
+
+		fig
+	end
+end
+
+# ╔═╡ 9e4cbaf3-9791-4848-87a3-bc23a8ccc181
+plot_goodies(R)
+
+# ╔═╡ d92c6ad2-0944-4832-9226-b525802556c6
+md"### Таблицы красивые"
 
 # ╔═╡ 8972e246-fc70-42be-b02a-f8aef83bbc91
 function table_swirl_short()
@@ -675,9 +751,6 @@ function table_swirl_short()
 	| $w_2, \text{м/с}$       |$(r̂1.w₂)  |$(r̂2.w₂)  |$(r̂3.w₂)  |$(r̂4.w₂)  |$(r̂5.w₂)  |
 	"""
 end
-
-# ╔═╡ 8191ff73-b2e4-4c3a-be5d-abd90d94ff65
-table_swirl_short()
 
 # ╔═╡ e531c079-9b6d-446c-9946-2708b5993e9f
 function table_swirl()
@@ -2421,22 +2494,23 @@ version = "3.6.0+0"
 # ╔═╡ Cell order:
 # ╟─cf901c9a-5552-4de7-b4fb-1cf9451e526a
 # ╠═5072912f-e96c-4894-b37b-15c805d99dc8
-# ╠═744a686c-6b35-4b5d-bd7d-77ea0ad561ed
-# ╠═beb5dc3a-a6fd-42f9-8e71-5c47120c0bca
-# ╟─2b3ff95e-629c-42a0-b0d4-453f18ac64b9
-# ╟─1307a1b3-21ee-471d-80da-4fef86063430
+# ╟─3c524531-95a0-456e-ba4e-a919c09422b2
 # ╟─39f2ed09-2a95-49a7-a0d0-d62414051b22
 # ╟─dad00772-609e-4b37-8a6e-1c76f8a5bb10
-# ╠═36c608cb-a140-4b01-bbc1-c4ccfb073bc6
-# ╟─8110d01d-5e36-46b1-9651-a844bacb33a2
-# ╠═fa89fa27-743a-4c68-82c0-8670105f83f0
+# ╟─744a686c-6b35-4b5d-bd7d-77ea0ad561ed
+# ╟─beb5dc3a-a6fd-42f9-8e71-5c47120c0bca
+# ╟─2b3ff95e-629c-42a0-b0d4-453f18ac64b9
+# ╟─36c608cb-a140-4b01-bbc1-c4ccfb073bc6
+# ╟─1307a1b3-21ee-471d-80da-4fef86063430
+# ╠═8110d01d-5e36-46b1-9651-a844bacb33a2
+# ╠═1e3efbe2-2470-4deb-882c-658994a4b3d7
+# ╟─fa89fa27-743a-4c68-82c0-8670105f83f0
 # ╟─caf250da-aee4-4b8a-8bdd-abd118df3817
 # ╟─92106f8d-eaba-41aa-85e4-55d935e289de
 # ╟─7266af5e-2f62-43a6-9472-a0ed6bf064ca
 # ╟─773bdd95-c9fe-41c4-806d-8330de487dab
 # ╟─7d5a8d73-94ea-4d52-8c74-12f4f2d1fe13
-# ╠═80f53296-aa6f-42a4-acdc-a4b5589dc291
-# ╟─8191ff73-b2e4-4c3a-be5d-abd90d94ff65
+# ╟─9e4cbaf3-9791-4848-87a3-bc23a8ccc181
 # ╟─c77e3589-c71f-46d1-aa94-5e320e21a523
 # ╟─4c8032e7-d526-4c0a-ae32-68098530071d
 # ╟─05b8e026-848a-4f7c-af26-50a4814847ab
@@ -2445,8 +2519,12 @@ version = "3.6.0+0"
 # ╟─4649b9ca-8e7b-4a0f-a8e0-55b78524149e
 # ╟─baa31527-d5b8-49d0-9917-ca1c8b77913a
 # ╟─af2d0b3c-48ff-4989-b2e7-f22e83df8efa
+# ╟─d7815a7f-ffa3-4306-bb5a-0213b45154ae
+# ╟─54df4190-d684-4f14-bb8c-cd088dac8c0e
 # ╟─d28bccea-bd00-4248-b772-611f4ef2684c
-# ╠═b57ee049-1fea-491a-9b35-6ee771b89cdf
+# ╟─6e4149dd-ba84-419d-b242-260ca055c9a0
+# ╟─f52085c1-4478-4beb-8ed0-47c7c5e58c75
+# ╟─d92c6ad2-0944-4832-9226-b525802556c6
 # ╟─8972e246-fc70-42be-b02a-f8aef83bbc91
 # ╟─e531c079-9b6d-446c-9946-2708b5993e9f
 # ╟─86c4bec4-9260-4789-a64c-22691b07e3cb
