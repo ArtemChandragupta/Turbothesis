@@ -407,13 +407,13 @@ function find_GΦΨ(T, Φ➞, Ψ➞, P₂, l̄)
 		end
 	end
 
-	max_sum = -Inf
+	Δₘᵢₙ = Inf
 	best_result = nothing
 
 	for res in good_results
-    	current_sum = res[2] + res[3]
-    	if current_sum > max_sum
-        	max_sum     = current_sum
+    	Δᵢ = abs(res[4]*T.Gᵧ/CONST.kₙₜ - T.Nₜ)
+    	if Δᵢ < Δₘᵢₙ
+        	Δₘᵢₙ = Δᵢ
         	best_result = res
     	end
 	end
@@ -608,18 +608,6 @@ function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
     return reduce(vcat, valid_parts)
 end
 
-# ╔═╡ f537bb23-5970-43ec-8ac7-303f45bb3001
-T.Hᵤₜ
-
-# ╔═╡ 3eb12d50-cf6a-410d-b23e-5799c9aa3401
-T.Nₜ
-
-# ╔═╡ aff14dc1-c959-4f00-887c-76438cd1e055
-S[4]
-
-# ╔═╡ 43938279-6fd8-4e30-86fd-41b8ddff0c25
-T
-
 # ╔═╡ 6316022b-a071-4d6b-be2a-d786c8edad45
 begin
 	Cα₁ = 30
@@ -724,7 +712,7 @@ function plot_Ḡ(Ḡ, Φ, Ψ, T)
 		G_values = [G[1]      for G in Ḡ]
 		Φ_values = [G[2]      for G in Ḡ]
 		Ψ_values = [G[3]      for G in Ḡ]
-		H_values = [G[4]*G[1] for G in Ḡ]
+		H_values = [G[4]*G[1]/ CONST.kₙₜ for G in Ḡ]
 	
 		G_matrix = reshape(G_values, (length(Ψ➞), length(Φ➞)))'
 		H_matrix = reshape(H_values, (length(Ψ➞), length(Φ➞)))'
@@ -734,9 +722,9 @@ function plot_Ḡ(Ḡ, Φ, Ψ, T)
 		hm = heatmap!(ax, Φ➞, Ψ➞, G_matrix, rasterize=true)
 		Colorbar(fig[1, 2], hm, label=L"G_{opt}")
 
-		contour!(ax, Φ➞,Ψ➞,G_matrix, levels=[      T.Gᵧ], labels=true, color=:red )
-		contour!(ax, Φ➞,Ψ➞,H_matrix, levels=[T.Hᵤₜ*T.Gᵧ], labels=true, color=:blue)
-		contour!(ax, Φ➞,Ψ➞,H_matrix, levels=[T.Nₜ      ], labels=true, color=:black)
+		contour!(ax, Φ➞,Ψ➞,G_matrix, levels=[T.Gᵧ], color=:red )
+		contour!(ax, Φ➞,Ψ➞,H_matrix, levels=[T.Nₜ], color=:blue)
+		# contour!(ax, Φ➞,Ψ➞,H_matrix, levels=[T.Hᵤₜ*T.Gᵧ / CONST.kₙₜ], labels=true, color=:blue)
 		scatter!(ax, Φ, Ψ, color=:red, markersize=8)
 
 		# save("assets/G.svg", Gfig)
@@ -2624,21 +2612,17 @@ version = "4.1.0+0"
 # ╠═ec47fa62-62ea-4bf8-a57f-9e6b10b5fa0b
 # ╠═65781f50-667a-44c0-beb2-466dfb293d36
 # ╠═77bbea27-c0fa-4320-ab84-ff91730410e3
-# ╠═7290e07c-eedc-429f-a2fa-7130dae8da37
+# ╟─7290e07c-eedc-429f-a2fa-7130dae8da37
 # ╠═c2b940ae-7013-4184-916f-cc2c6c3bb718
 # ╟─cfbd1033-b649-4ab2-941a-1519bcc28986
 # ╟─a18642f2-7b7c-4317-8959-f93952f0d607
 # ╠═e24903de-8706-4d29-aaf0-2005799675e1
 # ╠═4e7e1ddb-8a03-4818-be9e-fa31698faf07
-# ╠═f537bb23-5970-43ec-8ac7-303f45bb3001
-# ╠═3eb12d50-cf6a-410d-b23e-5799c9aa3401
-# ╠═aff14dc1-c959-4f00-887c-76438cd1e055
-# ╠═43938279-6fd8-4e30-86fd-41b8ddff0c25
 # ╟─1f21d0d2-43a3-489b-9b77-d09d0824f799
 # ╟─4acc88bf-4bbf-49b5-8006-920901d8ddc9
-# ╟─6316022b-a071-4d6b-be2a-d786c8edad45
+# ╠═6316022b-a071-4d6b-be2a-d786c8edad45
 # ╠═d51bd461-3106-4b8d-9d3a-66c7fb6c8ab1
-# ╟─43b474fc-51fa-4aef-86fa-cba0eb59bcf9
+# ╠═43b474fc-51fa-4aef-86fa-cba0eb59bcf9
 # ╠═9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
 # ╟─b0aa65a1-3433-4b48-9196-d47e6e35379e
 # ╟─7e82ca6c-5c36-4c0d-ba07-914ff604f107
