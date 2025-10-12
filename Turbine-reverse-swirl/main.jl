@@ -437,6 +437,9 @@ function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
     return reduce(vcat, valid_parts)
 end
 
+# ╔═╡ 98cd69e5-e99f-4717-9551-3551022899b3
+I
+
 # ╔═╡ caf250da-aee4-4b8a-8bdd-abd118df3817
 #@bind Yα₁ PlutoUI.NumberField(26:66, default=63) # double
 @bind Yα₁ PlutoUI.NumberField(13:33, default=30) # single
@@ -2496,22 +2499,23 @@ version = "3.6.0+0"
 # ╟─cf901c9a-5552-4de7-b4fb-1cf9451e526a
 # ╠═5072912f-e96c-4894-b37b-15c805d99dc8
 # ╟─3c524531-95a0-456e-ba4e-a919c09422b2
-# ╟─39f2ed09-2a95-49a7-a0d0-d62414051b22
-# ╟─dad00772-609e-4b37-8a6e-1c76f8a5bb10
-# ╟─744a686c-6b35-4b5d-bd7d-77ea0ad561ed
-# ╟─beb5dc3a-a6fd-42f9-8e71-5c47120c0bca
-# ╟─2b3ff95e-629c-42a0-b0d4-453f18ac64b9
+# ╠═39f2ed09-2a95-49a7-a0d0-d62414051b22
+# ╠═dad00772-609e-4b37-8a6e-1c76f8a5bb10
+# ╠═744a686c-6b35-4b5d-bd7d-77ea0ad561ed
+# ╠═beb5dc3a-a6fd-42f9-8e71-5c47120c0bca
+# ╠═2b3ff95e-629c-42a0-b0d4-453f18ac64b9
 # ╟─36c608cb-a140-4b01-bbc1-c4ccfb073bc6
 # ╟─1307a1b3-21ee-471d-80da-4fef86063430
 # ╠═8110d01d-5e36-46b1-9651-a844bacb33a2
+# ╠═98cd69e5-e99f-4717-9551-3551022899b3
 # ╠═1e3efbe2-2470-4deb-882c-658994a4b3d7
 # ╠═fa89fa27-743a-4c68-82c0-8670105f83f0
 # ╟─caf250da-aee4-4b8a-8bdd-abd118df3817
 # ╟─92106f8d-eaba-41aa-85e4-55d935e289de
-# ╟─7266af5e-2f62-43a6-9472-a0ed6bf064ca
+# ╠═7266af5e-2f62-43a6-9472-a0ed6bf064ca
 # ╠═773bdd95-c9fe-41c4-806d-8330de487dab
 # ╠═7d5a8d73-94ea-4d52-8c74-12f4f2d1fe13
-# ╠═9e4cbaf3-9791-4848-87a3-bc23a8ccc181
+# ╟─9e4cbaf3-9791-4848-87a3-bc23a8ccc181
 # ╟─c77e3589-c71f-46d1-aa94-5e320e21a523
 # ╟─4c8032e7-d526-4c0a-ae32-68098530071d
 # ╟─05b8e026-848a-4f7c-af26-50a4814847ab

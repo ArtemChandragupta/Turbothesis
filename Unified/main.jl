@@ -101,8 +101,8 @@ function calc_prime(𝒞 = CONST, 𝒯 = TASK)
 	Gₙ  = 𝒯.N / ( Hₜ * 𝒞.ηₘₜ - Hₖ / 𝒞.ηₘₖ )
 	Q̇₁  = 𝒞.Cpᵧ * (𝒯.T⃰₃ - T⃰₂)
 	Q₁  = Q̇₁ / 𝒞.ηₖₛ
-	ηe  = (Hₜ * 𝒞.ηₘₜ - Hₖ / 𝒞.ηₘₖ) / Q₁
-	Φ   = (Hₜ * 𝒞.ηₘₜ - Hₖ / 𝒞.ηₘₖ) / (Hₜ * 𝒞.ηₘₜ)
+	ηₑ  = (Hₜ * 𝒞.ηₘₜ - Hₖ / 𝒞.ηₘₖ) / Q₁
+	φ   = (Hₜ * 𝒞.ηₘₜ - Hₖ / 𝒞.ηₘₖ) / (Hₜ * 𝒞.ηₘₜ)
 
 	# Расчет с охладителем
 	t⃰₂   = T⃰₂ - 𝒞.T̂₀
@@ -119,8 +119,7 @@ function calc_prime(𝒞 = CONST, 𝒯 = TASK)
 	Hₑ   = (1+gₜ) * (1-ĝc) * Hₜ * 𝒞.ηₘₜ - Hₖ * 𝒞.ηₘₖ
 	Ωₐₗₗ = Hₑ * Gₙ / Gₜ
 	
-	(; P⃰₁, T⃰₁, P⃰₂, T⃰₂, H⃰ₒₖ,	Hₖ,	P⃰₃, P⃰₄,	π⃰ₜ,	H⃰ₒₜ, Hₜ, T⃰₄, Gₙ, Q̇₁, Q₁, ηe, Φ,
-	t⃰₂, t⃰₃, gₐᵢᵣ, a, gₜ, gᶜc, gᵖc, gc, ĝc, Gₜ, Ωᵣₐₛ, Hₑ, Ωₐₗₗ)
+	(; P⃰₁, T⃰₁, P⃰₂, T⃰₂, H⃰ₒₖ,	Hₖ,	P⃰₃, P⃰₄,	π⃰ₜ,	H⃰ₒₜ, Hₜ, T⃰₄, Gₙ, Q̇₁, Q₁, ηₑ, φ, t⃰₂, t⃰₃, gₐᵢᵣ, a, gₜ, gᶜc, gᵖc, gc, ĝc, Gₜ, Ωᵣₐₛ, Hₑ, Ωₐₗₗ)
 end
 
 # ╔═╡ 56a5a75a-20ff-443e-992a-c8a5957b7a90
@@ -189,19 +188,19 @@ function calc_turb(I, C, π⃰ₖ, T⃰₀, 𝒞 = CONST, 𝒯 = TASK)
 	Hᵤₜ  = 𝒞.kₙₜ * Nₜ / Gᵧ
 	ΔT⃰ₜ  = Hᵤₜ / 𝒞.Cpᵧ
 	T⃰₂ₜ  = T⃰₀ - ΔT⃰ₜ
-	aᵏʳ₂ = √( (2𝒞.kᵧ)/(𝒞.kᵧ+1) * 𝒞.Rₙ * T⃰₂ₜ )
+	aᵏʳ₂ = √( (2𝒞.kᵧ)/(𝒞.kᵧ+1) * 𝒞.Rᵧ * T⃰₂ₜ )
 	c₂ₜ  = 𝒞.λ₂ₜ * aᵏʳ₂
 	Hₐₜ  = Hᵤₜ + c₂ₜ^2 / 2
 	Hₒₜ  = Hₐₜ / 𝒞.ηₐₜ
 	T⃰₂ₜₜ = T⃰₀ - Hₒₜ / 𝒞.Cpᵧ
 	P₂ₜ  = P⃰₀ * (T⃰₂ₜₜ / T⃰₀)^𝒞.kk_1
 	T₂T  = T⃰₂ₜ - c₂ₜ^2 / (2𝒞.Cpᵧ)
-	ρ₂ₜ  = P₂ₜ / (𝒞.Rₙ * T₂T)
+	ρ₂ₜ  = P₂ₜ / (𝒞.Rᵧ * T₂T)
 	F₂ₜ  = Gᵧ / (ρ₂ₜ * c₂ₜ * sind(𝒞.å))
 	σₚ   = 8.9 * 𝒯.n^2 * F₂ₜ
 	kₚ   = 𝒞.σ₅₀₀ / σₚ
 	d₂ₘ  = 60 * 𝒞.Y / (π * 𝒯.n) * √(Hₒₜ / 2)
-	u₂   = (π * d₂ₘ * 𝒯.n) / 60
+	u₂   = π * d₂ₘ * 𝒯.n / 60
 	l₂   = F₂ₜ / (π * d₂ₘ)
 	kₘ   = d₂ₘ / l₂
 	
@@ -255,13 +254,13 @@ end
 function calc_G(G, T; 𝒞 = CONST, 𝒯 = TASK)
 	P⃰₀    = T.P⃰₀
 	d₂ₘ   = T.d₂ₘ
-	HuT   = 𝒯.N * 𝒞.kₙₜ / G
+	HuT   = T.Nₜ * 𝒞.kₙₜ / G
 	ΔtT   = HuT / 𝒞.Cpᵧ
     T⃰₂T   = 𝒯.T⃰₃ - ΔtT
     aₖᵣ   = √(2𝒞.kᵧ / (𝒞.kᵧ + 1) * 𝒞.Rᵧ * T⃰₂T)
     c₂T   = aₖᵣ * 𝒞.λ₂ₜ
-    H_adt = HuT + c₂T^2 / 2
-    H₀T   = H_adt / 𝒞.ηₐₜ
+    Hₐₜ   = HuT + c₂T^2 / 2
+    H₀T   = Hₐₜ / 𝒞.ηₐₜ
     T₂tT  = 𝒯.T⃰₃ - H₀T / 𝒞.Cpᵧ
     p₂T   = T.P⃰₀ * (T₂tT / 𝒯.T⃰₃)^𝒞.kk_1
     T₂T   = T⃰₂T - c₂T^2 / 2𝒞.Cpᵧ
@@ -273,7 +272,7 @@ function calc_G(G, T; 𝒞 = CONST, 𝒯 = TASK)
     d₂Tl₂ = d₂ₘ / l₂
     Y     = u₂ * √(𝒞.m / 2H₀T)
 
-        (; P⃰₀, d₂ₘ, HuT, ΔtT, T⃰₂T, aₖᵣ, c₂T, H_adt, H₀T, T₂tT, p₂T, T₂T, ρ₂T, F₂T, σ_p, u₂, l₂, d₂Tl₂, Y )
+    (; P⃰₀, d₂ₘ, HuT, ΔtT, T⃰₂T, aₖᵣ, c₂T, Hₐₜ, H₀T, T₂tT, p₂T, T₂T, ρ₂T, F₂T, σ_p, u₂, l₂, d₂Tl₂, Y )
     end
 
 # ╔═╡ 7290e07c-eedc-429f-a2fa-7130dae8da37
@@ -308,7 +307,7 @@ function stage_params(T, P₂, Φ, Ψ, l̄, 𝒯 = TASK)
 		) for i in 1:4
 	]
 
-	return (stages[1], stages[2], stages[3], stages[4])
+	(stages[1], stages[2], stages[3], stages[4])
 end
 
 # ╔═╡ c2b940ae-7013-4184-916f-cc2c6c3bb718
@@ -318,8 +317,10 @@ begin
 		S2 = calc_stage(S1.p⃰₂, S1.T⃰₂, G, Params[2])
 		S3 = calc_stage(S2.p⃰₂, S2.T⃰₂, G, Params[3])
 		S4 = calc_stage(S3.p⃰₂, S3.T⃰₂, G, Params[4])
+
+		H = S1.Hᵤ + S2.Hᵤ + S3.Hᵤ + S4.Hᵤ
 	
-		return (S1, S2, S3, S4)
+		return (S1, S2, S3, S4, H)
 	end
 	
 	function calc_stage(p⃰₀, T⃰₀, G, 𝒫, 𝒞 = CONST, 𝒯 = TASK)
@@ -363,42 +364,46 @@ begin
 		Mc₁  = c₁ / √(𝒞.kᵧ * 𝒞.Rᵧ * T₁)
 		Mw₂  = w₂ / √(𝒞.kᵧ * 𝒞.Rᵧ * T₂)
 		T⃰₂tt = T₂tt * (p⃰₂/p₂)^𝒞.k_1k
-		ηᵤ   = (T⃰₀ - T⃰₂)/(T⃰₀ - T₂tt )
+		ηᵤ   = (T⃰₀ - T⃰₂)/(T⃰₀ - T₂tt)
 		η⃰ᵤ   = (T⃰₀ - T⃰₂)/(T⃰₀ - T⃰₂tt)
+		Hᵤ   = (T⃰₀ - T⃰₂) * 𝒞.Cpᵧ
 	
-		(; p⃰₀, T⃰₀, p₂, H₀, T₂tt, c₁t, c₁, T₁t, p₁, T₁, ρ₁, F₁r, F₁, α₁, c₁u, c₁z, u₁, u₂, w₁u, w₁, β₁, T⃰w₁, p⃰w₁, T⃰w₂, p⃰w₂t, H⃰₂, w₂t, w₂, T₂, F₂r, F₂, β⃰₂, w₂u, c₂z, c₂u, α₂, c₂, T⃰₂, p⃰₂, Mc₁, Mw₂, T⃰₂tt, ηᵤ, η⃰ᵤ)
+		(; p⃰₀, T⃰₀, p₂, H₀, T₂tt, c₁t, c₁, T₁t, p₁, T₁, ρ₁, F₁r, F₁, α₁, c₁u, c₁z, u₁, u₂, w₁u, w₁, β₁, T⃰w₁, p⃰w₁, T⃰w₂, p⃰w₂t, H⃰₂, w₂t, w₂, T₂, F₂r, F₂, β⃰₂, w₂u, c₂z, c₂u, α₂, c₂, T⃰₂, p⃰₂, Mc₁, Mw₂, T⃰₂tt, ηᵤ, η⃰ᵤ, Hᵤ)
 	end
+
+	md"Расчет по ступеням"
 end
 
 # ╔═╡ 65781f50-667a-44c0-beb2-466dfb293d36
-function find_Gopt(I, T, P₂, Φ, Ψ, l̄)
+function find_Gₒₚₜ(T, P₂, Φ, Ψ, l̄)
 
-	G_range = range(T.Gᵧ - 40, T.Gᵧ + 40, length = 100)
-	T_range = map(G -> calc_G(G, T), G_range)
+	G➞ = range(T.Gᵧ - 40, T.Gᵧ + 40, length = 500)
+	T➞ = map(G -> calc_G(G, T), G➞)
 	
-	Params_range = [stage_params(Tₜₘₚ, P₂, Φ, Ψ, l̄) for Tₜₘₚ in T_range]
-    𝒮 = calc_stages.(G_range, T_range, Params_range)
-    𝒮4 = [s[4] for s in 𝒮]
-	ᾱ₂ = [s.α₂ for s in 𝒮4]
+	Params➞ = [stage_params(Tᵢ, P₂, Φ, Ψ, l̄) for Tᵢ in T➞]
+    𝒮  = calc_stages.(G➞, T➞, Params➞)
+    𝒮₄ = [s[4] for s in 𝒮 ]
+	ᾱ₂ = [s.α₂ for s in 𝒮₄]
+	H➞ = [s[5] for s in 𝒮 ]
 
-	iₘₐₓ = argmax(ᾱ₂)
-	iₘᵢₙ = argmin(ᾱ₂)
+	Gₒₚₜ = (G➞[argmax(ᾱ₂)] + G➞[argmin(ᾱ₂)])/2
+	Hᵢ   = (H➞[argmax(ᾱ₂)] + H➞[argmin(ᾱ₂)])/2
 
-	Gₒₚₜ = (G_range[iₘₐₓ] + G_range[iₘᵢₙ])/2
+	(Gₒₚₜ, Hᵢ)
 end
 
 # ╔═╡ ec47fa62-62ea-4bf8-a57f-9e6b10b5fa0b
-function find_GΦΨ(I, T, Φ_range, Ψ_range, P₂, l̄)
+function find_GΦΨ(T, Φ➞, Ψ➞, P₂, l̄)
 	results = []
 	good_results = []
 
-	for Φtmp in Φ_range
-		for Ψtmp in Ψ_range
-			Gₒₚₜtmp = find_Gopt(I, T, P₂, Φtmp, (Ψtmp,Ψtmp,Ψtmp,Ψtmp), l̄)
-			if abs(Gₒₚₜtmp - T.Gᵧ) < 0.01
-				push!(good_results, (Gₒₚₜtmp, Φtmp, Ψtmp))
+	for Φᵢ in Φ➞
+		for Ψᵢ in Ψ➞
+			(Gᵢ, Hᵢ) = find_Gₒₚₜ(T, P₂, Φᵢ, (Ψᵢ, Ψᵢ, Ψᵢ, Ψᵢ), l̄)
+			if abs(Gᵢ - T.Gᵧ) < 0.01
+				push!(good_results, (Gᵢ, Φᵢ, Ψᵢ, Hᵢ))
 			end
-			push!(results, (Gₒₚₜtmp, Φtmp, Ψtmp))
+			push!(results, (Gᵢ, Φᵢ, Ψᵢ, Hᵢ))
 		end
 	end
 
@@ -408,7 +413,7 @@ function find_GΦΨ(I, T, Φ_range, Ψ_range, P₂, l̄)
 	for res in good_results
     	current_sum = res[2] + res[3]
     	if current_sum > max_sum
-        	max_sum = current_sum
+        	max_sum     = current_sum
         	best_result = res
     	end
 	end
@@ -448,8 +453,7 @@ begin
 	end
 
 	function calc_ɤ(𝒫, 𝓜, swirl_params, 𝒞 = CONST)
-		γ₁ = 20
-		γ₂ = 20
+		γ  = 20
 		α₁ = swirl_params.α₁
 		β⃰₂ = swirl_params.β⃰₂
 		F  = swirl_params.F
@@ -464,18 +468,17 @@ begin
 		χ¹ = 𝓜.p₁ * (𝓜.T⃰₀  / 𝓜.T₁)^𝒞.kk_1 / 𝓜.p⃰₀
 		χ² = 𝓜.p₂ * (𝓜.T⃰w₂ / 𝓜.T₂)^𝒞.kk_1 / 𝓜.p⃰w₂t
 
-		(; α₁, F, γ₁, γ₂, ρK, β⃰₂, n₁, n₂, b₁, b₂, A, B, χ¹, χ²)
+		(; α₁, F, γ, ρK, β⃰₂, n₁, n₂, b₁, b₂, A, B, χ¹, χ²)
 	end
 
 	function calc_swirl_mid(𝒫, 𝓜, ɤ, 𝒞 = CONST)
 		r    = 𝒫.rc
-		γ₁   = ɤ.γ₁/2
-		γ₂   = ɤ.γ₂/2
+		γ    = ɤ.γ/2
 		c₁   = 𝓜.c₁
 		α₁   = 𝓜.α₁
 		c₁u  = 𝓜.c₁u
 		c₁z  = 𝓜.c₁z
-		c₁r  = c₁z * tand(γ₁)
+		c₁r  = c₁z * tand(γ)
 		u₁   = 𝓜.u₁
 		u₂   = 𝓜.u₂
 		β₁   = 𝓜.β₁
@@ -503,17 +506,16 @@ begin
 		Hu   = (c₁^2 - c₂^2)/2 + (w₂^2 - w₁^2)/2 + (u₁^2 - u₂^2)/2
 		ρK   = Hp / Hu
 
-		(; r, γ₁, γ₂, c₁, α₁, c₁u, c₁z, c₁r, u₁, u₂, β₁, w₁, w₁u, w₂u, c₂u, c₂z, c₂, c₂r, α₂, β⃰₂, w₂, T₁, p₁, ρ₁, T⃰w₁, T₂, p₂, ρ₂, πρc₁, πρc₂, ρT, Hp, Hu, ρK)
+		(; r, γ, c₁, α₁, c₁u, c₁z, c₁r, u₁, u₂, β₁, w₁, w₁u, w₂u, c₂u, c₂z, c₂, c₂r, α₂, β⃰₂, w₂, T₁, p₁, ρ₁, T⃰w₁, T₂, p₂, ρ₂, πρc₁, πρc₂, ρT, Hp, Hu, ρK)
 	end
 
 	function calc_swirl(№, 𝒫, w₂u_R1, 𝓜, ɤ, 𝒞 = CONST, 𝒯 = TASK)
 		r    = 𝒫.rk + 𝒫.l₂ * (№-1)/4
-		γ₁   = ɤ.γ₁ * (№-1)/4
-		γ₂   = ɤ.γ₂ * (№-1)/4
+		γ    = ɤ.γ * (№-1)/4
 		α₁   = atand(ɤ.b₁ / (r^ɤ.n₁))
 		c₁z  = r * ɤ.A + ɤ.B
 		c₁u  = c₁z / tand(α₁)
-		c₁r  = c₁z * tand(γ₁)
+		c₁r  = c₁z * tand(γ )
 		c₁   = √(c₁z^2 + c₁u^2 + c₁r^2)
 		u₁   = π * 2r * 𝒯.n / 60
 		u₂   = π * (𝒫.d₁c - 𝒫.l₁/2 + 𝒫.l₁ * (№-1)/4) * 𝒯.n / 60
@@ -524,7 +526,7 @@ begin
 		c₂u  = w₂u + u₂
 		β⃰₂   = atand(ɤ.b₂ / r^ɤ.n₂)
 		c₂z  = -w₂u * tand(β⃰₂)
-		c₂r  =  c₂z * tand(γ₂)
+		c₂r  =  c₂z * tand(γ )
 		c₂   = √(c₂z^2 + c₂u^2 + c₂r^2)
 		α₂   = atand(c₂z / c₂u)
 		w₂   = c₂z / sind(β⃰₂)
@@ -542,7 +544,7 @@ begin
 		Hu   = (c₁^2 - c₂^2)/2 + (w₂^2 - w₁^2)/2 + (u₁^2 - u₂^2)/2
 		ρK   = Hp / Hu
 
-		(; r, γ₁, γ₂, c₁, α₁, c₁u, c₁z, c₁r, u₁, u₂, β₁, w₁, w₁u, w₂u, c₂u, c₂z, c₂, c₂r, α₂, β⃰₂, w₂, T₁, p₁, ρ₁, T⃰w₁, T₂, p₂, ρ₂, πρc₁, πρc₂, ρT, Hp, Hu, ρK)
+		(; r, γ, c₁, α₁, c₁u, c₁z, c₁r, u₁, u₂, β₁, w₁, w₁u, w₂u, c₂u, c₂z, c₂, c₂r, α₂, β⃰₂, w₂, T₁, p₁, ρ₁, T⃰w₁, T₂, p₂, ρ₂, πρc₁, πρc₂, ρT, Hp, Hu, ρK)
 	end
 end
 
@@ -562,12 +564,12 @@ end
 
 # ╔═╡ 4e7e1ddb-8a03-4818-be9e-fa31698faf07
 begin
-	P₂      = (900_000, 480_000, 230_000, 97_500)
-	Φ_range = range(0.94, 0.98, length=100)
-	Ψ_range = range(0.94, 0.98, length=100)
+	P₂ = (900_000, 480_000, 230_000, 97_500)
+	Φ➞ = range(0.94, 0.98, length=200)
+	Ψ➞ = range(0.94, 0.98, length=200)
 
 	l̄ = build_geometry(T)
-	((Gₒₚₜ, Φ, Ψ), Ḡ) = find_GΦΨ(I, T, Φ_range, Ψ_range, P₂, l̄)
+	((Gₒₚₜ, Φ, Ψ), Ḡ) = find_GΦΨ(T, Φ➞, Ψ➞, P₂, l̄)
 	P = stage_params(T, P₂, Φ, (Ψ,Ψ,Ψ,Ψ), l̄)
 	S = calc_stages(Gₒₚₜ, T, P)
 	
@@ -597,7 +599,6 @@ function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
 				
 				σ = abs( abs(2p̄[2]-p̄[1]-p̄[3]) - abs(2p̄[4]-p̄[3]-p̄[5]) )
                 result = (; F, ρK, σ, Δρ)
-				# result = (; F=F, ρK=ρK, σ=σ, Δρ=Δρ)
                 push!(local_valid, result)
 				
             end
@@ -606,6 +607,18 @@ function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
     
     return reduce(vcat, valid_parts)
 end
+
+# ╔═╡ f537bb23-5970-43ec-8ac7-303f45bb3001
+T.Hᵤₜ
+
+# ╔═╡ 3eb12d50-cf6a-410d-b23e-5799c9aa3401
+T.Nₜ
+
+# ╔═╡ aff14dc1-c959-4f00-887c-76438cd1e055
+S[4]
+
+# ╔═╡ 43938279-6fd8-4e30-86fd-41b8ddff0c25
+T
 
 # ╔═╡ 6316022b-a071-4d6b-be2a-d786c8edad45
 begin
@@ -676,18 +689,23 @@ md"### 📊 Графики"
 # ╔═╡ 8fd74453-354f-4cae-8e46-c310abdc6b5b
 function plot_geometry(l̄)
 	with_theme(theme_latexfonts()) do
+		
+		viridis_cmap = cgrad(:viridis)
+        color1 = viridis_cmap[0.1]
+        color2 = viridis_cmap[0.8]
+		
 		fig = Figure(size=(800, 400))
 		ax = Axis(fig[1,1],aspect = DataAspect(), title = "Продольное сечение")
 		
 		for i in 1:Int(length(l̄.ll₁)/2)
-			poly!(ax, color = :blue, Point2f[
+			poly!(ax, color = color1, Point2f[
 				(l̄.xl₁[2i  ], 0          ), (l̄.xl₁[2i  ], l̄.ll₁[2i]), 
 				(l̄.xl₁[2i-1], l̄.ll₁[2i-1]), (l̄.xl₁[2i-1], 0        )
 			])
 		end
 
 		for i in 1:Int(length(l̄.ll₁)/2)
-			poly!(ax, color = :red, Point2f[
+			poly!(ax, color = color2, Point2f[
 				(l̄.xl₂[2i  ], 0          ), (l̄.xl₂[2i  ], l̄.ll₂[2i]),
 				(l̄.xl₂[2i-1], l̄.ll₂[2i-1]), (l̄.xl₂[2i-1], 0        )
 			])
@@ -703,23 +721,27 @@ plot_geometry(l̄)
 # ╔═╡ 18159b8a-c05b-4191-9eae-71f7b7646e7d
 function plot_Ḡ(Ḡ, Φ, Ψ, T)
 	with_theme(theme_latexfonts()) do
-		G_values = [G[1] for G in Ḡ]
-		Φ_values = [G[2] for G in Ḡ]
-		Ψ_values = [G[3] for G in Ḡ]
+		G_values = [G[1]      for G in Ḡ]
+		Φ_values = [G[2]      for G in Ḡ]
+		Ψ_values = [G[3]      for G in Ḡ]
+		H_values = [G[4]*G[1] for G in Ḡ]
 	
-		G_matrix = reshape(G_values, (length(Ψ_range), length(Φ_range)))'
+		G_matrix = reshape(G_values, (length(Ψ➞), length(Φ➞)))'
+		H_matrix = reshape(H_values, (length(Ψ➞), length(Φ➞)))'
 	
-		Gfig = Figure()
-		Gax = Axis(Gfig[1, 1], xlabel="Φ", ylabel="Ψ")
-		hm = heatmap!(Gax, Φ_range, Ψ_range, G_matrix, rasterize=true)
-		Colorbar(Gfig[1, 2], hm, label=L"G_{opt}")
+		fig = Figure()
+		ax = Axis(fig[1, 1], xlabel="Φ", ylabel="Ψ")
+		hm = heatmap!(ax, Φ➞, Ψ➞, G_matrix, rasterize=true)
+		Colorbar(fig[1, 2], hm, label=L"G_{opt}")
 
-		contour!(Gax, Φ_range,Ψ_range,G_matrix, levels=[T.Gᵧ], color=:red)
-		scatter!(Gax, Φ, Ψ, color=:red, markersize=8)
+		contour!(ax, Φ➞,Ψ➞,G_matrix, levels=[      T.Gᵧ], labels=true, color=:red )
+		contour!(ax, Φ➞,Ψ➞,H_matrix, levels=[T.Hᵤₜ*T.Gᵧ], labels=true, color=:blue)
+		contour!(ax, Φ➞,Ψ➞,H_matrix, levels=[T.Nₜ      ], labels=true, color=:black)
+		scatter!(ax, Φ, Ψ, color=:red, markersize=8)
 
 		# save("assets/G.svg", Gfig)
 	
-		Gfig
+		fig
 	end
 end
 
@@ -772,7 +794,7 @@ function plot_tooth(valid_params, F_range, ρK_range, filtered_FρK)
             title = L"$\Delta \rho$ ($\alpha_1 = %$(Cα₁)$, $\beta^*_2 = %$(Cβ⃰₂)$)",
             axis_settings...
         )
-        hm2 = heatmap!(ax2, ρK_range, F_range, Δρ_matrix, rasterize=true)
+        hm2 = heatmap!(ax2, ρK_range, F_range, abs.(Δρ_matrix), rasterize=true)
         Colorbar(fig[1, 4], hm2, label=L"\Delta", width=15)
         scatter!(ax2, filtered_FρK[2], filtered_FρK[1], color=:red, markersize=8)
 
@@ -2593,33 +2615,37 @@ version = "4.1.0+0"
 
 # ╔═╡ Cell order:
 # ╟─89d5d4d4-a5f0-11f0-275d-edfe9355555d
-# ╟─4b0d698d-7921-4bf0-b5d4-0bf680d992e5
+# ╠═4b0d698d-7921-4bf0-b5d4-0bf680d992e5
 # ╟─fb7eb31f-8d28-4e05-b994-29a85e359b14
 # ╟─b5be0f61-904f-498d-8b4d-3bb84cf62270
 # ╟─56a5a75a-20ff-443e-992a-c8a5957b7a90
-# ╟─40561c16-193e-4349-bc16-a7d9ceb55f62
+# ╠═40561c16-193e-4349-bc16-a7d9ceb55f62
 # ╟─692ea0cf-2fc9-47fb-9542-930c64ac94bc
-# ╟─ec47fa62-62ea-4bf8-a57f-9e6b10b5fa0b
-# ╟─65781f50-667a-44c0-beb2-466dfb293d36
-# ╟─77bbea27-c0fa-4320-ab84-ff91730410e3
-# ╟─7290e07c-eedc-429f-a2fa-7130dae8da37
-# ╟─c2b940ae-7013-4184-916f-cc2c6c3bb718
-# ╠═cfbd1033-b649-4ab2-941a-1519bcc28986
+# ╠═ec47fa62-62ea-4bf8-a57f-9e6b10b5fa0b
+# ╠═65781f50-667a-44c0-beb2-466dfb293d36
+# ╠═77bbea27-c0fa-4320-ab84-ff91730410e3
+# ╠═7290e07c-eedc-429f-a2fa-7130dae8da37
+# ╠═c2b940ae-7013-4184-916f-cc2c6c3bb718
+# ╟─cfbd1033-b649-4ab2-941a-1519bcc28986
 # ╟─a18642f2-7b7c-4317-8959-f93952f0d607
-# ╟─e24903de-8706-4d29-aaf0-2005799675e1
-# ╟─4e7e1ddb-8a03-4818-be9e-fa31698faf07
+# ╠═e24903de-8706-4d29-aaf0-2005799675e1
+# ╠═4e7e1ddb-8a03-4818-be9e-fa31698faf07
+# ╠═f537bb23-5970-43ec-8ac7-303f45bb3001
+# ╠═3eb12d50-cf6a-410d-b23e-5799c9aa3401
+# ╠═aff14dc1-c959-4f00-887c-76438cd1e055
+# ╠═43938279-6fd8-4e30-86fd-41b8ddff0c25
 # ╟─1f21d0d2-43a3-489b-9b77-d09d0824f799
-# ╠═4acc88bf-4bbf-49b5-8006-920901d8ddc9
-# ╠═6316022b-a071-4d6b-be2a-d786c8edad45
-# ╟─d51bd461-3106-4b8d-9d3a-66c7fb6c8ab1
-# ╠═43b474fc-51fa-4aef-86fa-cba0eb59bcf9
-# ╟─9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
+# ╟─4acc88bf-4bbf-49b5-8006-920901d8ddc9
+# ╟─6316022b-a071-4d6b-be2a-d786c8edad45
+# ╠═d51bd461-3106-4b8d-9d3a-66c7fb6c8ab1
+# ╟─43b474fc-51fa-4aef-86fa-cba0eb59bcf9
+# ╠═9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
 # ╟─b0aa65a1-3433-4b48-9196-d47e6e35379e
 # ╟─7e82ca6c-5c36-4c0d-ba07-914ff604f107
 # ╟─48f45b5a-03af-4b1c-bdb9-16964246e85c
 # ╟─8fd74453-354f-4cae-8e46-c310abdc6b5b
-# ╟─18159b8a-c05b-4191-9eae-71f7b7646e7d
-# ╠═6cf7f12e-cc58-4b08-816b-584e02dbd071
+# ╠═18159b8a-c05b-4191-9eae-71f7b7646e7d
+# ╟─6cf7f12e-cc58-4b08-816b-584e02dbd071
 # ╟─0654861a-f4d5-4adb-b929-8e7e6ae78b89
 # ╟─8678ac5d-fea0-4697-b2e6-799e72afda5a
 # ╟─1ae0f50a-c021-41cd-a389-cec934e34e26
