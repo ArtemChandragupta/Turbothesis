@@ -4,6 +4,18 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    #! format: off
+    return quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
+        el
+    end
+    #! format: on
+end
+
 # ╔═╡ 89d5d4d4-a5f0-11f0-275d-edfe9355555d
 begin
 	using PlutoUI
@@ -452,8 +464,8 @@ begin
 		return (; R = (R1, R2, R3, R4, R5), a, b, c, ɤ)
 	end
 
-	function calc_ɤ(𝒫, 𝓜, swirl_params, 𝒞 = CONST)
-		γ  = 20
+	function calc_ɤ(𝒫, 𝓜, swirl_params, 𝒞 = CONST, 𝒯 = TASK)
+		γ  = 𝒯.γ
 		α₁ = swirl_params.α₁
 		β⃰₂ = swirl_params.β⃰₂
 		F  = swirl_params.F
@@ -542,7 +554,8 @@ begin
 		ρT   = ( (p₁/𝓜.p⃰₀)^𝒞.k_1k - (p₂/𝓜.p⃰₀)^𝒞.k_1k ) / (1 - (p₂/𝓜.p⃰₀)^𝒞.k_1k )
 		Hp   = (w₂^2 - w₁^2)/2 + (u₁^2 - u₂^2)/2
 		Hu   = (c₁^2 - c₂^2)/2 + (w₂^2 - w₁^2)/2 + (u₁^2 - u₂^2)/2
-		ρK   = Hp / Hu
+		# ρK   = Hp / Hu
+		ρK   = № == 1 ? ɤ.ρK : Hp / Hu
 
 		(; r, γ, c₁, α₁, c₁u, c₁z, c₁r, u₁, u₂, β₁, w₁, w₁u, w₂u, c₂u, c₂z, c₂, c₂r, α₂, β⃰₂, w₂, T₁, p₁, ρ₁, T⃰w₁, T₂, p₂, ρ₂, πρc₁, πρc₂, ρT, Hp, Hu, ρK)
 	end
@@ -608,10 +621,26 @@ function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
     return reduce(vcat, valid_parts)
 end
 
+# ╔═╡ 62e8b518-6fae-4224-b42c-aac2ad86bac2
+for i in 1:4
+print(P[i].ρTc, "\n")
+end
+
+# ╔═╡ 22ff36be-8826-4d6d-ac49-910c08087798
+for i in 1:4
+print(S[i].Hᵤ, "\n")
+end
+
+# ╔═╡ 7e4039e8-ed6c-46eb-a079-9df82d4272d6
+@bind Cα₁ PlutoUI.NumberField(13:33, default=30) # single
+
+# ╔═╡ d1889b73-726a-468b-9bb9-e69cd81a796b
+@bind Cβ⃰₂ PlutoUI.NumberField(15:65, default=38) # single
+
 # ╔═╡ 6316022b-a071-4d6b-be2a-d786c8edad45
 begin
-	Cα₁ = 30
-	Cβ⃰₂ = 38
+	#Cα₁ = 30
+	#Cβ⃰₂ = 38
 	
 	F_range  = range(-0.5, 0  , length=200)
 	ρK_range = range(0.2 , 0.5, length=200)
@@ -709,9 +738,9 @@ plot_geometry(l̄)
 # ╔═╡ 18159b8a-c05b-4191-9eae-71f7b7646e7d
 function plot_Ḡ(Ḡ, Φ, Ψ, T)
 	with_theme(theme_latexfonts()) do
-		G_values = [G[1]      for G in Ḡ]
-		Φ_values = [G[2]      for G in Ḡ]
-		Ψ_values = [G[3]      for G in Ḡ]
+		G_values = [G[1] for G in Ḡ]
+		Φ_values = [G[2] for G in Ḡ]
+		Ψ_values = [G[3] for G in Ḡ]
 		H_values = [G[4]*G[1]/ CONST.kₙₜ for G in Ḡ]
 	
 		G_matrix = reshape(G_values, (length(Ψ➞), length(Φ➞)))'
@@ -724,7 +753,6 @@ function plot_Ḡ(Ḡ, Φ, Ψ, T)
 
 		contour!(ax, Φ➞,Ψ➞,G_matrix, levels=[T.Gᵧ], color=:red )
 		contour!(ax, Φ➞,Ψ➞,H_matrix, levels=[T.Nₜ], color=:blue)
-		# contour!(ax, Φ➞,Ψ➞,H_matrix, levels=[T.Hᵤₜ*T.Gᵧ / CONST.kₙₜ], labels=true, color=:blue)
 		scatter!(ax, Φ, Ψ, color=:red, markersize=8)
 
 		# save("assets/G.svg", Gfig)
@@ -814,10 +842,10 @@ function plot_goodies(R)
 	
 		# График давлений
 		ax2 = Axis(fig[1, 2],
-				   title = L"p_2  при  обратной  закрутке",
+				   title = L"p_2 \ при \ обратной \ закрутке",
 				   xlabel = "r", ylabel = "p₂"
 				  )
-		lines!(ax2, [r.r for r in R], [r.p₂ for r in R], label = "p₂")
+		scatterlines!(ax2, 1:length(R), [r.p₂ for r in R], label = "p₂")
 
 		fig
 	end
@@ -852,21 +880,23 @@ function table_swirl_short()
 	"""
 end
 
+# ╔═╡ 14df03dc-2bc0-4743-91a4-081d56078047
+table_swirl_short()
+
 # ╔═╡ ef9bc959-20a8-44aa-9093-725c4734dd8d
 function table_swirl()
-	#r̂1 = map(x -> round(x; sigdigits=4), R1)
-	#r̂2 = map(x -> round(x; sigdigits=4), R2)
-	#r̂3 = map(x -> round(x; sigdigits=4), R3)
-	#r̂4 = map(x -> round(x; sigdigits=4), R4)
-	#r̂5 = map(x -> round(x; sigdigits=4), R5)
+	r̂1 = map(x -> round(x; sigdigits=4), R[1])
+	r̂2 = map(x -> round(x; sigdigits=4), R[2])
+	r̂3 = map(x -> round(x; sigdigits=4), R[3])
+	r̂4 = map(x -> round(x; sigdigits=4), R[4])
+	r̂5 = map(x -> round(x; sigdigits=4), R[5])
 
 	md"""
 	# Обратная закрутка
 	| Величина                |Сечение 1 |Сечение 2 |Сечение 3 |Сечение 4 |Сечение 5 |
 	|:------------------------|:--------:|:--------:|:--------:|:--------:|:--------:|
 	| $r, м$                  |$(r̂1.r)   |$(r̂2.r)   |$(r̂3.r)   |$(r̂4.r)   |$(r̂5.r)   |
-	| $\gamma_1, \degree$     |$(r̂1.γ₁)  |$(r̂2.γ₁)  |$(r̂3.γ₁)  |$(r̂4.γ₁)  |$(r̂5.γ₁)  |
-	| $\gamma_2, \degree$     |$(r̂1.γ₂)  |$(r̂2.γ₂)  |$(r̂3.γ₂)  |$(r̂4.γ₂)  |$(r̂5.γ₂)  |
+	| $\gamma_1, \degree$     |$(r̂1.γ )  |$(r̂2.γ )  |$(r̂3.γ )  |$(r̂4.γ )  |$(r̂5.γ )  |
 	| $c_1, \text{м/с}$       |$(r̂1.c₁)  |$(r̂2.c₁)  |$(r̂3.c₁)  |$(r̂4.c₁)  |$(r̂5.c₁)  |
 	| $\alpha_1, \degree$     |$(r̂1.α₁)  |$(r̂2.α₁)  |$(r̂3.α₁)  |$(r̂4.α₁)  |$(r̂5.α₁)  |
 	| $c_{1u}, \text{м/с}$    |$(r̂1.c₁u) |$(r̂2.c₁u) |$(r̂3.c₁u) |$(r̂4.c₁u) |$(r̂5.c₁u) |
@@ -902,6 +932,9 @@ function table_swirl()
 	| $\Delta \rho_k$         |$(r̂1.Δρ)  |$(r̂2.Δρ)  |$(r̂3.Δρ)  |$(r̂4.Δρ)  |$(r̂5.Δρ)  |
 	"""
 end
+
+# ╔═╡ 1567fa8c-625c-43b4-b38f-205b47d6c325
+table_swirl()
 
 # ╔═╡ 3958c916-7eaf-4b0c-9d01-58f218542010
 function table_mid()
@@ -2603,34 +2636,40 @@ version = "4.1.0+0"
 
 # ╔═╡ Cell order:
 # ╟─89d5d4d4-a5f0-11f0-275d-edfe9355555d
-# ╠═4b0d698d-7921-4bf0-b5d4-0bf680d992e5
+# ╟─4b0d698d-7921-4bf0-b5d4-0bf680d992e5
 # ╟─fb7eb31f-8d28-4e05-b994-29a85e359b14
 # ╟─b5be0f61-904f-498d-8b4d-3bb84cf62270
 # ╟─56a5a75a-20ff-443e-992a-c8a5957b7a90
 # ╠═40561c16-193e-4349-bc16-a7d9ceb55f62
 # ╟─692ea0cf-2fc9-47fb-9542-930c64ac94bc
-# ╠═ec47fa62-62ea-4bf8-a57f-9e6b10b5fa0b
-# ╠═65781f50-667a-44c0-beb2-466dfb293d36
-# ╠═77bbea27-c0fa-4320-ab84-ff91730410e3
-# ╟─7290e07c-eedc-429f-a2fa-7130dae8da37
+# ╟─ec47fa62-62ea-4bf8-a57f-9e6b10b5fa0b
+# ╟─65781f50-667a-44c0-beb2-466dfb293d36
+# ╟─77bbea27-c0fa-4320-ab84-ff91730410e3
+# ╠═7290e07c-eedc-429f-a2fa-7130dae8da37
 # ╠═c2b940ae-7013-4184-916f-cc2c6c3bb718
 # ╟─cfbd1033-b649-4ab2-941a-1519bcc28986
-# ╟─a18642f2-7b7c-4317-8959-f93952f0d607
-# ╠═e24903de-8706-4d29-aaf0-2005799675e1
-# ╠═4e7e1ddb-8a03-4818-be9e-fa31698faf07
+# ╠═a18642f2-7b7c-4317-8959-f93952f0d607
+# ╟─e24903de-8706-4d29-aaf0-2005799675e1
+# ╟─4e7e1ddb-8a03-4818-be9e-fa31698faf07
+# ╠═62e8b518-6fae-4224-b42c-aac2ad86bac2
+# ╠═22ff36be-8826-4d6d-ac49-910c08087798
 # ╟─1f21d0d2-43a3-489b-9b77-d09d0824f799
 # ╟─4acc88bf-4bbf-49b5-8006-920901d8ddc9
-# ╠═6316022b-a071-4d6b-be2a-d786c8edad45
-# ╠═d51bd461-3106-4b8d-9d3a-66c7fb6c8ab1
-# ╠═43b474fc-51fa-4aef-86fa-cba0eb59bcf9
-# ╠═9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
+# ╟─7e4039e8-ed6c-46eb-a079-9df82d4272d6
+# ╟─d1889b73-726a-468b-9bb9-e69cd81a796b
+# ╟─6316022b-a071-4d6b-be2a-d786c8edad45
+# ╟─d51bd461-3106-4b8d-9d3a-66c7fb6c8ab1
+# ╟─43b474fc-51fa-4aef-86fa-cba0eb59bcf9
+# ╟─9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
+# ╟─14df03dc-2bc0-4743-91a4-081d56078047
+# ╠═1567fa8c-625c-43b4-b38f-205b47d6c325
 # ╟─b0aa65a1-3433-4b48-9196-d47e6e35379e
 # ╟─7e82ca6c-5c36-4c0d-ba07-914ff604f107
 # ╟─48f45b5a-03af-4b1c-bdb9-16964246e85c
 # ╟─8fd74453-354f-4cae-8e46-c310abdc6b5b
-# ╠═18159b8a-c05b-4191-9eae-71f7b7646e7d
+# ╟─18159b8a-c05b-4191-9eae-71f7b7646e7d
 # ╟─6cf7f12e-cc58-4b08-816b-584e02dbd071
-# ╟─0654861a-f4d5-4adb-b929-8e7e6ae78b89
+# ╠═0654861a-f4d5-4adb-b929-8e7e6ae78b89
 # ╟─8678ac5d-fea0-4697-b2e6-799e72afda5a
 # ╟─1ae0f50a-c021-41cd-a389-cec934e34e26
 # ╟─ef9bc959-20a8-44aa-9093-725c4734dd8d
