@@ -293,26 +293,26 @@ function stage_params(T, P₂, Φ, Ψ, l̄, 𝒯 = TASK)
 	l₂ = (l̄.ll₂[2], l̄.ll₂[4], l̄.ll₂[6], l̄.ll₂[8])
 	p₂ = P₂
 
-	d₁c = @. T.d₂ₘ - T.l₂ + l₁
-	d₂c = @. T.d₂ₘ - T.l₂ + l₂
+	d₁ₘ = @. T.d₂ₘ - T.l₂ + l₁
+	d₂ₘ = @. T.d₂ₘ - T.l₂ + l₂
 
 	n = 0.6
 
 	rk = (T.d₂ₘ - T.l₂)/2
-	rc = @. d₂c / 2
+	rₘ = @. d₂ₘ / 2
 
 	ρTk = 0.07
-	ρTc = @. 1 - (1 - ρTk) * (rk/rc)^(2n) * Φ^2
+	ρTc = @. 1 - (1 - ρTk) * (rk/rₘ)^(2n) * Φ^2
 
 	stages = [
 		(n   = n,
      	 rk  = rk,
-         rc  = rc[i],
+         rₘ  = rₘ[i],
      	 l₁  = l₁[i],
     	 l₂  = l₂[i],
 		 p₂  = p₂[i],
-         d₁c = d₁c[i],
-		 d₂c = d₂c[i],
+         d₁ₘ = d₁ₘ[i],
+		 d₂ₘ = d₂ₘ[i],
 		 Φ   = Φ,
 		 Ψ   = Ψ[i],
 		 ρTc = ρTc[i]
@@ -346,12 +346,12 @@ begin
 		T₁   = T⃰₀ - c₁^2 / 2𝒞.Cpᵧ
 		ρ₁   = p₁ / (𝒞.Rᵧ * T₁)
 		F₁r  = G * 𝒞.Rᵧ * T₁ / (p₁ * c₁)
-		F₁   = π * 𝒫.d₁c * 𝒫.l₁
+		F₁   = π * 𝒫.d₁ₘ * 𝒫.l₁
 		α₁   = asind(F₁r / F₁)
 		c₁u  = c₁ * cosd(α₁)
 		c₁z  = c₁ * sind(α₁)
-		u₁   = π * 𝒫.d₁c * 𝒯.n / 60
-		u₂   = π * 𝒫.d₂c * 𝒯.n / 60
+		u₁   = π * 𝒫.d₁ₘ * 𝒯.n / 60
+		u₂   = π * 𝒫.d₂ₘ * 𝒯.n / 60
 		w₁u  = c₁u - u₁
 		w₁   = √(c₁z^2 + w₁u^2)
 		β₁   = atand(c₁z / w₁u)
@@ -364,7 +364,7 @@ begin
 		w₂   = w₂t * 𝒫.Ψ
 		T₂   = T⃰w₁ - w₂^2 / 2𝒞.Cpᵧ
 		F₂r  = G * 𝒞.Rᵧ * T₂ / (p₂ * w₂)
-		F₂   = π * 𝒫.d₂c * 𝒫.l₂
+		F₂   = π * 𝒫.d₂ₘ * 𝒫.l₂
 		β⃰₂   = asind(F₂r/F₂)
 		w₂u  = w₂ * cosd(β⃰₂)
 		c₂z  = w₂ * sind(β⃰₂)
@@ -383,7 +383,7 @@ begin
 		(; p⃰₀, T⃰₀, p₂, H₀, T₂tt, c₁t, c₁, T₁t, p₁, T₁, ρ₁, F₁r, F₁, α₁, c₁u, c₁z, u₁, u₂, w₁u, w₁, β₁, T⃰w₁, p⃰w₁, T⃰w₂, p⃰w₂t, H⃰₂, w₂t, w₂, T₂, F₂r, F₂, β⃰₂, w₂u, c₂z, c₂u, α₂, c₂, T⃰₂, p⃰₂, Mc₁, Mw₂, T⃰₂tt, ηᵤ, η⃰ᵤ, Hᵤ)
 	end
 
-	md"Расчет по ступеням"
+	md"λ Расчет по ступеням"
 end
 
 # ╔═╡ 65781f50-667a-44c0-beb2-466dfb293d36
@@ -471,12 +471,12 @@ begin
 		F  = swirl_params.F
 		ρK = swirl_params.ρK
 		
-		n₁ = log(tand(α₁)/tand(𝓜.α₁)) / log(𝒫.rc/ (𝒫.rc + 𝒫.l₂/2))
-		n₂ = log(tand(𝓜.β⃰₂)/tand(β⃰₂)) / log((𝒫.rc + 𝒫.l₂/2)/ 𝒫.rc)
-		b₁ = (𝒫.rc + 𝒫.l₂/2)^n₁ * tand(α₁)
-		b₂ = 𝒫.rc^n₂ * tand(𝓜.β⃰₂)
+		n₁ = log(tand(α₁)/tand(𝓜.α₁)) / log(𝒫.rₘ/ (𝒫.rₘ + 𝒫.l₂/2))
+		n₂ = log(tand(𝓜.β⃰₂)/tand(β⃰₂)) / log((𝒫.rₘ + 𝒫.l₂/2)/ 𝒫.rₘ)
+		b₁ = (𝒫.rₘ + 𝒫.l₂/2)^n₁ * tand(α₁)
+		b₂ = 𝒫.rₘ^n₂ * tand(𝓜.β⃰₂)
 		A  = (F * 𝓜.c₁z)/(𝒫.l₂/2)
-		B  = 𝓜.c₁z - A * 𝒫.rc
+		B  = 𝓜.c₁z - A * 𝒫.rₘ
 		χ¹ = 𝓜.p₁ * (𝓜.T⃰₀  / 𝓜.T₁)^𝒞.kk_1 / 𝓜.p⃰₀
 		χ² = 𝓜.p₂ * (𝓜.T⃰w₂ / 𝓜.T₂)^𝒞.kk_1 / 𝓜.p⃰w₂t
 
@@ -484,7 +484,7 @@ begin
 	end
 
 	function calc_swirl_mid(𝒫, 𝓜, ɤ, 𝒞 = CONST)
-		r    = 𝒫.rc
+		r    = 𝒫.rₘ
 		γ    = ɤ.γ/2
 		c₁   = 𝓜.c₁
 		α₁   = 𝓜.α₁
@@ -500,7 +500,7 @@ begin
 		c₂u  = 𝓜.c₂u
 		c₂z  = 𝓜.c₂z
 		c₂   = 𝓜.c₂
-		c₂r  = 𝓜.c₂u
+		c₂r  = 𝓜.c₂z * tand(γ)
 		α₂   = 𝓜.α₂
 		β⃰₂   = 𝓜.β⃰₂
 		w₂   = 𝓜.w₂
@@ -514,11 +514,11 @@ begin
 		πρc₁ = 2π * ρ₁ * c₁z * r
 		πρc₂ = 2π * ρ₂ * c₂z * r
 		ρT   = 𝒫.ρTc
-		Hp   = (w₂^2 - w₁^2)/2 + (u₁^2 - u₂^2)/2
-		Hu   = (c₁^2 - c₂^2)/2 + (w₂^2 - w₁^2)/2 + (u₁^2 - u₂^2)/2
-		ρK   = Hp / Hu
+		Hₚ   = (w₂^2 - w₁^2)/2 + (u₁^2 - u₂^2)/2
+		Hᵤ   = (c₁^2 - c₂^2)/2 + (w₂^2 - w₁^2)/2 + (u₁^2 - u₂^2)/2
+		ρK   = Hₚ / Hᵤ
 
-		(; r, γ, c₁, α₁, c₁u, c₁z, c₁r, u₁, u₂, β₁, w₁, w₁u, w₂u, c₂u, c₂z, c₂, c₂r, α₂, β⃰₂, w₂, T₁, p₁, ρ₁, T⃰w₁, T₂, p₂, ρ₂, πρc₁, πρc₂, ρT, Hp, Hu, ρK)
+		(; r, γ, c₁, α₁, c₁u, c₁z, c₁r, u₁, u₂, β₁, w₁, w₁u, w₂u, c₂u, c₂z, c₂, c₂r, α₂, β⃰₂, w₂, T₁, p₁, ρ₁, T⃰w₁, T₂, p₂, ρ₂, πρc₁, πρc₂, ρT, Hₚ, Hᵤ, ρK)
 	end
 
 	function calc_swirl(№, 𝒫, w₂u_R1, 𝓜, ɤ, 𝒞 = CONST, 𝒯 = TASK)
@@ -529,8 +529,8 @@ begin
 		c₁u  = c₁z / tand(α₁)
 		c₁r  = c₁z * tand(γ )
 		c₁   = √(c₁z^2 + c₁u^2 + c₁r^2)
-		u₁   = π * 2r * 𝒯.n / 60
-		u₂   = π * (𝒫.d₁c - 𝒫.l₁/2 + 𝒫.l₁ * (№-1)/4) * 𝒯.n / 60
+		u₁   = 2π * (𝒫.rk + 𝒫.l₁ * (№-1)/4) * 𝒯.n / 60
+		u₂   = 2π * r * 𝒯.n / 60
 		w₁u  = c₁u - u₁
 		β₁   = atand(c₁z / w₁u)
 		w₁   = c₁z / sind(β₁)
@@ -552,13 +552,13 @@ begin
 		πρc₁ = 2π * ρ₁ * c₁z * r
 		πρc₂ = 2π * ρ₂ * c₂z * r
 		ρT   = ( (p₁/𝓜.p⃰₀)^𝒞.k_1k - (p₂/𝓜.p⃰₀)^𝒞.k_1k ) / (1 - (p₂/𝓜.p⃰₀)^𝒞.k_1k )
-		Hp   = (w₂^2 - w₁^2)/2 + (u₁^2 - u₂^2)/2
-		Hu   = (c₁^2 - c₂^2)/2 + (w₂^2 - w₁^2)/2 + (u₁^2 - u₂^2)/2
-		# ρK   = Hp / Hu
-		ρK   = № == 1 ? ɤ.ρK : Hp / Hu
+		Hₚ   = (w₂^2 - w₁^2)/2 + (u₁^2 - u₂^2)/2
+		Hᵤ   = (c₁^2 - c₂^2)/2 + (w₂^2 - w₁^2)/2 + (u₁^2 - u₂^2)/2
+		ρK   = № == 1 ? ɤ.ρK : Hₚ / Hᵤ
 
-		(; r, γ, c₁, α₁, c₁u, c₁z, c₁r, u₁, u₂, β₁, w₁, w₁u, w₂u, c₂u, c₂z, c₂, c₂r, α₂, β⃰₂, w₂, T₁, p₁, ρ₁, T⃰w₁, T₂, p₂, ρ₂, πρc₁, πρc₂, ρT, Hp, Hu, ρK)
+		(; r, γ, c₁, α₁, c₁u, c₁z, c₁r, u₁, u₂, β₁, w₁, w₁u, w₂u, c₂u, c₂z, c₂, c₂r, α₂, β⃰₂, w₂, T₁, p₁, ρ₁, T⃰w₁, T₂, p₂, ρ₂, πρc₁, πρc₂, ρT, Hₚ, Hᵤ, ρK)
 	end
+	md"λ Расчет обратной закрутки"
 end
 
 # ╔═╡ e24903de-8706-4d29-aaf0-2005799675e1
@@ -606,8 +606,8 @@ function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
 
             if abs(Δρ) < 0.1 &&
 			all(p̄[i] < p̄[i+1] for i in 1:4) &&
-			RR[1].ρT < RR[5].ρT &&
-			RR[1].ρK < RR[5].ρK &&
+			# RR[1].ρT < RR[5].ρT &&
+			# RR[1].ρK < RR[5].ρK &&
 			all( (p̄[i+1] - p̄[i]) < (p̄[i+2] - p̄[i+1]) for i in 1:3 )
 				
 				σ = abs( abs(2p̄[2]-p̄[1]-p̄[3]) - abs(2p̄[4]-p̄[3]-p̄[5]) )
@@ -621,34 +621,24 @@ function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
     return reduce(vcat, valid_parts)
 end
 
-# ╔═╡ 62e8b518-6fae-4224-b42c-aac2ad86bac2
-for i in 1:4
-print(P[i].ρTc, "\n")
-end
-
-# ╔═╡ 22ff36be-8826-4d6d-ac49-910c08087798
-for i in 1:4
-print(S[i].Hᵤ, "\n")
-end
-
 # ╔═╡ 7e4039e8-ed6c-46eb-a079-9df82d4272d6
-@bind Cα₁ PlutoUI.NumberField(13:33, default=30) # single
+@bind Cα₁ PlutoUI.NumberField(13:33, default=31)
 
 # ╔═╡ d1889b73-726a-468b-9bb9-e69cd81a796b
-@bind Cβ⃰₂ PlutoUI.NumberField(15:65, default=38) # single
+@bind Cβ⃰₂ PlutoUI.NumberField(15:65, default=35)
 
 # ╔═╡ 6316022b-a071-4d6b-be2a-d786c8edad45
 begin
-	#Cα₁ = 30
-	#Cβ⃰₂ = 38
+	#Cα₁ = 31
+	#Cβ⃰₂ = 35
 	
-	F_range  = range(-0.5, 0  , length=200)
-	ρK_range = range(0.2 , 0.5, length=200)
+	F_range  = range(-0.5, 0  , length=400)
+	ρK_range = range(0.2 , 0.5, length=400)
 	
 	valid_FρK = find_FρK_threaded(Cα₁, Cβ⃰₂, F_range, ρK_range)
 	filtered_FρK = argmin(p -> p.σ, filter(p -> abs(p.Δρ) < 0.01, valid_FρK))
 	
-	md"### ∮ Поиск хороших значений ρk и F"
+	md"### ∮ Поиск _хороших_ значений ρk и F"
 end
 
 # ╔═╡ 43b474fc-51fa-4aef-86fa-cba0eb59bcf9
@@ -831,19 +821,19 @@ function plot_goodies(R)
 
 		ax1 = Axis(fig[1, 1],
 			title = LaTeXString("Σ Δρ_k = $(round(sum(r.Δρ for r in R), digits=2))"),
-	    	xlabel = "r", ylabel = "ρ"
+	    	ylabel = "ρ"
 		)
 	
 		# Линии для ρK и ρT
-		lines!(ax1, [r.r for r in R], [r.ρK for r in R],
+		scatterlines!(ax1, 1:length(R), [r.ρK for r in R],
 		    label = "ρK, ρK = $(round(ρK, digits=2)), F = $(round(F, digits=2))")
-		lines!(ax1, [r.r for r in R], [r.ρT for r in R], label = "ρT")
+		scatterlines!(ax1, 1:length(R), [r.ρT for r in R], label = "ρT")
 		axislegend(ax1)
 	
 		# График давлений
 		ax2 = Axis(fig[1, 2],
 				   title = L"p_2 \ при \ обратной \ закрутке",
-				   xlabel = "r", ylabel = "p₂"
+				   ylabel = "p₂"
 				  )
 		scatterlines!(ax2, 1:length(R), [r.p₂ for r in R], label = "p₂")
 
@@ -879,9 +869,6 @@ function table_swirl_short()
 	| $w_2, \text{м/с}$       |$(r̂1.w₂)  |$(r̂2.w₂)  |$(r̂3.w₂)  |$(r̂4.w₂)  |$(r̂5.w₂)  |
 	"""
 end
-
-# ╔═╡ 14df03dc-2bc0-4743-91a4-081d56078047
-table_swirl_short()
 
 # ╔═╡ ef9bc959-20a8-44aa-9093-725c4734dd8d
 function table_swirl()
@@ -925,8 +912,8 @@ function table_swirl()
 	| $2\pi\rho_1 c_{1z}r$    |$(r̂1.πρc₁)|$(r̂2.πρc₁)|$(r̂3.πρc₁)|$(r̂4.πρc₁)|$(r̂5.πρc₁)|
 	| $2\pi\rho_2 c_{2z}r$    |$(r̂1.πρc₂)|$(r̂2.πρc₂)|$(r̂3.πρc₂)|$(r̂4.πρc₂)|$(r̂5.πρc₂)|
 	| $\rho_T$                |$(r̂1.ρT)  |$(r̂2.ρT)  |$(r̂3.ρT)  |$(r̂4.ρT)  |$(r̂5.ρT)  |
-	| $H_p, \text{Дж}$        |$(r̂1.Hp)  |$(r̂2.Hp)  |$(r̂3.Hp)  |$(r̂4.Hp)  |$(r̂5.Hp)  |
-	| $H_u, \text{Дж}$        |$(r̂1.Hu)  |$(r̂2.Hu)  |$(r̂3.Hu)  |$(r̂4.Hu)  |$(r̂5.Hu)  |
+	| $H_p, \text{Дж}$        |$(r̂1.Hₚ)  |$(r̂2.Hₚ)  |$(r̂3.Hₚ)  |$(r̂4.Hₚ)  |$(r̂5.Hₚ)  |
+	| $H_u, \text{Дж}$        |$(r̂1.Hᵤ)  |$(r̂2.Hᵤ)  |$(r̂3.Hᵤ)  |$(r̂4.Hᵤ)  |$(r̂5.Hᵤ)  |
 	| $\rho_k$                |$(r̂1.ρK)  |$(r̂2.ρK)  |$(r̂3.ρK)  |$(r̂4.ρK)  |$(r̂5.ρK)  |
 	| $\rho_\text{k полин}$   |$(r̂1.ρKp) |$(r̂2.ρKp) |$(r̂3.ρKp) |$(r̂4.ρKp) |$(r̂5.ρKp) |
 	| $\Delta \rho_k$         |$(r̂1.Δρ)  |$(r̂2.Δρ)  |$(r̂3.Δρ)  |$(r̂4.Δρ)  |$(r̂5.Δρ)  |
@@ -2640,19 +2627,17 @@ version = "4.1.0+0"
 # ╟─fb7eb31f-8d28-4e05-b994-29a85e359b14
 # ╟─b5be0f61-904f-498d-8b4d-3bb84cf62270
 # ╟─56a5a75a-20ff-443e-992a-c8a5957b7a90
-# ╠═40561c16-193e-4349-bc16-a7d9ceb55f62
+# ╟─40561c16-193e-4349-bc16-a7d9ceb55f62
 # ╟─692ea0cf-2fc9-47fb-9542-930c64ac94bc
 # ╟─ec47fa62-62ea-4bf8-a57f-9e6b10b5fa0b
 # ╟─65781f50-667a-44c0-beb2-466dfb293d36
 # ╟─77bbea27-c0fa-4320-ab84-ff91730410e3
-# ╠═7290e07c-eedc-429f-a2fa-7130dae8da37
-# ╠═c2b940ae-7013-4184-916f-cc2c6c3bb718
+# ╟─7290e07c-eedc-429f-a2fa-7130dae8da37
+# ╟─c2b940ae-7013-4184-916f-cc2c6c3bb718
 # ╟─cfbd1033-b649-4ab2-941a-1519bcc28986
-# ╠═a18642f2-7b7c-4317-8959-f93952f0d607
+# ╟─a18642f2-7b7c-4317-8959-f93952f0d607
 # ╟─e24903de-8706-4d29-aaf0-2005799675e1
 # ╟─4e7e1ddb-8a03-4818-be9e-fa31698faf07
-# ╠═62e8b518-6fae-4224-b42c-aac2ad86bac2
-# ╠═22ff36be-8826-4d6d-ac49-910c08087798
 # ╟─1f21d0d2-43a3-489b-9b77-d09d0824f799
 # ╟─4acc88bf-4bbf-49b5-8006-920901d8ddc9
 # ╟─7e4039e8-ed6c-46eb-a079-9df82d4272d6
@@ -2661,7 +2646,6 @@ version = "4.1.0+0"
 # ╟─d51bd461-3106-4b8d-9d3a-66c7fb6c8ab1
 # ╟─43b474fc-51fa-4aef-86fa-cba0eb59bcf9
 # ╟─9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
-# ╟─14df03dc-2bc0-4743-91a4-081d56078047
 # ╠═1567fa8c-625c-43b4-b38f-205b47d6c325
 # ╟─b0aa65a1-3433-4b48-9196-d47e6e35379e
 # ╟─7e82ca6c-5c36-4c0d-ba07-914ff604f107
@@ -2669,7 +2653,7 @@ version = "4.1.0+0"
 # ╟─8fd74453-354f-4cae-8e46-c310abdc6b5b
 # ╟─18159b8a-c05b-4191-9eae-71f7b7646e7d
 # ╟─6cf7f12e-cc58-4b08-816b-584e02dbd071
-# ╠═0654861a-f4d5-4adb-b929-8e7e6ae78b89
+# ╟─0654861a-f4d5-4adb-b929-8e7e6ae78b89
 # ╟─8678ac5d-fea0-4697-b2e6-799e72afda5a
 # ╟─1ae0f50a-c021-41cd-a389-cec934e34e26
 # ╟─ef9bc959-20a8-44aa-9093-725c4734dd8d
