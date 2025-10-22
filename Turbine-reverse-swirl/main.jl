@@ -260,6 +260,36 @@ function find_GΦΨ(Φ_range, Ψ_range, P₂, l̄)
 	(best_result, results)
 end
 
+# ╔═╡ 36c608cb-a140-4b01-bbc1-c4ccfb073bc6
+function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
+    T = @NamedTuple{F::Float64, ρK::Float64, SSE::Float64, Δ::Float64}
+    valid_parts = [T[] for _ in 1:Threads.nthreads()]
+    
+    Threads.@threads for F in F_range
+        tid = Threads.threadid()
+        local_valid = valid_parts[tid]
+        
+        for ρK in ρK_range
+            SP = (; α₁, F, ρK, β⃰₂)
+            RR, a, b, c, ɤ = swirl_reverse(P[4], S[4], I, SP)
+			ΔR = sum(r.Δρ for r in RR)
+			p̄  = [r.p₂ for r in RR]
+
+            if abs(ΔR) < 0.1 &&
+			all(p̄[i] < p̄[i+1] for i in 1:4) &&
+			RR[1].ρT < RR[5].ρT &&
+			RR[1].ρK < RR[5].ρK &&
+			all( (p̄[i+1] - p̄[i]) < (p̄[i+2] - p̄[i+1]) for i in 1:3 )
+				sse = abs( abs(2p̄[2]-p̄[1]-p̄[3]) - abs(2p̄[4]-p̄[3]-p̄[5]) )
+                result = (F=F, ρK=ρK, SSE=sse, Δ=ΔR)
+                push!(local_valid, result)
+            end
+        end
+    end
+    
+    return reduce(vcat, valid_parts)
+end
+
 # ╔═╡ 1307a1b3-21ee-471d-80da-4fef86063430
 begin
 	function swirl_reverse(Params, mid, I, swirl_params)
@@ -405,36 +435,6 @@ begin
 	S = calc_stages(Gₒₚₜ, I, P)
 
 	md"### Первичный расчет и расчет по ступеням"
-end
-
-# ╔═╡ 36c608cb-a140-4b01-bbc1-c4ccfb073bc6
-function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
-    T = @NamedTuple{F::Float64, ρK::Float64, SSE::Float64, Δ::Float64}
-    valid_parts = [T[] for _ in 1:Threads.nthreads()]
-    
-    Threads.@threads for F in F_range
-        tid = Threads.threadid()
-        local_valid = valid_parts[tid]
-        
-        for ρK in ρK_range
-            SP = (; α₁, F, ρK, β⃰₂)
-            RR, a, b, c, ɤ = swirl_reverse(P[4], S[4], I, SP)
-			ΔR = sum(r.Δρ for r in RR)
-			p̄  = [r.p₂ for r in RR]
-
-            if abs(ΔR) < 0.1 &&
-			all(p̄[i] < p̄[i+1] for i in 1:4) &&
-			RR[1].ρT < RR[5].ρT &&
-			RR[1].ρK < RR[5].ρK &&
-			all( (p̄[i+1] - p̄[i]) < (p̄[i+2] - p̄[i+1]) for i in 1:3 )
-				sse = abs( abs(2p̄[2]-p̄[1]-p̄[3]) - abs(2p̄[4]-p̄[3]-p̄[5]) )
-                result = (F=F, ρK=ρK, SSE=sse, Δ=ΔR)
-                push!(local_valid, result)
-            end
-        end
-    end
-    
-    return reduce(vcat, valid_parts)
 end
 
 # ╔═╡ 98cd69e5-e99f-4717-9551-3551022899b3
