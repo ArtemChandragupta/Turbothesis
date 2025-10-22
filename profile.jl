@@ -10,8 +10,6 @@ begin
 	using LaTeXStrings
 	using CairoMakie
 	using Interpolations
-	using LinearAlgebra
-	using ColorSchemes
 end
 
 # ╔═╡ 6298d6f2-3a7d-4cd2-958c-9d493cd2e657
@@ -67,13 +65,13 @@ function build_profile(α₁, β₁, α₂, β₂, c₁, w₁, c₂, w₂, l, ξ
 	lines!(ax, xc, cline.(xc), color=:black)
 	lines!(ax, xp, pline.(xp), color=:black)
 	lines!(ax, xs, sline.(xs), color=:black)
-	
+
 	# Треугольники скоростей
-	colors = [:red, :blue]
-	lines!(ax, [0,     c₁ * cosd(α₁)], [0,     c₁ * sind(α₁)], color=colors[1])
-	lines!(ax, [0,     w₁ * cosd(β₁)], [0,     w₁ * sind(β₁)], color=colors[1])
-	lines!(ax, [l, l + c₂ * cosd(α₂)], [ξ, ξ + c₂ * sind(α₂)], color=colors[2])
-	lines!(ax, [l, l + w₂ * cosd(β₂)], [ξ, ξ + w₂ * sind(β₂)], color=colors[2])
+    lines!(ax, [0,     c₁ * cosd(α₁)], [0,     c₁ * sind(α₁)], color=:red)
+	# arrows2d!(ax, [0], [0], [c₁ * cosd(α₁)], [c₁ * sind(α₁)], color=:red)
+    lines!(ax, [0,     w₁ * cosd(β₁)], [0,     w₁ * sind(β₁)], color=:red)
+    lines!(ax, [l, l + c₂ * cosd(α₂)], [ξ, ξ + c₂ * sind(α₂)], color=:blue)
+    lines!(ax, [l, l + w₂ * cosd(β₂)], [ξ, ξ + w₂ * sind(β₂)], color=:blue)
 	
 	fig
 end
@@ -87,7 +85,7 @@ function compute_distances(pline_old, xp, sline_new, xs)
     for x in xp
         y_old_upper = pline_old(x)
         # Находим минимальное расстояние до новой нижней кривой s
-        min_dist = minimum([norm([x - xs_j, y_old_upper - sline_new(xs_j)]) for xs_j in xs])
+		min_dist = minimum([sqrt((x - xs_j)^2 + (y_old_upper - sline_new(xs_j))^2) for xs_j in xs])
         push!(distances, min_dist)
     end
     return distances
@@ -125,7 +123,7 @@ function build_shifted_profile(α₁, β₁, α₂, β₂, c₁, w₁, c₂, w�
 	sline_new = hermite_polynomial(s1_shifted..., tand(β₁ₛ), s2_shifted..., tand(β₂ₛ))
     
     # Дискретизация кривых
-    xc = range(0, l, 200)
+    xc = range(0    , l    , 200)
     xp = range(p1[1], p2[1], 200)
     xs = range(s1[1], s2[1], 200)
     
@@ -142,12 +140,13 @@ function build_shifted_profile(α₁, β₁, α₂, β₂, c₁, w₁, c₂, w�
     	norm_distances = (distances .- min_dist) ./ (max_dist - min_dist)
 
 	    # Получение цветов из палитры viridis
-    	colors = [get(ColorSchemes.viridis, d) for d in norm_distances]
-    
+    	colors = [cgrad(:viridis, [0, 1])[d] for d in norm_distances]
+
 	    # Визуализация расстояний от p к сдвинутой s с цветовой кодировкой
     	for (i, x) in enumerate(xp)
         	y_old_upper = pline(x)
-			idx = argmin([norm([x - xs_j, y_old_upper - sline_new(xs_j)]) for xs_j in xs])
+
+			idx = argmin([sqrt((x - xs_j)^2 + (y_old_upper - sline_new(xs_j))^2) for xs_j in xs])
 	        x_new_lower = xs[idx]
     	    y_new_lower = sline_new(x_new_lower)
         
@@ -163,21 +162,12 @@ function build_shifted_profile(α₁, β₁, α₂, β₂, c₁, w₁, c₂, w�
 		arc!(ax, (l, ξ + Δy), R₂, deg2rad(90 + β₂ₚ), deg2rad(     -90 + β₂ₛ), color=:black)
 
 		# Профиль лопатки
-    	lines!(ax, xc, cline.(xc), color=:black)
     	lines!(ax, xp, pline.(xp), color=:black)
     	lines!(ax, xs, sline.(xs), color=:black)
 
 	    # Сдвинутый профиль лопатки
     	lines!(ax, xp, pline_new.(xp), color=:black)
     	lines!(ax, xs, sline_new.(xs), color=:black)
-
-	    # Треугольники скоростей
-    	# arrows!(ax, [0,     c₁ * cosd(α₁)], [0,     c₁ * sind(α₁)], color=:red)
-		 arrows2d!(ax, [0], [0], [c₁ * cosd(α₁)], [c₁ * sind(α₁)], 
-                color=:red)
-    	lines!(ax, [0,     w₁ * cosd(β₁)], [0,     w₁ * sind(β₁)], color=:red)
-    	lines!(ax, [l, l + c₂ * cosd(α₂)], [ξ, ξ + c₂ * sind(α₂)], color=:blue)
-    	lines!(ax, [l, l + w₂ * cosd(β₂)], [ξ, ξ + w₂ * sind(β₂)], color=:blue)
 
     	Colorbar(fig[1, 2], limits = (min_dist, max_dist))
 
@@ -190,19 +180,195 @@ end
 # ╔═╡ 56778a9f-0677-4768-8391-7527ec6c9f69
 build_shifted_profile(36.51, 56.94, 84.32, 47.72, 0.6761, 0.4839, 0.3996, 0.5339, 2.0, 0.8, 0.05, 0.03, 13, 2, 1.9)
 
+# ╔═╡ 66829525-9204-4102-8eac-9444bdbe998f
+function build_profile_center(α₁, β₁, α₂, β₂, c₁, w₁, c₂, w₂, l, ξ, R₁, R₂, Δ₁, Δ₂)
+    # Нормализация углов
+    α₁, β₁ = α₁ - 90, β₁ - 90  # Углы у входной кромки
+    α₂, β₂ = 90 - α₂, 90 - β₂  # Углы у выходной кромки
+    
+    # Углы для построения профиля
+    β₁ₚ, β₂ₚ = β₁ + Δ₁, β₂ - Δ₂
+    β₁ₛ, β₂ₛ = β₁ - Δ₁, β₂ + Δ₂
+    
+    # Точки для сплайнов
+    p1 = ( R₁ * cosd(90 + β₁ₚ)    ,  R₁ * sind(90 + β₁ₚ)    )
+    p2 = ( R₂ * cosd(90 + β₂ₚ) + l,  R₂ * sind(90 + β₂ₚ) + ξ)
+    s1 = (-R₁ * cosd(90 + β₁ₛ)    , -R₁ * sind(90 + β₁ₛ)    )
+    s2 = (-R₂ * cosd(90 + β₂ₛ) + l, -R₂ * sind(90 + β₂ₛ) + ξ)
+    
+    # Построение сплайнов
+    cline = hermite_polynomial(0, 0 , tand(β₁ ), l, ξ , tand(β₂ ))
+    pline = hermite_polynomial(p1..., tand(β₁ₚ), p2..., tand(β₂ₚ))
+    sline = hermite_polynomial(s1..., tand(β₁ₛ), s2..., tand(β₂ₛ))
+    
+    xc = range(0, l, 200)
+    xp = range(p1[1], p2[1], 200)
+    xs = range(s1[1], s2[1], 200)
+    
+    # Получим координаты точек на спинке и корыте
+    yp = pline.(xp)
+    ys = sline.(xs)
+    
+    # Функция для вычисления центроида между двумя кривыми
+    function compute_figure_centroid(x1, y1, x2, y2)
+        total_area  = 0.0
+        weighted_cx = 0.0
+        weighted_cy = 0.0
+
+        for i in 1:length(xp)-1
+            # Точки четырехугольника между кривыми
+            a = (x1[i], y1[i])
+            b = (x1[i+1], y1[i+1])
+            c = (x2[i+1], y2[i+1])
+            d = (x2[i], y2[i])
+            
+            # Разбиваем на два треугольника и вычисляем их свойства
+            # Треугольник 1: a-b-c
+            area1 = abs((b[1]-a[1])*(c[2]-a[2]) - (c[1]-a[1])*(b[2]-a[2])) / 2
+            cx1 = (a[1] + b[1] + c[1]) / 3
+            cy1 = (a[2] + b[2] + c[2]) / 3
+            
+            # Треугольник 2: a-c-d
+            area2 = abs((c[1]-a[1])*(d[2]-a[2]) - (d[1]-a[1])*(c[2]-a[2])) / 2
+            cx2 = (a[1] + c[1] + d[1]) / 3
+            cy2 = (a[2] + c[2] + d[2]) / 3
+            
+            # Суммируем вклады
+            total_area += area1 + area2
+            weighted_cx += cx1 * area1 + cx2 * area2
+            weighted_cy += cy1 * area1 + cy2 * area2
+        end
+
+        return weighted_cx / total_area, weighted_cy / total_area
+    end
+    
+    # Вычисляем центроид
+    centroid_x, centroid_y = compute_figure_centroid(xp, yp, xs, ys)
+    
+    # Визуализация
+    fig = Figure()
+    ax = Axis(fig[1, 1], aspect = DataAspect())
+    hidedecorations!(ax)
+    
+    # Дуги скругления
+    arc!(ax, (0, 0), R₁, deg2rad(90 + β₁ₚ), deg2rad(360 - 90 + β₁ₛ), color=:black)
+    arc!(ax, (l, ξ), R₂, deg2rad(90 + β₂ₚ), deg2rad(     -90 + β₂ₛ), color=:black)
+    
+    # Профиль лопатки
+    lines!(ax, xc, cline.(xc), color=:black)
+    lines!(ax, xp, yp, color=:black)
+    lines!(ax, xs, ys, color=:black)
+    
+    # Отображаем центроид
+    scatter!(ax, centroid_x, centroid_y, color=:black, markersize=15)
+
+	# Треугольники скоростей
+    lines!(ax, [0,     c₁ * cosd(α₁)], [0,     c₁ * sind(α₁)], color=:red)
+	# arrows2d!(ax, [0], [0], [c₁ * cosd(α₁)], [c₁ * sind(α₁)], color=:red)
+    lines!(ax, [0,     w₁ * cosd(β₁)], [0,     w₁ * sind(β₁)], color=:red)
+    lines!(ax, [l, l + c₂ * cosd(α₂)], [ξ, ξ + c₂ * sind(α₂)], color=:blue)
+    lines!(ax, [l, l + w₂ * cosd(β₂)], [ξ, ξ + w₂ * sind(β₂)], color=:blue)
+    
+    fig
+end
+
+# ╔═╡ 43adaae3-1011-481f-b54c-becf6d546b4a
+build_profile_center(36.51, 56.94, 84.32, 47.72, 0.6761, 0.4839, 0.3996, 0.5339, 2.0, 0.8, 0.05, 0.03, 13, 2)
+
+# ╔═╡ 3271a455-6ecb-429e-812c-07a807fd95a7
+function compute_profile_data(α₁, β₁, α₂, β₂, c₁, w₁, c₂, w₂, l, ξ, R₁, R₂, Δ₁, Δ₂, Δy)
+    # Нормализация углов
+    α₁, β₁ = α₁ - 90, β₁ - 90
+    α₂, β₂ = 90 - α₂, 90 - β₂
+    
+    # Углы для построения профиля
+    β₁ₚ, β₂ₚ = β₁ + Δ₁, β₂ - Δ₂
+    β₁ₛ, β₂ₛ = β₁ - Δ₁, β₂ + Δ₂
+    
+    # Точки для сплайнов
+    p1 = ( R₁ * cosd(90 + β₁ₚ)    ,  R₁ * sind(90 + β₁ₚ)    )
+    p2 = ( R₂ * cosd(90 + β₂ₚ) + l,  R₂ * sind(90 + β₂ₚ) + ξ)
+    s1 = (-R₁ * cosd(90 + β₁ₛ)    , -R₁ * sind(90 + β₁ₛ)    )
+    s2 = (-R₂ * cosd(90 + β₂ₛ) + l, -R₂ * sind(90 + β₂ₛ) + ξ)
+    
+    # Построение сплайнов оригинального профиля
+    pline = hermite_polynomial(p1..., tand(β₁ₚ), p2..., tand(β₂ₚ))
+    sline = hermite_polynomial(s1..., tand(β₁ₛ), s2..., tand(β₂ₛ))
+    
+    # Построение сплайнов сдвинутого профиля
+	pline_shifted = hermite_polynomial(p1[1], p1[2] + Δy, tand(β₁ₚ), p2[1], p2[2] + Δy, tand(β₂ₚ))
+	sline_shifted = hermite_polynomial(s1[1], s1[2] + Δy, tand(β₁ₛ), s2[1], s2[2] + Δy, tand(β₂ₛ))
+    
+    # Дискретизация кривых
+    xp = range(p1[1], p2[1], 200)
+    xs = range(s1[1], s2[1], 200)
+    
+    # Вычисление расстояний
+	distances = [minimum(sqrt((x - xs_j)^2 + (pline(x) - sline_shifted(xs_j))^2) for xs_j in xs) for x in xp]
+    
+    return (pline, sline, pline_shifted, sline_shifted, xp, xs, distances,
+            p1, p2, s1, s2, β₁ₚ, β₁ₛ, β₂ₚ, β₂ₛ)
+end
+
+# ╔═╡ 8f3d5c7d-21a0-4be3-9c5d-b983b3edd56a
+function plot_shifted_profile(α₁, β₁, α₂, β₂, c₁, w₁, c₂, w₂, l, ξ, R₁, R₂, Δ₁, Δ₂, Δy)
+    # Вычисление данных профиля
+    data = compute_profile_data(α₁, β₁, α₂, β₂, c₁, w₁, c₂, w₂, l, ξ, R₁, R₂, Δ₁, Δ₂, Δy)
+    pline, sline, pline_shifted, sline_shifted, xp, xs, distances = data[1:7]
+    p1, p2, s1, s2, β₁ₚ, β₁ₛ, β₂ₚ, β₂ₛ = data[8:15]
+    
+    with_theme(theme_latexfonts()) do
+        fig = Figure()
+        ax = Axis(fig[1, 1], aspect = DataAspect())
+        hidedecorations!(ax)
+        
+        # Нормализация расстояний для цветовой шкалы
+        min_dist, max_dist = extrema(distances)
+        colors = [cgrad(:viridis)[(d - min_dist) / (max_dist - min_dist)] for d in distances]
+        
+        # Визуализация расстояний
+        for (i, x) in enumerate(xp)
+            y_upper = pline(x)
+			idx = argmin([sqrt((x - xs_j)^2 + (y_upper - sline_shifted(xs_j))^2) for xs_j in xs])
+			lines!(ax, [x, xs[idx]], [y_upper, sline_shifted(xs[idx])], color=colors[i], linewidth=4)
+        end
+        
+        # Дуги скругления профилей
+        arc_points = [
+            ((0, 0     ), R₁, deg2rad(90 + β₁ₚ), deg2rad(360 - 90 + β₁ₛ)),
+            ((l, ξ     ), R₂, deg2rad(90 + β₂ₚ), deg2rad(-90 + β₂ₛ)     ),
+            ((0, Δy    ), R₁, deg2rad(90 + β₁ₚ), deg2rad(360 - 90 + β₁ₛ)),
+            ((l, ξ + Δy), R₂, deg2rad(90 + β₂ₚ), deg2rad(-90 + β₂ₛ)     )
+        ]
+        
+        for arc in arc_points
+            arc!(ax, arc..., color=:black)
+        end
+        
+        # Отрисовка профилей
+        for curve in [(xp, pline), (xs, sline), (xp, pline_shifted), (xs, sline_shifted)]
+            lines!(ax, curve[1], curve[2].(curve[1]), color=:black)
+        end
+        
+        Colorbar(fig[1, 2], limits=(min_dist, max_dist), colormap=:viridis)
+        save("lines.png", fig)
+        return fig
+    end
+end
+
+# ╔═╡ 2f01c0b0-5915-4a65-a332-87eacf7903e3
+plot_shifted_profile(36.51, 56.94, 84.32, 47.72, 0.6761, 0.4839, 0.3996, 0.5339, 2.0, 0.8, 0.05, 0.03, 13, 2, 1.9)
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
 Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
-LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
 CairoMakie = "~0.15.6"
-ColorSchemes = "~3.31.0"
 Interpolations = "~0.16.2"
 LaTeXStrings = "~1.4.0"
 PlutoUI = "~0.7.62"
@@ -214,7 +380,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.7"
 manifest_format = "2.0"
-project_hash = "c71a5bfbd1b0964299d2c8b3df1dbd95c75b2d9f"
+project_hash = "4078cef4cdc1dc6c489d621140c1398d97254061"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -1763,7 +1929,12 @@ version = "4.1.0+0"
 # ╟─74758f44-2138-4c26-bbba-14f69bfb0610
 # ╟─a6f2e33a-6c0a-4973-bf76-22a7f3fd97f7
 # ╠═d2b2d953-435f-4e88-9ed9-8f37cdb8082c
-# ╟─06ece98b-ecf6-4f23-b102-85b2821c91bc
-# ╟─56778a9f-0677-4768-8391-7527ec6c9f69
+# ╠═06ece98b-ecf6-4f23-b102-85b2821c91bc
+# ╠═56778a9f-0677-4768-8391-7527ec6c9f69
+# ╠═66829525-9204-4102-8eac-9444bdbe998f
+# ╟─43adaae3-1011-481f-b54c-becf6d546b4a
+# ╠═3271a455-6ecb-429e-812c-07a807fd95a7
+# ╠═8f3d5c7d-21a0-4be3-9c5d-b983b3edd56a
+# ╠═2f01c0b0-5915-4a65-a332-87eacf7903e3
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
