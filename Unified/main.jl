@@ -118,21 +118,23 @@ begin
 		φ   = (Hₜ * 𝒞.ηₘₜ - Hₖ / 𝒞.ηₘₖ) / (Hₜ * 𝒞.ηₘₜ)
 	
 		# Расчет с охладителем
-		t⃰₂   = T⃰₂ - 𝒞.T̂₀
-		t⃰₃   = 𝒯.T⃰₃ - 𝒞.T̂₀
-		gₐᵢᵣ = (𝒞.Qₙₚ*𝒞.ηₖₛ + 𝒞.hₜₒₚ + 𝒞.L₀*𝒞.Cpₙ*t⃰₂ - (𝒞.L₀+1)*𝒞.Cpₐ*t⃰₃) / (𝒞.Cpₙ * (t⃰₃-t⃰₂))
-		a    = (𝒞.L₀ + gₐᵢᵣ)/ 𝒞.L₀
-		gₜ   = 1 / (a * 𝒞.L₀)
-		gᶜc  = 0.01 + 0.25 / 10000 * (𝒯.T⃰₃ - 𝒞.Tₛₜ)
-		gᵖc  = 0.08 + 0.22 / 10000 * (𝒯.T⃰₃ - 𝒞.Tₛₜ)
-		gc   = 𝒞.σᵤₜ * (gᶜc + gᵖc)
-		ĝc   = ( (1+gₜ) * gc ) / ( 1 + (1+gₜ)*gc )
-		Gₜ   = gₜ * (1-ĝc) * Gₙ
-		Ωᵣₐₛ = H⃰ₒₜ * Gₙ / Gₜ
-		Hₑ   = (1+gₜ) * (1-ĝc) * Hₜ * 𝒞.ηₘₜ - Hₖ * 𝒞.ηₘₖ
-		Ωₐₗₗ = Hₑ * Gₙ / Gₜ
+		# t⃰₂   = T⃰₂ - 𝒞.T̂₀
+		# t⃰₃   = 𝒯.T⃰₃ - 𝒞.T̂₀
+		# gₐᵢᵣ = (𝒞.Qₙₚ*𝒞.ηₖₛ + 𝒞.hₜₒₚ + 𝒞.L₀*𝒞.Cpₙ*t⃰₂ - (𝒞.L₀+1)*𝒞.Cpₐ*t⃰₃) / (𝒞.Cpₙ * (t⃰₃-t⃰₂))
+		# a    = (𝒞.L₀ + gₐᵢᵣ)/ 𝒞.L₀
+		# gₜ   = 1 / (a * 𝒞.L₀)
+		# gᶜc  = 0.01 + 0.25 / 10000 * (𝒯.T⃰₃ - 𝒞.Tₛₜ)
+		# gᵖc  = 0.08 + 0.22 / 10000 * (𝒯.T⃰₃ - 𝒞.Tₛₜ)
+		# gc   = 𝒞.σᵤₜ * (gᶜc + gᵖc)
+		# ĝc   = ( (1+gₜ) * gc ) / ( 1 + (1+gₜ)*gc )
+		# Gₜ   = gₜ * (1-ĝc) * Gₙ
+		# Ωᵣₐₛ = H⃰ₒₜ * Gₙ / Gₜ
+		# Hₑ   = (1+gₜ) * (1-ĝc) * Hₜ * 𝒞.ηₘₜ - Hₖ * 𝒞.ηₘₖ
+		# Ωₐₗₗ = Hₑ * Gₙ / Gₜ
 		
-		(; P⃰₁, T⃰₁, P⃰₂, T⃰₂, H⃰ₒₖ,	Hₖ,	P⃰₃, P⃰₄,	π⃰ₜ,	H⃰ₒₜ, Hₜ, T⃰₄, Gₙ, Q̇₁, Q₁, ηₑ, φ, t⃰₂, t⃰₃, gₐᵢᵣ, a, gₜ, gᶜc, gᵖc, gc, ĝc, Gₜ, Ωᵣₐₛ, Hₑ, Ωₐₗₗ)
+		(; P⃰₁, T⃰₁, P⃰₂, T⃰₂, H⃰ₒₖ,	Hₖ,	P⃰₃, P⃰₄,	π⃰ₜ,	H⃰ₒₜ, Hₜ, T⃰₄, Gₙ, Q̇₁, Q₁, ηₑ, φ, 
+		 # t⃰₂, t⃰₃, gₐᵢᵣ, a, gₜ, gᶜc, gᵖc, gc, ĝc, Gₜ, Ωᵣₐₛ, Hₑ, Ωₐₗₗ
+		 )
 	end
 	
 	md"λ Расчет тепловой схемы"
@@ -140,10 +142,10 @@ end
 
 # ╔═╡ 56a5a75a-20ff-443e-992a-c8a5957b7a90
 begin
-	function calc_comp(I, π⃰ₖ, 𝒞 = CONST, 𝒯 = TASK)
+	function calc_comp(I, Å, 𝒞 = CONST, 𝒯 = TASK)
 		P⃰₁   = 𝒞.σ⃰ᵢₙ * 𝒯.Pₙ
 		T⃰₁   = 𝒯.Tₙ
-		P⃰ₖ   = 𝒯.Pₙ * π⃰ₖ
+		P⃰ₖ   = 𝒯.Pₙ * Å.π⃰ₖ
 		P⃰₂   = P⃰ₖ / 𝒞.σ⃰ₒᵤₜ
 		ρ₁   = P⃰₁ / (𝒞.Rₙ * T⃰₁)
 		nₖ   = 𝒞.kₙ * 𝒞.η⃰ₐ / (𝒞.kₙ * 𝒞.η⃰ₐ - 𝒞.kₙ + 1)
@@ -156,7 +158,7 @@ begin
 		ν₂   = (π * Dₘ₁^2 - F₂) / (π * Dₘ₁^2 + F₂)
 		l₂   = (1 - ν₂) * √( F₂/(π * (1 - ν₂^2)) )
 		uₙ₁  = 𝒯.n * π * D₁ / 60
-		H⃰ₐ   = (𝒞.kₙ / (𝒞.kₙ-1)) * 𝒞.Rₙ * T⃰₁ * ( ( P⃰₂/P⃰₁ )^( (𝒞.kₙ-1)/𝒞.kₙ) - 1 )
+		H⃰ₐ   = (𝒞.kₙ / (𝒞.kₙ-1)) * 𝒞.Rₙ * T⃰₁ * ( (P⃰₂/P⃰₁)^( (𝒞.kₙ-1)/𝒞.kₙ) - 1 )
 		H⃰ₖ   = H⃰ₐ / 𝒞.η⃰ₐ
 		i    = ceil(H⃰ₖ / 𝒞.hₘ)
 		kₘ = (2H⃰ₖ/𝒞.hₘ - 3 + (8-i)*𝒞.k₁) / (5+i)
@@ -201,20 +203,20 @@ end
 
 # ╔═╡ 40561c16-193e-4349-bc16-a7d9ceb55f62
 begin
-	function calc_turb(I, C, π⃰ₖ, T⃰₀, 𝒞 = CONST, 𝒯 = TASK)
+	function calc_turb(I, C, Å, 𝒞 = CONST, 𝒯 = TASK)
 		P⃰₀   = 𝒞.σ⃰ₖₛ * C.P⃰ₖ
 		Nₖ   = C.H⃰ₖ * I.Gₙ
 		Nₜ   = 𝒯.N + Nₖ
-		Gᵧ   = I.Gₙ + I.Gₜ
+		Gᵧ   = I.Gₙ
 		Hᵤₜ  = 𝒞.kₙₜ * Nₜ / Gᵧ
 		ΔT⃰ₜ  = Hᵤₜ / 𝒞.Cpᵧ
-		T⃰₂ₜ  = T⃰₀ - ΔT⃰ₜ
+		T⃰₂ₜ  = Å.T⃰₀ - ΔT⃰ₜ
 		aᵏʳ₂ = √( (2𝒞.kᵧ)/(𝒞.kᵧ+1) * 𝒞.Rᵧ * T⃰₂ₜ )
 		c₂ₜ  = 𝒞.λ₂ₜ * aᵏʳ₂
 		Hₐₜ  = Hᵤₜ + c₂ₜ^2 / 2
 		Hₒₜ  = Hₐₜ / 𝒞.ηₐₜ
-		T⃰₂ₜₜ = T⃰₀ - Hₒₜ / 𝒞.Cpᵧ
-		P₂ₜ  = P⃰₀ * (T⃰₂ₜₜ / T⃰₀)^𝒞.kk_1
+		T⃰₂ₜₜ = Å.T⃰₀ - Hₒₜ / 𝒞.Cpᵧ
+		P₂ₜ  = P⃰₀ * (T⃰₂ₜₜ / Å.T⃰₀)^𝒞.kk_1
 		T₂T  = T⃰₂ₜ - c₂ₜ^2 / (2𝒞.Cpᵧ)
 		ρ₂ₜ  = P₂ₜ / (𝒞.Rᵧ * T₂T)
 		F₂ₜ  = Gᵧ / (ρ₂ₜ * c₂ₜ * sind(𝒞.å))
@@ -311,14 +313,10 @@ end
 # ╔═╡ 7290e07c-eedc-429f-a2fa-7130dae8da37
 begin
 	function stage_params(T, P₂, Φ, Ψ, l̄, 𝒯 = TASK)
-		# Длина задней кромки сопловой лопатки
-		l₁  = (l̄.ll₁[2], l̄.ll₁[4], l̄.ll₁[6], l̄.ll₁[8])
-		# Длина задней кромки рабочей лопатки
-		l₂  = (l̄.ll₂[2], l̄.ll₂[4], l̄.ll₂[6], l̄.ll₂[8])
-		# Длина передней кромки рабочей лопатки
-		l₂₁ = (l̄.ll₂[1], l̄.ll₂[3], l̄.ll₂[5], l̄.ll₂[7])
-		# Ширина рабочей лопатки
-		b₂  = (l̄.xl₂[2]-l̄.xl₂[1], l̄.xl₂[4]-l̄.xl₂[3], l̄.xl₂[6]-l̄.xl₂[5], l̄.xl₂[8]-l̄.xl₂[7])
+		l₁  = (l̄.ll₁[2], l̄.ll₁[4], l̄.ll₁[6], l̄.ll₁[8]) # Задней кромки сл
+		l₂  = (l̄.ll₂[2], l̄.ll₂[4], l̄.ll₂[6], l̄.ll₂[8]) # Задней кромки рл
+		l₂₁ = (l̄.ll₂[1], l̄.ll₂[3], l̄.ll₂[5], l̄.ll₂[7]) # Передней кромки рл
+		b₂  = (l̄.xl₂[2]-l̄.xl₂[1], l̄.xl₂[4]-l̄.xl₂[3], l̄.xl₂[6]-l̄.xl₂[5], l̄.xl₂[8]-l̄.xl₂[7]) # Ширина рабочей лопатки
 		
 		p₂ = P₂
 	
@@ -605,23 +603,63 @@ begin
 	md"λ Расчет обратной закрутки"
 end
 
+# ╔═╡ 6d9aa6d2-8c16-4bff-bd80-91db31f0ac81
+begin
+	function calc_comp_c(I, Å, 𝒞 = CONST, 𝒯 = TASK)
+		P⃰₁ = 𝒞.σ⃰ᵢₙ * 𝒯.Pₙ
+		T⃰₁ = 𝒯.Tₙ
+		P⃰ₖ = 𝒯.Pₙ * Å.π⃰ₖ
+		P⃰₂ = P⃰ₖ / 𝒞.σ⃰ₒᵤₜ
+		H⃰ₐ = (𝒞.kₙ / (𝒞.kₙ-1)) * 𝒞.Rₙ * T⃰₁ * ( ( P⃰₂/P⃰₁ )^( (𝒞.kₙ-1)/𝒞.kₙ) - 1 )
+		H⃰ₖ = H⃰ₐ / 𝒞.η⃰ₐ
+		
+		(; P⃰₁, T⃰₁, P⃰ₖ, P⃰₂, H⃰ₐ, H⃰ₖ)
+	end
+	
+	md"λ Расчет компрессора"
+end
+
+# ╔═╡ caeb332a-a68e-4c25-8812-663be4174db8
+begin
+	function calc_turb_c(B, C, Å, 𝒞 = CONST, 𝒯 = TASK)
+		P⃰₀   = 𝒞.σ⃰ₖₛ * C.P⃰ₖ
+		Nₖ   = C.H⃰ₖ * Å.Gₙ
+		Nₜ   = 𝒯.N + Nₖ
+		Gᵧ   = Å.Gᵧ
+		Hᵤₜ  = 𝒞.kₙₜ * Nₜ / Gᵧ
+		ΔT⃰ₜ  = Hᵤₜ / 𝒞.Cpᵧ
+		T⃰₂ₜ  = Å.T⃰₀ - ΔT⃰ₜ
+		aᵏʳ₂ = √( (2𝒞.kᵧ)/(𝒞.kᵧ+1) * 𝒞.Rᵧ * T⃰₂ₜ )
+		c₂ₜ  = 0.5 * aᵏʳ₂
+		Hₐₜ  = Hᵤₜ + c₂ₜ^2 / 2
+		Hₒₜ  = Hₐₜ / 𝒞.ηₐₜ
+		T⃰₂ₜₜ = Å.T⃰₀ - Hₒₜ / 𝒞.Cpᵧ
+		P₂ₜ  = P⃰₀ * (T⃰₂ₜₜ / Å.T⃰₀)^𝒞.kk_1
+		
+		(; P⃰₀, Nₖ, Gᵧ, Nₜ, Hᵤₜ, ΔT⃰ₜ, T⃰₂ₜ, aᵏʳ₂, c₂ₜ, Hₐₜ, Hₒₜ, T⃰₂ₜₜ, P₂ₜ)
+	end
+	
+	md"λ Расчет турбины простой"
+end
+
 # ╔═╡ e24903de-8706-4d29-aaf0-2005799675e1
 begin
 	I = calc_prime()
 
 	# Результат A2GTP
-	π⃰ₖ  = 16
-	T⃰₀  = 1643
+	Å = (π⃰ₖ = 16, T⃰₀ = 1643, Gₙ = 173.363, Gᵧ = 155.083)
 	
-	C = calc_comp(I, π⃰ₖ)
-	T = calc_turb(I, C, π⃰ₖ, T⃰₀)
+	C = calc_comp(I, Å)
+	T = calc_turb(I, C, Å)
 	
 	md"### ∮ Первичный расчет"
 end
 
 # ╔═╡ 4e7e1ddb-8a03-4818-be9e-fa31698faf07
 begin
-	P₂ = (900_000, 480_000, 230_000, 97_500)
+	P₂ = (900_000, 480_000, 230_000, T.P₂ₜ)
+	# πₜ = (T.P₂ₜ / T.P⃰₀)^(1/4)
+	# P₂ = (T.P⃰₀*πₜ, T.P⃰₀*πₜ^2, T.P⃰₀*πₜ^3, T.P⃰₀*πₜ^4)
 	Φ➞ = range(0.94, 0.98, length=200)
 	Ψ➞ = range(0.94, 0.98, length=200)
 
@@ -723,13 +761,6 @@ end
 # ╔═╡ d1889b73-726a-468b-9bb9-e69cd81a796b
 @bind Cβ⃰₂ PlutoUI.NumberField(15:65, default=37)
 
-# ╔═╡ e8e5ef58-bec4-4c49-89d8-56fc5b8841a9
-begin
-    println("Julia version: ", VERSION)
-    println("Threads available: ", Threads.nthreads())
-    println("Threads max: ", Threads.maxthreadid())
-end
-
 # ╔═╡ 6316022b-a071-4d6b-be2a-d786c8edad45
 begin
 	#Cα₁ = 31
@@ -753,6 +784,15 @@ begin
 	
 	md"### ∮ Обратная закрутка"
 end
+
+# ╔═╡ ba361882-01ce-426b-8725-90f00d00be4a
+# profile_show(Pr1)
+
+# ╔═╡ 44ec2743-fcc2-41fd-a7eb-0e86202ccb6b
+# profile_shift(Pr1)
+
+# ╔═╡ 65e1301d-9baa-4c84-9bbf-0a82ed444c29
+# profiles_show(Pr1, Pr2, Pr3, Pr4, Pr5)
 
 # ╔═╡ b0aa65a1-3433-4b48-9196-d47e6e35379e
 md"# Приложение"
@@ -842,13 +882,13 @@ function plot_Ḡ(Ḡ, Φ, Ψ, T)
 		H_matrix = reshape(H_values, (length(Ψ➞), length(Φ➞)))'
 	
 		fig = Figure()
-		ax = Axis(fig[1, 1], xlabel="Φ", ylabel="Ψ")
+		ax = Axis(fig[1, 1], xlabel = "Φ", ylabel = "Ψ")
 		hm = heatmap!(ax, Φ➞, Ψ➞, G_matrix, interpolate = true)
-		Colorbar(fig[1, 2], hm, label=L"G_{opt}")
+		Colorbar(fig[1, 2], hm, label = L"G_{opt}", minorticksvisible=true)
 
-		contour!(ax, Φ➞,Ψ➞,G_matrix, levels=[T.Gᵧ], color=:red )
-		contour!(ax, Φ➞,Ψ➞,H_matrix, levels=[T.Nₜ], color=:blue)
-		scatter!(ax, Φ, Ψ, color=:red, markersize=8)
+		contour!(ax, Φ➞,Ψ➞,G_matrix, levels = [T.Gᵧ], color = "#e75480" )
+		contour!(ax, Φ➞,Ψ➞,H_matrix, levels = [T.Nₜ], color = "#b8860b" )
+		scatter!(ax, Φ, Ψ, color = "#e75480", markersize=8)
 
 		save("assets/G.svg", fig)
 	
@@ -1144,7 +1184,7 @@ begin
 		# Вычисление оптимального числа лопаток
 		Z    = calc_conf(b, cₘₐₓ.cₘ, R[n])
 
-		(; R₁, R₂, l, ξ, b, α₁, β₁, α₂, β₂, β₁ₚ, β₂ₚ, β₁ₛ, β₂ₛ, xc, yc, xp, yp, xs, ys, cntr, cₘₐₓ, Z, pline, sline)
+		(; R₁, R₂, l, ξ, b, α₁, β₁, α₂, β₂, β₁ₚ, β₂ₚ, β₁ₛ, β₂ₛ, xc, yc, xp, yp, xs, ys, cntr, cₘₐₓ, Z)
 	end
 
 	md"Λ Построение профиля"
@@ -1165,9 +1205,6 @@ end
 
 # ╔═╡ 7c9eb183-348e-44b1-bd47-ce3ea70d3efb
 nₗ
-
-# ╔═╡ ec22023b-2daa-4f6b-9731-2ff34e4d02e7
-Pr1.pline
 
 # ╔═╡ 9d1db807-3229-4d28-b78b-325f9c82c60d
 begin
@@ -1277,9 +1314,6 @@ begin
 	md"Λ Отображение одного профиля"
 end
 
-# ╔═╡ ba361882-01ce-426b-8725-90f00d00be4a
-profile_show(Pr1)
-
 # ╔═╡ 0edf5251-3d74-4f2c-bced-88fdb511d2f8
 begin
 	function profile_shift(Pr)
@@ -1310,24 +1344,24 @@ begin
 			end
 
 			# Дуги скругления
-			arc!(ax, color=:black, linewidth = 2, (0   , 0   ),
+			arc!(ax, color = :black, linewidth = 2, (0   , 0   ),
 				 Pr.R₁, deg2rad(90 + Pr.β₁ₚ), deg2rad(360 - 90 + Pr.β₁ₛ)
 				)
-			arc!(ax, color=:black, linewidth = 2, (Pr.l, Pr.ξ),
+			arc!(ax, color = :black, linewidth = 2, (Pr.l, Pr.ξ),
 				 Pr.R₂, deg2rad(90 + Pr.β₂ₚ), deg2rad(     -90 + Pr.β₂ₛ)
 				)
 
 		    # Профиль лопатки
-    		lines!(ax, Pr.xp, Pr.yp, color=:black, linewidth = 2)
-	    	lines!(ax, Pr.xs, Pr.ys, color=:black, linewidth = 2)
+    		lines!(ax, Pr.xp, Pr.yp, color = :black, linewidth = 2)
+	    	lines!(ax, Pr.xs, Pr.ys, color = :black, linewidth = 2)
 
 			# Дуги скругления
-			arc!(ax, (0   ,        Δ), Pr.R₁, deg2rad(90 + Pr.β₁ₚ), deg2rad(360 - 90 + Pr.β₁ₛ), color=:black, linewidth = 2)
-			arc!(ax, (Pr.l, Pr.ξ + Δ), Pr.R₂, deg2rad(90 + Pr.β₂ₚ), deg2rad(     -90 + Pr.β₂ₛ), color=:black, linewidth = 2)
+			arc!(ax, (0   ,        Δ), Pr.R₁, deg2rad(90 + Pr.β₁ₚ), deg2rad(360 - 90 + Pr.β₁ₛ), color = :black, linewidth = 2)
+			arc!(ax, (Pr.l, Pr.ξ + Δ), Pr.R₂, deg2rad(90 + Pr.β₂ₚ), deg2rad(     -90 + Pr.β₂ₛ), color = :black, linewidth = 2)
 
 		    # Профиль лопатки
-    		lines!(ax, Pr.xp, Pr.yp .+ Δ, color=:black, linewidth = 2)
-    		lines!(ax, Pr.xs, Pr.ys .+ Δ, color=:black, linewidth = 2)
+    		lines!(ax, Pr.xp, Pr.yp .+ Δ, color = :black, linewidth = 2)
+    		lines!(ax, Pr.xs, Pr.ys .+ Δ, color = :black, linewidth = 2)
 
 			Colorbar(fig[1, 2], limits=(min_dist,max_dist), minorticksvisible=true,
 					 label = L"t, \ м м"
@@ -1339,9 +1373,6 @@ begin
 
 	md"Λ Отображение конфузорности"
 end
-
-# ╔═╡ 44ec2743-fcc2-41fd-a7eb-0e86202ccb6b
-profile_shift(Pr1)
 
 # ╔═╡ 7cb1c106-ccfe-48eb-af87-0eb6812a4000
 begin
@@ -1407,9 +1438,6 @@ begin
 	md"Λ Отображение всех профилей"
 end
 
-# ╔═╡ 65e1301d-9baa-4c84-9bbf-0a82ed444c29
-profiles_show(Pr1, Pr2, Pr3, Pr4, Pr5)
-
 # ╔═╡ 8678ac5d-fea0-4697-b2e6-799e72afda5a
 md"### 📋 Красивые таблицы"
 
@@ -1435,9 +1463,6 @@ function table_swirl_short()
 	| $w_2, \text{м/с}$       |$(r̂1.w₂)  |$(r̂2.w₂)  |$(r̂3.w₂)  |$(r̂4.w₂)  |$(r̂5.w₂)  |
 	"""
 end
-
-# ╔═╡ 6a1cb344-122b-4230-ba7d-99f9b7f20f1d
-table_swirl_short()
 
 # ╔═╡ ef9bc959-20a8-44aa-9093-725c4734dd8d
 function table_swirl()
@@ -1622,161 +1647,6 @@ function table_prime()
 	| $d_{2T}/l_2$               | $(Î.d₂Tl₂) | Отношение фигней               |
 	| $Y$                        | $(Î.Y)     | Это $u/C_0$                    |
 	"""
-end
-
-# ╔═╡ 91407204-7175-43b8-89b6-913e22f1d5be
-function export_profiles_to_cadquery(profiles::Vector, filename::String="turbine_blade_profiles.py")
-    open(filename, "w") do file
-        # Записываем заголовок файла
-        write(file, "\"\"\"\nTurbine Blade Profiles for CadQuery\nGenerated from Julia turbine blade design\n\"\"\"\n\n")
-        write(file, "import cadquery as cq\n\n")
-        write(file, "def create_turbine_blade():\n")
-        write(file, "    \"\"\"Create turbine blade from profile sections\"\"\"\n")
-        write(file, "    sections = []\n\n")
-        
-        for (profile_idx, profile) in enumerate(profiles)
-            # Получаем радиус текущего сечения
-            r = hasproperty(profile, :r) ? profile.r : 0.0
-            
-            # Вычисляем точки контура профиля
-            n_points = 100
-            
-            # Дуга входной кромки
-            arc_center1 = (0.0, 0.0)
-            angles1 = range(deg2rad(90 + profile.β₁ₚ), deg2rad(360 - 90 + profile.β₁ₛ), length=n_points)
-            arc1_points = [Point2f(arc_center1[1] + profile.R₁ * cos(θ), arc_center1[2] + profile.R₁ * sin(θ)) for θ in angles1]
-            
-            # Дуга выходной кромки
-            arc_center2 = (profile.l, profile.ξ)
-            angles2 = range(deg2rad(90 + profile.β₂ₚ), deg2rad(-90 + profile.β₂ₛ), length=n_points)
-            arc2_points = [Point2f(arc_center2[1] + profile.R₂ * cos(θ), arc_center2[2] + profile.R₂ * sin(θ)) for θ in angles2]
-            
-            # Полный контур профиля
-            full_contour = vcat(
-                [Point2f(x, y) for (x, y) in zip(profile.xp, profile.yp)],  # спинка
-                arc2_points,                                                  # выходная кромка
-                reverse([Point2f(x, y) for (x, y) in zip(profile.xs, profile.ys)]), # корытце
-                arc1_points                                                   # входная кромка
-            )
-            
-            # Записываем точки профиля в формате CadQuery
-            write(file, "    # Profile section $profile_idx at radius r = $r\n")
-            write(file, "    points_$profile_idx = [\n")
-            
-            for point in full_contour
-                write(file, "        ($(point[1]), $(point[2])),\n")
-            end
-            
-            write(file, "    ]\n")
-            write(file, "    section_$profile_idx = cq.Workplane(\"XY\").polyline(points_$profile_idx).close()")
-            write(file, ".translate((0, 0, $r))\n")
-            write(file, "    sections.append(section_$profile_idx)\n\n")
-        end
-        
-        # Записываем команду для создания лофтинга
-        write(file, "    # Create loft through all sections\n")
-        write(file, "    blade = cq.Workplane(\"XY\").loft(sections)\n")
-        write(file, "    return blade\n\n")
-        
-        write(file, "# Create and display the blade\n")
-        write(file, "if __name__ == \"__main__\":\n")
-        write(file, "    blade = create_turbine_blade()\n")
-        write(file, "    cq.exporters.export(blade, 'turbine_blade.step')\n")
-        write(file, "    print(\"Turbine blade exported to turbine_blade.step\")\n")
-    end
-    
-    println("CadQuery script generated: $filename")
-end
-
-# ╔═╡ cabd4dcd-2a50-4f84-a09e-36db46230c05
-export_profiles_to_cadquery([Pr1, Pr2, Pr3, Pr4, Pr5], "turbine_blade.py")
-
-# ╔═╡ e2d032f9-3322-48c0-a02d-a9ae2f6683c9
-# Альтернативная версия с более продвинутым построением
-function export_profiles_to_cadquery_advanced(profiles::Vector, filename::String="turbine_blade_advanced.py")
-    open(filename, "w") do file
-        write(file, "\"\"\"\nAdvanced Turbine Blade Profiles for CadQuery\n\"\"\"\n\n")
-        write(file, "import cadquery as cq\n\n")
-        write(file, "def create_turbine_blade():\n")
-        write(file, "    # Create individual sections\n")
-        
-        for (profile_idx, profile) in enumerate(profiles)
-            r = hasproperty(profile, :r) ? profile.r : 0.0
-            
-            # Вычисляем точки контура
-            n_points = 100
-            arc_center1 = (0.0, 0.0)
-            angles1 = range(deg2rad(90 + profile.β₁ₚ), deg2rad(360 - 90 + profile.β₁ₛ), length=n_points)
-            arc1_points = [Point2f(arc_center1[1] + profile.R₁ * cos(θ), arc_center1[2] + profile.R₁ * sin(θ)) for θ in angles1]
-            
-            arc_center2 = (profile.l, profile.ξ)
-            angles2 = range(deg2rad(90 + profile.β₂ₚ), deg2rad(-90 + profile.β₂ₛ), length=n_points)
-            arc2_points = [Point2f(arc_center2[1] + profile.R₂ * cos(θ), arc_center2[2] + profile.R₂ * sin(θ)) for θ in angles2]
-            
-            full_contour = vcat(
-                [Point2f(x, y) for (x, y) in zip(profile.xp, profile.yp)],
-                arc2_points,
-                reverse([Point2f(x, y) for (x, y) in zip(profile.xs, profile.ys)]),
-                arc1_points
-            )
-            
-            write(file, "    # Section $profile_idx\n")
-            write(file, "    points_$profile_idx = [\n")
-            for point in full_contour
-                write(file, "        ($(point[1]), $(point[2])),\n")
-            end
-            write(file, "    ]\n")
-        end
-        
-        write(file, "\n    # Create sections with proper positioning\n")
-        write(file, "    sections = []\n")
-        for (profile_idx, profile) in enumerate(profiles)
-            r = hasproperty(profile, :r) ? profile.r : 0.0
-            write(file, "    section_$profile_idx = cq.Workplane(\"XY\").polyline(points_$profile_idx).close()")
-            
-            # Добавляем возможный поворот если нужно
-            if hasproperty(profile, :angle)
-                write(file, ".rotate((0,0,0), (0,0,1), $(profile.angle))")
-            end
-            
-            write(file, ".translate((0, 0, $r))\n")
-            write(file, "    sections.append(section_$profile_idx)\n")
-        end
-        
-        write(file, "\n    # Create blade using loft\n")
-        write(file, "    blade = cq.Workplane(\"XY\").loft(sections, ruled=True)\n")
-        write(file, "    \n")
-        write(file, "    # Add optional fillets for smooth edges\n")
-        write(file, "    # blade = blade.edges().fillet(0.1)  # Adjust fillet radius as needed\n")
-        write(file, "    \n")
-        write(file, "    return blade\n\n")
-        
-        write(file, "def create_blade_with_hub(tip_clearance=2.0, hub_radius=50.0):\n")
-        write(file, "    \"\"\"Create complete blade assembly with hub\"\"\"\n")
-        write(file, "    blade = create_turbine_blade()\n")
-        write(file, "    \n")
-        write(file, "    # Create hub cylinder\n")
-        write(file, "    max_z = max([p.r for p in profiles]) + tip_clearance\n")
-        write(file, "    hub = cq.Workplane(\"XY\").circle(hub_radius).extrude(max_z)\n")
-        write(file, "    \n")
-        write(file, "    # Combine blade with hub\n")
-        write(file, "    assembly = hub.union(blade)\n")
-        write(file, "    \n")
-        write(file, "    return assembly\n\n")
-        
-        write(file, "if __name__ == \"__main__\":\n")
-        write(file, "    # Create simple blade\n")
-        write(file, "    blade = create_turbine_blade()\n")
-        write(file, "    cq.exporters.export(blade, 'turbine_blade.step')\n")
-        write(file, "    \n")
-        write(file, "    # Create blade with hub\n")
-        write(file, "    # assembly = create_blade_with_hub()\n")
-        write(file, "    # cq.exporters.export(assembly, 'turbine_assembly.step')\n")
-        write(file, "    \n")
-        write(file, "    print(\"Turbine blade exported\")\n")
-    end
-    
-    println("Advanced CadQuery script generated: $filename")
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -3343,11 +3213,11 @@ version = "4.1.0+0"
 
 # ╔═╡ Cell order:
 # ╟─89d5d4d4-a5f0-11f0-275d-edfe9355555d
-# ╟─4b0d698d-7921-4bf0-b5d4-0bf680d992e5
+# ╠═4b0d698d-7921-4bf0-b5d4-0bf680d992e5
 # ╟─fb7eb31f-8d28-4e05-b994-29a85e359b14
-# ╟─b5be0f61-904f-498d-8b4d-3bb84cf62270
-# ╟─56a5a75a-20ff-443e-992a-c8a5957b7a90
-# ╟─40561c16-193e-4349-bc16-a7d9ceb55f62
+# ╠═b5be0f61-904f-498d-8b4d-3bb84cf62270
+# ╠═56a5a75a-20ff-443e-992a-c8a5957b7a90
+# ╠═40561c16-193e-4349-bc16-a7d9ceb55f62
 # ╟─692ea0cf-2fc9-47fb-9542-930c64ac94bc
 # ╟─ec47fa62-62ea-4bf8-a57f-9e6b10b5fa0b
 # ╟─65781f50-667a-44c0-beb2-466dfb293d36
@@ -3357,25 +3227,23 @@ version = "4.1.0+0"
 # ╟─23866f8f-bdff-45be-afcd-91d3c87a200e
 # ╟─cfbd1033-b649-4ab2-941a-1519bcc28986
 # ╟─3e5014a8-e39f-4d3c-bb2f-122dea8482bb
+# ╟─6d9aa6d2-8c16-4bff-bd80-91db31f0ac81
+# ╠═caeb332a-a68e-4c25-8812-663be4174db8
 # ╠═e24903de-8706-4d29-aaf0-2005799675e1
 # ╠═4e7e1ddb-8a03-4818-be9e-fa31698faf07
 # ╟─1f21d0d2-43a3-489b-9b77-d09d0824f799
 # ╟─4acc88bf-4bbf-49b5-8006-920901d8ddc9
 # ╟─7e4039e8-ed6c-46eb-a079-9df82d4272d6
 # ╟─d1889b73-726a-468b-9bb9-e69cd81a796b
-# ╟─e8e5ef58-bec4-4c49-89d8-56fc5b8841a9
 # ╟─6316022b-a071-4d6b-be2a-d786c8edad45
-# ╟─d51bd461-3106-4b8d-9d3a-66c7fb6c8ab1
+# ╠═d51bd461-3106-4b8d-9d3a-66c7fb6c8ab1
 # ╟─43b474fc-51fa-4aef-86fa-cba0eb59bcf9
-# ╟─6a1cb344-122b-4230-ba7d-99f9b7f20f1d
-# ╟─9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
+# ╠═9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
 # ╠═20f45d03-754e-4d6a-b1ad-431745281c4e
 # ╠═7c9eb183-348e-44b1-bd47-ce3ea70d3efb
-# ╠═ec22023b-2daa-4f6b-9731-2ff34e4d02e7
 # ╠═ba361882-01ce-426b-8725-90f00d00be4a
 # ╠═44ec2743-fcc2-41fd-a7eb-0e86202ccb6b
 # ╠═65e1301d-9baa-4c84-9bbf-0a82ed444c29
-# ╠═cabd4dcd-2a50-4f84-a09e-36db46230c05
 # ╟─b0aa65a1-3433-4b48-9196-d47e6e35379e
 # ╟─7e82ca6c-5c36-4c0d-ba07-914ff604f107
 # ╟─48f45b5a-03af-4b1c-bdb9-16964246e85c
@@ -3400,7 +3268,5 @@ version = "4.1.0+0"
 # ╟─3958c916-7eaf-4b0c-9d01-58f218542010
 # ╟─b2981751-027d-4129-b6a4-7967947e4ffa
 # ╟─b0faed30-459f-40f0-b7a8-52fabde15bb7
-# ╠═91407204-7175-43b8-89b6-913e22f1d5be
-# ╠═e2d032f9-3322-48c0-a02d-a9ae2f6683c9
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
