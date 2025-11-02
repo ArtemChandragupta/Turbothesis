@@ -20,6 +20,7 @@
               waterfall-cad-svg
               lens
               linear
+              aeson
             ]))
             haskellPackages.cabal-install
             haskellPackages.haskell-language-server

@@ -22,6 +22,7 @@ begin
 	using LaTeXStrings
 	using CairoMakie
 	using Statistics
+	using JSON
 end
 
 # ╔═╡ 4b0d698d-7921-4bf0-b5d4-0bf680d992e5
@@ -118,22 +119,22 @@ begin
 		φ   = (Hₜ * 𝒞.ηₘₜ - Hₖ / 𝒞.ηₘₖ) / (Hₜ * 𝒞.ηₘₜ)
 	
 		# Расчет с охладителем
-		# t⃰₂   = T⃰₂ - 𝒞.T̂₀
-		# t⃰₃   = 𝒯.T⃰₃ - 𝒞.T̂₀
-		# gₐᵢᵣ = (𝒞.Qₙₚ*𝒞.ηₖₛ + 𝒞.hₜₒₚ + 𝒞.L₀*𝒞.Cpₙ*t⃰₂ - (𝒞.L₀+1)*𝒞.Cpₐ*t⃰₃) / (𝒞.Cpₙ * (t⃰₃-t⃰₂))
-		# a    = (𝒞.L₀ + gₐᵢᵣ)/ 𝒞.L₀
-		# gₜ   = 1 / (a * 𝒞.L₀)
-		# gᶜc  = 0.01 + 0.25 / 10000 * (𝒯.T⃰₃ - 𝒞.Tₛₜ)
-		# gᵖc  = 0.08 + 0.22 / 10000 * (𝒯.T⃰₃ - 𝒞.Tₛₜ)
-		# gc   = 𝒞.σᵤₜ * (gᶜc + gᵖc)
-		# ĝc   = ( (1+gₜ) * gc ) / ( 1 + (1+gₜ)*gc )
-		# Gₜ   = gₜ * (1-ĝc) * Gₙ
-		# Ωᵣₐₛ = H⃰ₒₜ * Gₙ / Gₜ
-		# Hₑ   = (1+gₜ) * (1-ĝc) * Hₜ * 𝒞.ηₘₜ - Hₖ * 𝒞.ηₘₖ
-		# Ωₐₗₗ = Hₑ * Gₙ / Gₜ
+		t⃰₂   = T⃰₂ - 𝒞.T̂₀
+		t⃰₃   = 𝒯.T⃰₃ - 𝒞.T̂₀
+		gₐᵢᵣ = (𝒞.Qₙₚ*𝒞.ηₖₛ + 𝒞.hₜₒₚ + 𝒞.L₀*𝒞.Cpₙ*t⃰₂ - (𝒞.L₀+1)*𝒞.Cpₐ*t⃰₃) / (𝒞.Cpₙ * (t⃰₃-t⃰₂))
+		a    = (𝒞.L₀ + gₐᵢᵣ)/ 𝒞.L₀
+		gₜ   = 1 / (a * 𝒞.L₀)
+		gᶜc  = 0.01 + 0.25 / 10000 * (𝒯.T⃰₃ - 𝒞.Tₛₜ)
+		gᵖc  = 0.08 + 0.22 / 10000 * (𝒯.T⃰₃ - 𝒞.Tₛₜ)
+		gc   = 𝒞.σᵤₜ * (gᶜc + gᵖc)
+		ĝc   = ( (1+gₜ) * gc ) / ( 1 + (1+gₜ)*gc )
+		Gₜ   = gₜ * (1-ĝc) * Gₙ
+		Ωᵣₐₛ = H⃰ₒₜ * Gₙ / Gₜ
+		Hₑ   = (1+gₜ) * (1-ĝc) * Hₜ * 𝒞.ηₘₜ - Hₖ * 𝒞.ηₘₖ
+		Ωₐₗₗ = Hₑ * Gₙ / Gₜ
 		
 		(; P⃰₁, T⃰₁, P⃰₂, T⃰₂, H⃰ₒₖ,	Hₖ,	P⃰₃, P⃰₄,	π⃰ₜ,	H⃰ₒₜ, Hₜ, T⃰₄, Gₙ, Q̇₁, Q₁, ηₑ, φ, 
-		 # t⃰₂, t⃰₃, gₐᵢᵣ, a, gₜ, gᶜc, gᵖc, gc, ĝc, Gₜ, Ωᵣₐₛ, Hₑ, Ωₐₗₗ
+		 t⃰₂, t⃰₃, gₐᵢᵣ, a, gₜ, gᶜc, gᵖc, gc, ĝc, Gₜ, Ωᵣₐₛ, Hₑ, Ωₐₗₗ
 		 )
 	end
 	
@@ -207,7 +208,7 @@ begin
 		P⃰₀   = 𝒞.σ⃰ₖₛ * C.P⃰ₖ
 		Nₖ   = C.H⃰ₖ * I.Gₙ
 		Nₜ   = 𝒯.N + Nₖ
-		Gᵧ   = I.Gₙ
+		Gᵧ   = I.Gₙ + I.Gₜ
 		Hᵤₜ  = 𝒞.kₙₜ * Nₜ / Gᵧ
 		ΔT⃰ₜ  = Hᵤₜ / 𝒞.Cpᵧ
 		T⃰₂ₜ  = Å.T⃰₀ - ΔT⃰ₜ
@@ -785,15 +786,6 @@ begin
 	md"### ∮ Обратная закрутка"
 end
 
-# ╔═╡ ba361882-01ce-426b-8725-90f00d00be4a
-# profile_show(Pr1)
-
-# ╔═╡ 44ec2743-fcc2-41fd-a7eb-0e86202ccb6b
-# profile_shift(Pr1)
-
-# ╔═╡ 65e1301d-9baa-4c84-9bbf-0a82ed444c29
-# profiles_show(Pr1, Pr2, Pr3, Pr4, Pr5)
-
 # ╔═╡ b0aa65a1-3433-4b48-9196-d47e6e35379e
 md"# Приложение"
 
@@ -839,181 +831,170 @@ end
 md"### 📊 Графики"
 
 # ╔═╡ 8fd74453-354f-4cae-8e46-c310abdc6b5b
-function plot_geometry(l̄)
-	with_theme(theme_latexfonts()) do
-		
-		viridis_cmap = cgrad(:viridis)
-        color1 = viridis_cmap[0.1]
-        color2 = viridis_cmap[0.8]
-		
-		fig = Figure(size=(800, 400))
-		ax = Axis(fig[1,1],aspect = DataAspect(), title = "Продольное сечение")
-		
-		for i in 1:Int(length(l̄.ll₁)/2)
-			poly!(ax, color = color1, Point2f[
-				(l̄.xl₁[2i  ], 0          ), (l̄.xl₁[2i  ], l̄.ll₁[2i]), 
-				(l̄.xl₁[2i-1], l̄.ll₁[2i-1]), (l̄.xl₁[2i-1], 0        )
-			])
+begin
+	function plot_geometry(l̄)
+		with_theme(theme_latexfonts()) do
+			
+			viridis_cmap = cgrad(:viridis)
+	        color1 = viridis_cmap[0.1]
+	        color2 = viridis_cmap[0.8]
+			
+			fig = Figure(size=(800, 400))
+			ax = Axis(fig[1,1],aspect = DataAspect(), title = "Продольное сечение")
+			
+			for i in 1:Int(length(l̄.ll₁)/2)
+				poly!(ax, color = color1, Point2f[
+					(l̄.xl₁[2i  ], 0          ), (l̄.xl₁[2i  ], l̄.ll₁[2i]), 
+					(l̄.xl₁[2i-1], l̄.ll₁[2i-1]), (l̄.xl₁[2i-1], 0        )
+				])
+			end
+	
+			for i in 1:Int(length(l̄.ll₁)/2)
+				poly!(ax, color = color2, Point2f[
+					(l̄.xl₂[2i  ], 0          ), (l̄.xl₂[2i  ], l̄.ll₂[2i]),
+					(l̄.xl₂[2i-1], l̄.ll₂[2i-1]), (l̄.xl₂[2i-1], 0        )
+				])
+			end
+	
+			fig
 		end
-
-		for i in 1:Int(length(l̄.ll₁)/2)
-			poly!(ax, color = color2, Point2f[
-				(l̄.xl₂[2i  ], 0          ), (l̄.xl₂[2i  ], l̄.ll₂[2i]),
-				(l̄.xl₂[2i-1], l̄.ll₂[2i-1]), (l̄.xl₂[2i-1], 0        )
-			])
-		end
-
-		fig
 	end
+	md"👁 Отображение продольного сечения"
 end
 
 # ╔═╡ 1f21d0d2-43a3-489b-9b77-d09d0824f799
 plot_geometry(l̄)
 
 # ╔═╡ 18159b8a-c05b-4191-9eae-71f7b7646e7d
-function plot_Ḡ(Ḡ, Φ, Ψ, T)
-	with_theme(theme_latexfonts()) do
-		G_values = [G[1] for G in Ḡ]
-		Φ_values = [G[2] for G in Ḡ]
-		Ψ_values = [G[3] for G in Ḡ]
-		H_values = [G[4]*G[1]/ CONST.kₙₜ for G in Ḡ]
+begin
+	function plot_Ḡ(Ḡ, Φ, Ψ, T)
+		with_theme(theme_latexfonts()) do
+			G_values = [G[1] for G in Ḡ]
+			Φ_values = [G[2] for G in Ḡ]
+			Ψ_values = [G[3] for G in Ḡ]
+			H_values = [G[4]*G[1]/ CONST.kₙₜ for G in Ḡ]
+		
+			G_matrix = reshape(G_values, (length(Ψ➞), length(Φ➞)))'
+			H_matrix = reshape(H_values, (length(Ψ➞), length(Φ➞)))'
+		
+			fig = Figure()
+			ax = Axis(fig[1, 1], xlabel = "Φ", ylabel = "Ψ")
+			hm = heatmap!(ax, Φ➞, Ψ➞, G_matrix, interpolate = true)
+			Colorbar(fig[1, 2], hm, label = L"G_{opt}", minorticksvisible=true)
 	
-		G_matrix = reshape(G_values, (length(Ψ➞), length(Φ➞)))'
-		H_matrix = reshape(H_values, (length(Ψ➞), length(Φ➞)))'
+			contour!(ax, Φ➞,Ψ➞,G_matrix, levels = [T.Gᵧ], color = "#e75480" )
+			contour!(ax, Φ➞,Ψ➞,H_matrix, levels = [T.Nₜ], color = "#b8860b" )
+			scatter!(ax, Φ, Ψ, color = "#e75480", markersize=8)
 	
-		fig = Figure()
-		ax = Axis(fig[1, 1], xlabel = "Φ", ylabel = "Ψ")
-		hm = heatmap!(ax, Φ➞, Ψ➞, G_matrix, interpolate = true)
-		Colorbar(fig[1, 2], hm, label = L"G_{opt}", minorticksvisible=true)
-
-		contour!(ax, Φ➞,Ψ➞,G_matrix, levels = [T.Gᵧ], color = "#e75480" )
-		contour!(ax, Φ➞,Ψ➞,H_matrix, levels = [T.Nₜ], color = "#b8860b" )
-		scatter!(ax, Φ, Ψ, color = "#e75480", markersize=8)
-
-		save("assets/G.svg", fig)
-	
-		fig
+			save("assets/G.svg", fig)
+		
+			fig
+		end
 	end
+	md"👁 Отображение поиска оптимальных Φ и Ψ"
 end
 
 # ╔═╡ 4acc88bf-4bbf-49b5-8006-920901d8ddc9
 plot_Ḡ(Ḡ, Φ, Ψ, T)
 
 # ╔═╡ 6cf7f12e-cc58-4b08-816b-584e02dbd071
-function plot_tooth(valid_params, F_range, ρK_range, filtered_FρK)
-
-    function fill_matrix(field)
-        matrix = fill(NaN, (length(ρK_range), length(F_range)))
-        for param in valid_params
-            i = findfirst(==(param.F), F_range)
-            j = findfirst(==(param.ρK), ρK_range)
-            if i !== nothing && j !== nothing
-                matrix[j, i] = getfield(param, field)
-            end
-        end
-        return matrix
-    end
-
-    σ_matrix  = fill_matrix(:σ )
-    Δρ_matrix = fill_matrix(:Δρ)
-
-    with_theme(theme_latexfonts()) do
-        fig = Figure(size=(800, 400))
-
-        # Общие настройки для осей
-        axis_settings = (
-            xminorticksvisible = true, xminorgridvisible = true,
-            xminorticks = IntervalsBetween(10),
-            yminorticksvisible = true, yminorgridvisible = true,
-            yminorticks = IntervalsBetween(10),
-        )
-
-        # График для среднеквадратичного отклонения
-        ax1 = Axis(fig[1, 1];
-            ylabel = L"F",
-            xlabel = L"\rho_K",
-            title  = L"\sigma ($\alpha_1 = %$(Cα₁)$, $\beta^*_2 = %$(Cβ⃰₂)$)",
-            axis_settings...
-        )
-        hm1 = heatmap!(ax1, ρK_range, F_range, σ_matrix, rasterize = true)
-        Colorbar(fig[1, 2], hm1, label="σ", width=15)
-        scatter!(ax1, filtered_FρK[2], filtered_FρK[1], color=:red, markersize=8)
-
-        # График для разницы полиномиальной и нормальной степени реактивности
-        ax2 = Axis(fig[1, 3];
-            xlabel = L"\rho_K",
-            title  = L"$\Delta \rho$ ($\alpha_1 = %$(Cα₁)$, $\beta^*_2 = %$(Cβ⃰₂)$)",
-            axis_settings...
-        )
-        hm2 = heatmap!(ax2, ρK_range, F_range, abs.(Δρ_matrix), rasterize=true)
-        Colorbar(fig[1, 4], hm2, label=L"\Delta", width=15)
-        scatter!(ax2, filtered_FρK[2], filtered_FρK[1], color=:red, markersize=8)
-
-        colgap!(fig.layout, 1, 10)
-        colgap!(fig.layout, 3, 10)
-        
-		save("assets/var.svg", fig)
-        fig
-    end
+begin
+	function plot_tooth(valid_params, F_range, ρK_range, filtered_FρK)
+	
+	    function fill_matrix(field)
+	        matrix = fill(NaN, (length(ρK_range), length(F_range)))
+	        for param in valid_params
+	            i = findfirst(==(param.F), F_range)
+	            j = findfirst(==(param.ρK), ρK_range)
+	            if i !== nothing && j !== nothing
+	                matrix[j, i] = getfield(param, field)
+	            end
+	        end
+	        return matrix
+	    end
+	
+	    σ_matrix  = fill_matrix(:σ )
+	    Δρ_matrix = fill_matrix(:Δρ)
+	
+	    with_theme(theme_latexfonts()) do
+	        fig = Figure(size=(800, 400))
+	
+	        # Общие настройки для осей
+	        axis_settings = (
+	            xminorticksvisible = true, xminorgridvisible = true,
+	            xminorticks = IntervalsBetween(10),
+	            yminorticksvisible = true, yminorgridvisible = true,
+	            yminorticks = IntervalsBetween(10),
+	        )
+	
+	        # График для среднеквадратичного отклонения
+	        ax1 = Axis(fig[1, 1];
+	            ylabel = L"F",
+	            xlabel = L"\rho_K",
+	            title  = L"\sigma ($\alpha_1 = %$(Cα₁)$, $\beta^*_2 = %$(Cβ⃰₂)$)",
+	            axis_settings...
+	        )
+	        hm1 = heatmap!(ax1, ρK_range, F_range, σ_matrix, rasterize = true)
+	        Colorbar(fig[1, 2], hm1, label="σ", width=15)
+	        scatter!(ax1, filtered_FρK[2], filtered_FρK[1], color=:red, markersize=8)
+	
+	        # График для разницы полиномиальной и нормальной степени реактивности
+	        ax2 = Axis(fig[1, 3];
+	            xlabel = L"\rho_K",
+	            title  = L"$\Delta \rho$ ($\alpha_1 = %$(Cα₁)$, $\beta^*_2 = %$(Cβ⃰₂)$)",
+	            axis_settings...
+	        )
+	        hm2 = heatmap!(ax2, ρK_range, F_range, abs.(Δρ_matrix), rasterize=true)
+	        Colorbar(fig[1, 4], hm2, label=L"\Delta", width=15)
+	        scatter!(ax2, filtered_FρK[2], filtered_FρK[1], color=:red, markersize=8)
+	
+	        colgap!(fig.layout, 1, 10)
+	        colgap!(fig.layout, 3, 10)
+	        
+			save("assets/var.svg", fig)
+	        fig
+	    end
+	end
+	md"👁 Отображение поиска параметров закрутки"
 end
 
 # ╔═╡ d51bd461-3106-4b8d-9d3a-66c7fb6c8ab1
 plot_tooth(valid_FρK, F_range, ρK_range, filtered_FρK)
 
 # ╔═╡ 0654861a-f4d5-4adb-b929-8e7e6ae78b89
-function plot_goodies(R)
-	with_theme(theme_latexfonts()) do
-		fig = Figure(size = (1200, 400))
-
-		ax1 = Axis(fig[1, 1],
-			title = LaTeXString("Σ Δρ_k = $(round(sum(r.Δρ for r in R), digits=2))"),
-	    	ylabel = "ρ"
-		)
+begin
+	function plot_goodies(R)
+		with_theme(theme_latexfonts()) do
+			fig = Figure(size = (1200, 400))
 	
-		# Линии для ρK и ρT
-		scatterlines!(ax1, 1:length(R), [r.ρK for r in R],
-			label = "ρK, ρK = $(round(ρK, digits=2)), F = $(round(F, digits=2))")
-		scatterlines!(ax1, 1:length(R), [r.ρT for r in R], label = "ρT")
-		axislegend(ax1, halign = :right, valign = :bottom)
+			ax1 = Axis(fig[1, 1],
+				title = LaTeXString("Σ Δρ_k = $(round(sum(r.Δρ for r in R), digits=2))"),
+		    	ylabel = "ρ"
+			)
+		
+			# Линии для ρK и ρT
+			scatterlines!(ax1, 1:length(R), [r.ρK for r in R],
+				label = "ρK, ρK = $(round(ρK, digits=2)), F = $(round(F, digits=2))")
+			scatterlines!(ax1, 1:length(R), [r.ρT for r in R], label = "ρT")
+			axislegend(ax1, halign = :right, valign = :bottom)
+		
+			# График давлений
+			ax2 = Axis(fig[1, 2],
+					   title = L"p_2 \ при \ обратной \ закрутке",
+					   ylabel = "p₂"
+					  )
+			scatterlines!(ax2, 1:length(R), [r.p₂ for r in R], label = "p₂")
 	
-		# График давлений
-		ax2 = Axis(fig[1, 2],
-				   title = L"p_2 \ при \ обратной \ закрутке",
-				   ylabel = "p₂"
-				  )
-		scatterlines!(ax2, 1:length(R), [r.p₂ for r in R], label = "p₂")
-
-		save("assets/goodies.svg", fig)
-
-		fig
+			save("assets/goodies.svg", fig)
+	
+			fig
+		end
 	end
+	md"👁 Отображение изменения степеней реактивности и давления за последней ступенью"
 end
 
 # ╔═╡ 9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
 plot_goodies(R)
-
-# ╔═╡ 61b339cb-63d4-4123-a000-b0257519fa75
-function plot_supplementaries(R)
-	with_theme(theme_latexfonts()) do
-		fig = Figure()
-
-		ax = Axis(fig[1, 1])
-
-		lines!(ax, 1:5, [r.u₁^2 - r.u₂^2 for r in R], label = "u")
-		lines!(ax, 1:5, [r.w₂^2 - r.w₁^2 for r in R], label = "w")
-		lines!(ax, 1:5, [r.c₁^2 - r.c₂^2 for r in R], label = "c")
-
-		# lines!(ax, 1:5, [r.u₁^2 for r in R], label = "u1")
-		# lines!(ax, 1:5, [r.u₂^2 for r in R], label = "u2")
-
-		lines!(ax, 1:5, [r.w₁^2 for r in R], label = "w1")
-		lines!(ax, 1:5, [r.w₂^2 for r in R], label = "w2")
-	
-		axislegend(ax)
-
-		fig
-	end
-end
 
 # ╔═╡ bd295267-109a-4c84-bba3-7cdd0d682b18
 md"### Профили"
@@ -1152,6 +1133,7 @@ begin
 
 		l = R[n].b - 2tand(l̄.β) * (R[n].r - R[1].r)
 		ξ = l * (R[n].w₁u + R[n].w₂u) / (R[n].w₁u / tand(β₁) + R[n].w₂u / tand(β₂))
+		r = R[n].r
 
 		# Длина хорды
 		b = √(l^2 + ξ^2)
@@ -1184,7 +1166,7 @@ begin
 		# Вычисление оптимального числа лопаток
 		Z    = calc_conf(b, cₘₐₓ.cₘ, R[n])
 
-		(; R₁, R₂, l, ξ, b, α₁, β₁, α₂, β₂, β₁ₚ, β₂ₚ, β₁ₛ, β₂ₛ, xc, yc, xp, yp, xs, ys, cntr, cₘₐₓ, Z)
+		(; R₁, R₂, l, ξ, r, b, α₁, β₁, α₂, β₂, β₁ₚ, β₂ₚ, β₁ₛ, β₂ₛ, xc, yc, xp, yp, xs, ys, cntr, cₘₐₓ, Z)
 	end
 
 	md"Λ Построение профиля"
@@ -1202,9 +1184,6 @@ begin
 
 	md"### ∮ Построение профилей рабочих лопаток"
 end
-
-# ╔═╡ 7c9eb183-348e-44b1-bd47-ce3ea70d3efb
-nₗ
 
 # ╔═╡ 9d1db807-3229-4d28-b78b-325f9c82c60d
 begin
@@ -1311,8 +1290,11 @@ begin
 		end
 	end
 
-	md"Λ Отображение одного профиля"
+	md"👁 Отображение одного профиля"
 end
+
+# ╔═╡ ba361882-01ce-426b-8725-90f00d00be4a
+profile_show(Pr1)
 
 # ╔═╡ 0edf5251-3d74-4f2c-bced-88fdb511d2f8
 begin
@@ -1371,8 +1353,11 @@ begin
 		end
 	end
 
-	md"Λ Отображение конфузорности"
+	md"👁 Отображение конфузорности"
 end
+
+# ╔═╡ 44ec2743-fcc2-41fd-a7eb-0e86202ccb6b
+profile_shift(Pr1)
 
 # ╔═╡ 7cb1c106-ccfe-48eb-af87-0eb6812a4000
 begin
@@ -1435,8 +1420,87 @@ begin
     	end
 	end
 
-	md"Λ Отображение всех профилей"
+	md"👁 Отображение всех профилей"
 end
+
+# ╔═╡ 65e1301d-9baa-4c84-9bbf-0a82ed444c29
+profiles_show(Pr1, Pr2, Pr3, Pr4, Pr5)
+
+# ╔═╡ b4612166-cbe9-4b21-b630-e08481294a03
+function transformProfile(Pr)
+	cx = -1000Pr.cntr[1]
+	cy = -1000Pr.cntr[2]
+
+    c1s = (cx + 1000Pr.R₁ * cosd(90  +  Pr.β₁ₚ            ),
+		   cy + 1000Pr.R₁ * sind(90  +  Pr.β₁ₚ            ))
+    c1e = (cx - 1000Pr.R₁ * cosd(90  +  Pr.β₁ₛ            ),
+		   cy - 1000Pr.R₁ * sind(90  +  Pr.β₁ₛ            ))
+	c1m = (cx + 1000Pr.R₁ * cosd(180 + (Pr.β₁ₚ + Pr.β₁ₛ)/2),
+		   cy + 1000Pr.R₁ * sind(180 + (Pr.β₁ₚ + Pr.β₁ₛ)/2))
+    
+	c2s = (cx + 1000Pr.l + 1000Pr.R₂ * cosd(90 + Pr.β₂ₚ               ),
+		   cy + 1000Pr.ξ + 1000Pr.R₂ * sind(90 + Pr.β₂ₚ               ))
+	c2e = (cx + 1000Pr.l - 1000Pr.R₂ * cosd(90 + Pr.β₂ₛ               ),
+		   cy + 1000Pr.ξ - 1000Pr.R₂ * sind(90 + Pr.β₂ₛ               ))
+	c2m = (cx + 1000Pr.l + 1000Pr.R₂ * cosd(    (Pr.β₂ₚ + Pr.β₂ₛ) / 2 ),
+		   cy + 1000Pr.ξ + 1000Pr.R₂ * sind(    (Pr.β₂ₚ + Pr.β₂ₛ) / 2 ))
+    
+    pls = (cx + 1000Pr.xp[1]  , cy + 1000Pr.yp[1]  )
+    ple = (cx + 1000Pr.xp[end], cy + 1000Pr.yp[end])
+    pl1 = (cx + 1000Pr.xp[1]   +                (Pr.xp[end] - Pr.xp[1]) * 1000/3,
+		   cy + 1000Pr.yp[1]   + tand(Pr.β₁ₚ) * (Pr.xp[end] - Pr.xp[1]) * 1000/3)
+    pl2 = (cx + 1000Pr.xp[end] -                (Pr.xp[end] - Pr.xp[1]) * 1000/3,
+		   cy + 1000Pr.yp[end] - tand(Pr.β₂ₚ) * (Pr.xp[end] - Pr.xp[1]) * 1000/3)
+    
+    sls = (cx + 1000Pr.xs[1]  , cy + 1000Pr.ys[1]  )
+    sle = (cx + 1000Pr.xs[end], cy + 1000Pr.ys[end])
+	sl1 = (cx + 1000Pr.xs[1]   +                (Pr.xs[end] - Pr.xs[1]) * 1000/3,
+		   cy + 1000Pr.ys[1]   + tand(Pr.β₁ₛ) * (Pr.xs[end] - Pr.xs[1]) * 1000/3)
+    sl2 = (cx + 1000Pr.xs[end] -                (Pr.xs[end] - Pr.xs[1]) * 1000/3,
+		   cy + 1000Pr.ys[end] - tand(Pr.β₂ₛ) * (Pr.xs[end] - Pr.xs[1]) * 1000/3)
+
+    (
+        c1 = (c1s, c1e, c1m     ),
+        c2 = (c2s, c2e, c2m     ),
+        pl = (pls, ple, pl1, pl2),
+        sl = (sls, sle, sl1, sl2),
+		rl = 1000Pr.r
+    )
+end
+
+# ╔═╡ 4886ddbb-9cc1-483c-8441-bd2b1961d540
+function write_Haskell(Data)
+	open("waterfall/Data.hs", "w") do f
+		write(f, "module Data where \n")
+		write(f, "import Linear (V3 (..), V2 (..), zero) \n")
+		for section in 1:length(Data)
+			write(f, "p$(section)c1s = V2 ($(Data[section][1][1][1])) ($(Data[section][1][1][2])) \n")
+			write(f, "p$(section)c1e = V2 ($(Data[section][1][2][1])) ($(Data[section][1][2][2])) \n")
+			write(f, "p$(section)c1m = V2 ($(Data[section][1][3][1])) ($(Data[section][1][3][2])) \n")
+
+			write(f, "p$(section)c2s = V2 ($(Data[section][2][1][1])) ($(Data[section][2][1][2])) \n")
+			write(f, "p$(section)c2e = V2 ($(Data[section][2][2][1])) ($(Data[section][2][2][2])) \n")
+			write(f, "p$(section)c2m = V2 ($(Data[section][2][3][1])) ($(Data[section][2][3][2])) \n")
+
+			write(f, "p$(section)ls0 = V2 ($(Data[section][3][1][1])) ($(Data[section][3][1][2])) \n")
+			write(f, "p$(section)ls1 = V2 ($(Data[section][3][2][1])) ($(Data[section][3][2][2])) \n")
+			write(f, "p$(section)ls2 = V2 ($(Data[section][3][3][1])) ($(Data[section][3][3][2])) \n")
+			write(f, "p$(section)ls3 = V2 ($(Data[section][3][4][1])) ($(Data[section][3][4][2])) \n")
+
+			write(f, "p$(section)lp0 = V2 ($(Data[section][4][1][1])) ($(Data[section][4][1][2])) \n")
+			write(f, "p$(section)lp1 = V2 ($(Data[section][4][2][1])) ($(Data[section][4][2][2])) \n")
+			write(f, "p$(section)lp2 = V2 ($(Data[section][4][3][1])) ($(Data[section][4][3][2])) \n")
+			write(f, "p$(section)lp3 = V2 ($(Data[section][4][4][1])) ($(Data[section][4][4][2])) \n")
+
+			write(f, "p$(section)r = $(Data[section][5]) \n")
+
+			write(f, "\n")
+		end
+	end
+end
+
+# ╔═╡ e93e7b4b-069f-44c5-8a0a-d1236ee4b2cc
+write_Haskell(transformProfile.([Pr1, Pr2, Pr3, Pr4, Pr5]))
 
 # ╔═╡ 8678ac5d-fea0-4697-b2e6-799e72afda5a
 md"### 📋 Красивые таблицы"
@@ -1653,12 +1717,14 @@ end
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [compat]
 CairoMakie = "~0.15.6"
+JSON = "~0.21.4"
 LaTeXStrings = "~1.4.0"
 PlutoUI = "~0.7.62"
 """
@@ -1669,7 +1735,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.12.1"
 manifest_format = "2.0"
-project_hash = "82cf8488bedd94d52485c2229a448e8ab2265136"
+project_hash = "832f7853c2ec3552ca1b52be9bbe64aacf5ef079"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -3213,11 +3279,11 @@ version = "4.1.0+0"
 
 # ╔═╡ Cell order:
 # ╟─89d5d4d4-a5f0-11f0-275d-edfe9355555d
-# ╠═4b0d698d-7921-4bf0-b5d4-0bf680d992e5
+# ╟─4b0d698d-7921-4bf0-b5d4-0bf680d992e5
 # ╟─fb7eb31f-8d28-4e05-b994-29a85e359b14
-# ╠═b5be0f61-904f-498d-8b4d-3bb84cf62270
-# ╠═56a5a75a-20ff-443e-992a-c8a5957b7a90
-# ╠═40561c16-193e-4349-bc16-a7d9ceb55f62
+# ╟─b5be0f61-904f-498d-8b4d-3bb84cf62270
+# ╟─56a5a75a-20ff-443e-992a-c8a5957b7a90
+# ╟─40561c16-193e-4349-bc16-a7d9ceb55f62
 # ╟─692ea0cf-2fc9-47fb-9542-930c64ac94bc
 # ╟─ec47fa62-62ea-4bf8-a57f-9e6b10b5fa0b
 # ╟─65781f50-667a-44c0-beb2-466dfb293d36
@@ -3228,9 +3294,9 @@ version = "4.1.0+0"
 # ╟─cfbd1033-b649-4ab2-941a-1519bcc28986
 # ╟─3e5014a8-e39f-4d3c-bb2f-122dea8482bb
 # ╟─6d9aa6d2-8c16-4bff-bd80-91db31f0ac81
-# ╠═caeb332a-a68e-4c25-8812-663be4174db8
-# ╠═e24903de-8706-4d29-aaf0-2005799675e1
-# ╠═4e7e1ddb-8a03-4818-be9e-fa31698faf07
+# ╟─caeb332a-a68e-4c25-8812-663be4174db8
+# ╟─e24903de-8706-4d29-aaf0-2005799675e1
+# ╟─4e7e1ddb-8a03-4818-be9e-fa31698faf07
 # ╟─1f21d0d2-43a3-489b-9b77-d09d0824f799
 # ╟─4acc88bf-4bbf-49b5-8006-920901d8ddc9
 # ╟─7e4039e8-ed6c-46eb-a079-9df82d4272d6
@@ -3239,11 +3305,11 @@ version = "4.1.0+0"
 # ╠═d51bd461-3106-4b8d-9d3a-66c7fb6c8ab1
 # ╟─43b474fc-51fa-4aef-86fa-cba0eb59bcf9
 # ╠═9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
-# ╠═20f45d03-754e-4d6a-b1ad-431745281c4e
-# ╠═7c9eb183-348e-44b1-bd47-ce3ea70d3efb
+# ╟─20f45d03-754e-4d6a-b1ad-431745281c4e
 # ╠═ba361882-01ce-426b-8725-90f00d00be4a
 # ╠═44ec2743-fcc2-41fd-a7eb-0e86202ccb6b
-# ╠═65e1301d-9baa-4c84-9bbf-0a82ed444c29
+# ╟─65e1301d-9baa-4c84-9bbf-0a82ed444c29
+# ╠═e93e7b4b-069f-44c5-8a0a-d1236ee4b2cc
 # ╟─b0aa65a1-3433-4b48-9196-d47e6e35379e
 # ╟─7e82ca6c-5c36-4c0d-ba07-914ff604f107
 # ╟─48f45b5a-03af-4b1c-bdb9-16964246e85c
@@ -3251,17 +3317,18 @@ version = "4.1.0+0"
 # ╟─18159b8a-c05b-4191-9eae-71f7b7646e7d
 # ╟─6cf7f12e-cc58-4b08-816b-584e02dbd071
 # ╟─0654861a-f4d5-4adb-b929-8e7e6ae78b89
-# ╟─61b339cb-63d4-4123-a000-b0257519fa75
 # ╟─bd295267-109a-4c84-bba3-7cdd0d682b18
 # ╟─ca7636ed-2d30-4086-bc61-ef31ab371969
 # ╟─8845a7bd-f62c-4531-953e-5aabd6b8e708
 # ╟─5d979de0-beb0-41df-a5cd-779eec0e611f
 # ╟─92eaacb2-756d-4f8e-b9c3-c02353c14417
 # ╟─0f7c4d6c-e748-4de0-8166-47d03f4129ec
-# ╟─61b7a669-218b-4cc2-a45b-ea70cdda0250
+# ╠═61b7a669-218b-4cc2-a45b-ea70cdda0250
 # ╟─9d1db807-3229-4d28-b78b-325f9c82c60d
 # ╟─0edf5251-3d74-4f2c-bced-88fdb511d2f8
 # ╟─7cb1c106-ccfe-48eb-af87-0eb6812a4000
+# ╠═b4612166-cbe9-4b21-b630-e08481294a03
+# ╠═4886ddbb-9cc1-483c-8441-bd2b1961d540
 # ╟─8678ac5d-fea0-4697-b2e6-799e72afda5a
 # ╟─1ae0f50a-c021-41cd-a389-cec934e34e26
 # ╟─ef9bc959-20a8-44aa-9093-725c4734dd8d
