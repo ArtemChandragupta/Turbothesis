@@ -12,7 +12,7 @@ import qualified Waterfall.Loft as Loft
 import qualified Waterfall.Path.Common as Path
 import qualified Waterfall.TwoD.Path2D as Path2D
 
-import Data
+import Data2
 
 p1 :: Waterfall.Path
 p1 = Waterfall.fromPath2D (Path2D.pathFrom2D p1c1e
@@ -65,5 +65,5 @@ lofter = Transforms.mirror (V3 0 1 0) (Loft.loft
 
 main :: IO ()
 main = do
-    Waterfall.writeSTEP "blade.step" lofter
-    Waterfall.SVG.writeDiagramSVG "blade.svg" (Waterfall.solidDiagram (V3 0 0 1) (Waterfall.uScale 10 lofter ))
+    Waterfall.writeSTEP "blade_stator.step" lofter
+    Waterfall.SVG.writeDiagramSVG "blade_stator.svg" (Waterfall.solidDiagram (V3 1 1 1) (Waterfall.uScale 10 lofter ))
