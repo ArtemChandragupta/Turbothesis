@@ -66,4 +66,4 @@ lofter = Transforms.mirror (V3 0 1 0) (Loft.loft
 main :: IO ()
 main = do
     Waterfall.writeSTEP "blade_stator.step" lofter
-    Waterfall.SVG.writeDiagramSVG "blade_stator.svg" (Waterfall.solidDiagram (V3 1 1 1) (Waterfall.uScale 10 lofter ))
+    Waterfall.SVG.writeDiagramSVG "blade_stator.svg" (Waterfall.solidDiagram (V3 0 0 1) (Waterfall.uScale 10 lofter ))

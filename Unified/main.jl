@@ -50,8 +50,8 @@ begin
 		kₙ  = 1030 / (1030 - 287),
 
 		# Константы для компрессора
-		σ⃰ᵢₙ  = 0.995,
-		σ⃰ₒᵤₜ = 0.995,
+		σ⃰ᵢₙ  = 0.985,
+		σ⃰ₒᵤₜ = 0.99,
 		η⃰ₐ   = 0.93, # Адиабатный КПД компрессора
 		cᶻ₁  = 140,
 		cᶻ₂  = 120,
@@ -62,12 +62,12 @@ begin
 
 		# Константы для турбины
 		σ⃰ₖₛ  = 0.990, # Потери в камере сгорания
-		kₙₜ  = 1, #1.018,
+		kₙₜ  = 1.018,
 		λ₂ₜ  = 0.5,
 		ηₐₜ  = 0.91,
 		å    = 90,
 		σ₅₀₀ = 610e6,
-		Y    = 0.6,
+		Y    = 0.59,
 		m    = 4,
 	)
 
@@ -233,9 +233,9 @@ begin
 		rk = (T.d₂ₘ - T.l₂)/2
 		rₘ = @. d₂ₘ / 2
 
-		ρTk = 0.07
-		# ρTc = @. 1 - (1 - ρTk) * (rk/rₘ)^(2n) * Φ^2
-		ρTc = (0.37, 0.37, 0.37, 0.37, 0.37)
+		ρTₖ = 0.07
+		ρTₘ = @. 1 - (1 - ρTₖ) * (rk/rₘ)^(2n) * Φ^2
+		# ρTc = (0.27, 0.28, 0.29, 0.3)
 
 		stages = [
 			(n   = n,
@@ -250,7 +250,7 @@ begin
 			 d₂ₘ = d₂ₘ[i],
 			 Φ   = Φ,
 			 Ψ   = Ψ,
-			 ρTc = ρTc[i]
+			 ρTₘ = ρTₘ[i]
 			) for i in 1:𝒞.m
 		]
 	end
@@ -260,17 +260,6 @@ end
 
 # ╔═╡ c2b940ae-7013-4184-916f-cc2c6c3bb718
 begin
-	# function calc_stages(G, T, Params, 𝒯 = TASK)
-	# 	S1 = calc_stage( T.P⃰₀,  T.T⃰₀, G, Params[1])
-	# 	S2 = calc_stage(S1.p⃰₂, S1.T⃰₂, G, Params[2])
-	# 	S3 = calc_stage(S2.p⃰₂, S2.T⃰₂, G, Params[3])
-	# 	S4 = calc_stage(S3.p⃰₂, S3.T⃰₂, G, Params[4])
-
-	# 	H = S1.Hᵤ + S2.Hᵤ + S3.Hᵤ + S4.Hᵤ
-
-	# 	return ((S1, S2, S3, S4), H)
-	# end
-
 	function calc_stages(G, T, Params, 𝒯 = TASK)
 	    S = []
 		p⃰_prev, T⃰_prev = T.P⃰₀, T.T⃰₀
@@ -289,7 +278,7 @@ begin
 		H₀   = 𝒫.H₀
 		T₂tt = T⃰₀ - H₀ / 𝒞.Cpᵧ
 		p₂   = p⃰₀ * (T₂tt / T⃰₀)^𝒞.kk_1
-		c₁t  = √( 2(1 - 𝒫.ρTc) * H₀)
+		c₁t  = √( 2(1 - 𝒫.ρTₘ) * H₀)
 		c₁   = c₁t * 𝒫.Φ
 		T₁t  = T⃰₀ - c₁t^2 / 2𝒞.Cpᵧ
 		p₁   = p⃰₀ * (T₁t / T⃰₀)^𝒞.kk_1
@@ -417,7 +406,7 @@ begin
 		ρ₂   = p₂ / (T₂ * 𝒞.Rᵧ)
 		πρc₁ = 2π * ρ₁ * c₁z * r
 		πρc₂ = 2π * ρ₂ * c₂z * r
-		ρT   = 𝒫.ρTc
+		ρT   = 𝒫.ρTₘ
 		Hₚ   = (w₂^2 - w₁^2)/2 + (u₁^2 - u₂^2)/2
 		Hᵤ   = (c₁^2 - c₂^2)/2 + (w₂^2 - w₁^2)/2 + (u₁^2 - u₂^2)/2
 		ρK   = Hₚ / Hᵤ
@@ -469,11 +458,7 @@ end
 # ╔═╡ e24903de-8706-4d29-aaf0-2005799675e1
 begin
 	# Результат A2GTP
-	# Å = (π⃰ₖ = 16, T⃰₀ = 1643, Gₙ = 173.363, Gᵧ = 155.083)
-	# Å = (π⃰ₖ = 16, T⃰₀ = 1643, Gₙ = 168.651, Gᵧ = 153.343)
-	# Å = (π⃰ₖ = 16, T⃰₀ = 1643, Gₙ = 189.517, Gᵧ = 160.424)
-	Å = (π⃰ₖ = 16, T⃰₀ = 1643, Gₙ = 173, Gᵧ = 153)
-	# Å = (π⃰ₖ = 16, T⃰₀ = 1593, Gₙ = 166, Gᵧ = 162)
+	Å = (π⃰ₖ = 16, T⃰₀ = 1643, Gₙ = 174.7, Gᵧ = 153.7)
 
 	C = calc_comp(Å)
 	T = calc_turb(C, Å)
@@ -500,10 +485,8 @@ begin
 	    F₂T   = G / (ρ₂T * c₂T * sind(𝒞.å))
 	    u₂    = π * d₂ₘ * 𝒯.n / 60
 	    l₂    = F₂T / (π * d₂ₘ)
-	    d₂Tl₂ = d₂ₘ / l₂
-	    Y     = u₂ * √(𝒞.m / 2H₀ₜ)
 	
-		(; T⃰₀, P⃰₀, d₂ₘ, HuT, ΔtT, T⃰₂T, aₖᵣ, c₂T, Hₐₜ, H₀ₜ, T₂tT, p₂T, T₂T, ρ₂T, F₂T, u₂, l₂, d₂Tl₂, Y )
+		(; T⃰₀, P⃰₀, d₂ₘ, HuT, ΔtT, T⃰₂T, aₖᵣ, c₂T, Hₐₜ, H₀ₜ, T₂tT, p₂T, T₂T, ρ₂T, F₂T, u₂, l₂)
 	end
 	
 	md"λ Вспомогательный расчет турбины для определения оптимального расхода"
@@ -563,9 +546,6 @@ begin
 	
 	md"Λ Варьирование Φ и Ψ"
 end
-
-# ╔═╡ 36384dca-f055-4055-bda6-6bad98bce04d
-T
 
 # ╔═╡ 4e7e1ddb-8a03-4818-be9e-fa31698faf07
 begin
@@ -628,10 +608,10 @@ begin
 end
 
 # ╔═╡ 7e4039e8-ed6c-46eb-a079-9df82d4272d6
-@bind Cα₁ PlutoUI.NumberField(13:40, default=22)
+@bind Cα₁ PlutoUI.NumberField(13:40, default=21)
 
 # ╔═╡ d1889b73-726a-468b-9bb9-e69cd81a796b
-@bind Cβ⃰₂ PlutoUI.NumberField(15:65, default=25)
+@bind Cβ⃰₂ PlutoUI.NumberField(15:65, default=26)
 
 # ╔═╡ 6316022b-a071-4d6b-be2a-d786c8edad45
 begin
@@ -991,8 +971,8 @@ begin
 	function calc_conf(b, c, ρ)
 		c̄    = c/b
 		t̄ₒₚₜ = ρ.β₁ > 0 ? 
-			(0.55 * (1-c̄) * (sind(ρ.β₁      )/ sind(ρ.β⃰₂) * (180/ (180 - (       ρ.β₁ + ρ.β⃰₂)) )^(1/3) )) : 
-			(0.55 * (1-c̄) * (sind(180 + ρ.β₁)/ sind(ρ.β⃰₂) * (180/ (180 - ( 180 + ρ.β₁ + ρ.β⃰₂)) )^(1/3) ))
+			(0.55(1-c̄) * (sind(ρ.β₁      )/ sind(ρ.β⃰₂) * (180/ (180 - (       ρ.β₁ + ρ.β⃰₂)) )^(1/3) )) : 
+			(0.55(1-c̄) * (sind(180 + ρ.β₁)/ sind(ρ.β⃰₂) * (180/ (180 - ( 180 + ρ.β₁ + ρ.β⃰₂)) )^(1/3) ))
 		tₒₚₜ  = t̄ₒₚₜ * b
 		Lᵒ    = 2π * ρ.r
 		z     = round(Lᵒ / tₒₚₜ)
@@ -1004,9 +984,25 @@ begin
 	md"λ Вычисление числа лопаток"
 end
 
+# ╔═╡ fb37070c-676f-4b74-b8ed-41ba4d230cdd
+begin
+	function calc_conf_2(b, c, ρ, α₂)
+		c̄    = c/b
+		t̄ₒₚₜ = 0.55(1-c̄) * sind(ρ.α₁)/sind(180 + α₂) * (180/(-(ρ.α₁ + α₂)) )^(1/3)
+		tₒₚₜ  = t̄ₒₚₜ * b
+		Lᵒ    = 2π * ρ.r
+		z     = round(Lᵒ / tₒₚₜ)
+		t     = Lᵒ / z
+
+		(; c̄, t̄ₒₚₜ, tₒₚₜ, Lᵒ, z, t)
+	end
+
+	md"λ Вычисление числа сопловых лопаток"
+end
+
 # ╔═╡ 61b7a669-218b-4cc2-a45b-ea70cdda0250
 begin
-	function profile_build(R, n, R₁, R₂, Δ₁, Δ₂, l̄)
+	function profile_build(R, n, R₁, R₂, Δ₁, Δ₂, l̄, Pr1)
 		# Нормализация углов
 		if R[n].β₁ < 0
 			β₁ₜₑₘₚ = 180 + R[n].β₁
@@ -1056,7 +1052,13 @@ begin
 		cₘₐₓ = thickness(xp, yp, xs, ys)
 
 		# Вычисление оптимального числа лопаток
-		Z    = calc_conf(b, cₘₐₓ.cₘ, R[n])
+		if n == 1
+			Z = calc_conf(b, cₘₐₓ.cₘ, R[n])
+		else
+			z = Pr1.Z.z
+			t = 2π * R[n].r / z
+			Z = (; z, t )
+		end
 
 		(; R₁, R₂, l, ξ, r, b, α₁, β₁, α₂, β₂, β₁ₚ, β₂ₚ, β₁ₛ, β₂ₛ, xc, yc, xp, yp, xs, ys, cntr, ctr1, ctr2, cₘₐₓ, Z)
 	end
@@ -1066,13 +1068,11 @@ end
 
 # ╔═╡ 20f45d03-754e-4d6a-b1ad-431745281c4e
 begin
-	Pr1 = profile_build(R, 1, 0.003  , 0.001 , 11, 3, l̄)
-	Pr2 = profile_build(R, 2, 0.00285, 0.0008, 11, 3, l̄)
-	Pr3 = profile_build(R, 3, 0.00235, 0.0007, 11, 3, l̄)
-	Pr4 = profile_build(R, 4, 0.00175, 0.0006, 11, 3, l̄)
-	Pr5 = profile_build(R, 5, 0.00125, 0.0005, 11, 3, l̄)
-
-	nₗ = Pr1.Z.z
+	Pr1 = profile_build(R, 1, 0.003  , 0.001 , 11, 3, l̄, 0  )
+	Pr2 = profile_build(R, 2, 0.00285, 0.0008, 11, 3, l̄, Pr1)
+	Pr3 = profile_build(R, 3, 0.00235, 0.0007, 11, 3, l̄, Pr1)
+	Pr4 = profile_build(R, 4, 0.00175, 0.0006, 11, 3, l̄, Pr1)
+	Pr5 = profile_build(R, 5, 0.00125, 0.0005, 11, 3, l̄, Pr1)
 
 	md"### ∮ Построение профилей рабочих лопаток"
 end
@@ -1399,7 +1399,7 @@ end
 
 # ╔═╡ 8047ae16-5263-46a7-8ef9-ee6a82c9f520
 begin
-	function profile_build_2(S, R, n, R₁, R₂, Δ₁, Δ₂, l̄)
+	function profile_build_2(S, R, n, R₁, R₂, Δ₁, Δ₂, l̄, Prs1)
 		# Нормализация углов
 		α₁ = S[3].α₂ - 90
 		α₂ = R[n].α₁ + 90
@@ -1408,7 +1408,7 @@ begin
     	α₁ₚ, α₂ₚ = α₁ - Δ₁, α₂ + Δ₂
     	α₁ₛ, α₂ₛ = α₁ + Δ₁, α₂ - Δ₂
 
-		l = R[n].b #- 2tand(l̄.β) * (R[n].r - R[1].r)
+		l = R[n].b + 2tand(l̄.β) * (R[n].r - R[1].r)
 		ξ = l * (S[3].c₂u + R[n].c₁u) / (S[3].c₂u / tand(α₁) + R[n].c₁u / tand(α₂))
 		r = R[n].r
 
@@ -1438,14 +1438,19 @@ begin
     	cntr, ctr1, ctr2 = centroid(xp,yp,xs,ys,
 									deg2rad(90 + α₁ₚ), deg2rad(    - 90 + α₁ₛ),
 									deg2rad(90 + α₂ₚ), deg2rad(360 - 90 + α₂ₛ),
-									# α₁ₚ,α₂ₚ,α₁ₛ,α₂ₛ,
 									l,ξ, R₁,R₂)
 
 		# Вычисление наибольшей толщины профиля и положения этого сечения
 		cₘₐₓ = thickness(xp, yp, xs, ys)
 
 		# Вычисление оптимального числа лопаток
-		Z    = calc_conf(b, cₘₐₓ.cₘ, R[n])
+		if n == 1
+			Z = calc_conf_2(b, cₘₐₓ.cₘ, R[n], S[3].α₂)
+		else
+			z = Prs1.Z.z
+			t = 2π * R[n].r / z
+			Z = (; z, t )
+		end
 
 		(; R₁, R₂, l, ξ, r, b, α₁, α₂, α₁ₚ, α₂ₚ, α₁ₛ, α₂ₛ, xc, yc, xp, yp, xs, ys, cntr, ctr1, ctr2, cₘₐₓ, Z)
 	end
@@ -1455,11 +1460,11 @@ end
 
 # ╔═╡ 7e3efafc-2d86-4e36-ad67-bbb12de0a0c0
 begin
-	Prs1 = profile_build_2(S, R, 1, 0.004, 0.001, 10, 3, l̄)
-	Prs2 = profile_build_2(S, R, 2, 0.004, 0.001, 10, 3, l̄)
-	Prs3 = profile_build_2(S, R, 3, 0.004, 0.001, 10, 3, l̄)
-	Prs4 = profile_build_2(S, R, 4, 0.004, 0.001, 10, 3, l̄)
-	Prs5 = profile_build_2(S, R, 5, 0.004, 0.001, 10, 3, l̄)
+	Prs1 = profile_build_2(S, R, 1, 0.004, 0.001, 10, 3, l̄, 0)
+	Prs2 = profile_build_2(S, R, 2, 0.004, 0.001, 10, 3, l̄, Prs1)
+	Prs3 = profile_build_2(S, R, 3, 0.004, 0.001, 10, 3, l̄, Prs1)
+	Prs4 = profile_build_2(S, R, 4, 0.004, 0.001, 10, 3, l̄, Prs1)
+	Prs5 = profile_build_2(S, R, 5, 0.004, 0.001, 10, 3, l̄, Prs1)
 
 	md"### ∮ Построение профилей сопловых лопаток"
 end
@@ -1572,6 +1577,69 @@ end
 # ╔═╡ e4ead9dc-7b59-4f4c-ae3f-83f4a842dedb
 profile_show_2(Prs1)
 
+# ╔═╡ cefd6d07-04f8-4c48-bb20-392113262348
+begin
+	function profile_shift_2(Pr)
+
+		Δ = Pr.Z.t
+
+		with_theme(theme_latexfonts()) do
+			fig = Figure()
+    		ax = Axis(fig[1, 1], aspect = DataAspect())
+			hidespines!(ax)
+    		hidedecorations!(ax)
+
+			# Расстояния между профилями
+			ds = distance(Pr.xp, Pr.yp, Pr.xs, Pr.ys, -Δ)
+
+			distances = [1000d.dᵢ for d in ds]
+
+			min_dist, max_dist = extrema(distances)
+    		norm_distances = (distances .- min_dist) ./ (max_dist - min_dist)
+
+			colors = [cgrad(:viridis, [0, 1])[d] for d in norm_distances]
+
+			for i in 1:length(Pr.xp)
+				lines!(ax, color = colors[i], linewidth=4,
+					   [Pr.xp[i], Pr.xs[ds[i].j]    ],
+					   [Pr.yp[i], Pr.ys[ds[i].j] - Δ]
+				  	)
+			end
+
+			# Дуги скругления
+			arc!(ax, color = :black, linewidth = 2, (0   , 0   ), Pr.R₁,
+				 deg2rad(90 + Pr.α₁ₚ), deg2rad(- 90 + Pr.α₁ₛ)
+				)
+			arc!(ax, color = :black, linewidth = 2, (Pr.l, Pr.ξ), Pr.R₂,
+				 deg2rad(90 + Pr.α₂ₚ), deg2rad(360     -90 + Pr.α₂ₛ)
+				)
+
+		    # Профиль лопатки
+    		lines!(ax, Pr.xp, Pr.yp, color = :black, linewidth = 2)
+	    	lines!(ax, Pr.xs, Pr.ys, color = :black, linewidth = 2)
+
+			# Дуги скругления
+			arc!(ax, (0   ,      - Δ), Pr.R₁, deg2rad(90 + Pr.α₁ₚ), deg2rad(- 90 + Pr.α₁ₛ), color = :black, linewidth = 2)
+			arc!(ax, (Pr.l, Pr.ξ - Δ), Pr.R₂, deg2rad(90 + Pr.α₂ₚ), deg2rad(360     -90 + Pr.α₂ₛ), color = :black, linewidth = 2)
+
+		    # Профиль лопатки
+    		lines!(ax, Pr.xp, Pr.yp .- Δ, color = :black, linewidth = 2)
+    		lines!(ax, Pr.xs, Pr.ys .- Δ, color = :black, linewidth = 2)
+
+			Colorbar(fig[1, 2], limits=(min_dist,max_dist), minorticksvisible=true,
+					 label = L"t, \ м м"
+					)
+    
+	    	fig
+		end
+	end
+
+	md"👁 Отображение конфузорности сопловой лопатки"
+end
+
+# ╔═╡ 238c67d2-2ca6-4d0a-b805-c457f7d508af
+profile_shift_2(Prs1)
+
 # ╔═╡ 8e992360-1373-4168-bc59-a7b04792befa
 begin
 	function profiles_show_2(Pr1, Pr2, Pr3, Pr4, Pr5)
@@ -1627,7 +1695,7 @@ begin
 					  )
         	end
 
-			save("assets/profiles.svg", fig)
+			save("assets/profiles2.svg", fig)
 
         	fig
     	end
@@ -1687,25 +1755,25 @@ function write_Haskell_2(Data)
 		write(f, "module Data2 where \n")
 		write(f, "import Linear (V3 (..), V2 (..), zero) \n")
 		for section in 1:length(Data)
-			write(f, "p$(section)c1s = V2 ($(Data[section][1][1][1])) ($(Data[section][1][1][2])) \n")
-			write(f, "p$(section)c1e = V2 ($(Data[section][1][2][1])) ($(Data[section][1][2][2])) \n")
-			write(f, "p$(section)c1m = V2 ($(Data[section][1][3][1])) ($(Data[section][1][3][2])) \n")
+			write(f, "ps$(section)c1s = V2 ($(Data[section][1][1][1])) ($(Data[section][1][1][2])) \n")
+			write(f, "ps$(section)c1e = V2 ($(Data[section][1][2][1])) ($(Data[section][1][2][2])) \n")
+			write(f, "ps$(section)c1m = V2 ($(Data[section][1][3][1])) ($(Data[section][1][3][2])) \n")
 
-			write(f, "p$(section)c2s = V2 ($(Data[section][2][1][1])) ($(Data[section][2][1][2])) \n")
-			write(f, "p$(section)c2e = V2 ($(Data[section][2][2][1])) ($(Data[section][2][2][2])) \n")
-			write(f, "p$(section)c2m = V2 ($(Data[section][2][3][1])) ($(Data[section][2][3][2])) \n")
+			write(f, "ps$(section)c2s = V2 ($(Data[section][2][1][1])) ($(Data[section][2][1][2])) \n")
+			write(f, "ps$(section)c2e = V2 ($(Data[section][2][2][1])) ($(Data[section][2][2][2])) \n")
+			write(f, "ps$(section)c2m = V2 ($(Data[section][2][3][1])) ($(Data[section][2][3][2])) \n")
 
-			write(f, "p$(section)ls0 = V2 ($(Data[section][3][1][1])) ($(Data[section][3][1][2])) \n")
-			write(f, "p$(section)ls1 = V2 ($(Data[section][3][2][1])) ($(Data[section][3][2][2])) \n")
-			write(f, "p$(section)ls2 = V2 ($(Data[section][3][3][1])) ($(Data[section][3][3][2])) \n")
-			write(f, "p$(section)ls3 = V2 ($(Data[section][3][4][1])) ($(Data[section][3][4][2])) \n")
+			write(f, "ps$(section)ls0 = V2 ($(Data[section][3][1][1])) ($(Data[section][3][1][2])) \n")
+			write(f, "ps$(section)ls1 = V2 ($(Data[section][3][2][1])) ($(Data[section][3][2][2])) \n")
+			write(f, "ps$(section)ls2 = V2 ($(Data[section][3][3][1])) ($(Data[section][3][3][2])) \n")
+			write(f, "ps$(section)ls3 = V2 ($(Data[section][3][4][1])) ($(Data[section][3][4][2])) \n")
 
-			write(f, "p$(section)lp0 = V2 ($(Data[section][4][1][1])) ($(Data[section][4][1][2])) \n")
-			write(f, "p$(section)lp1 = V2 ($(Data[section][4][2][1])) ($(Data[section][4][2][2])) \n")
-			write(f, "p$(section)lp2 = V2 ($(Data[section][4][3][1])) ($(Data[section][4][3][2])) \n")
-			write(f, "p$(section)lp3 = V2 ($(Data[section][4][4][1])) ($(Data[section][4][4][2])) \n")
+			write(f, "ps$(section)lp0 = V2 ($(Data[section][4][1][1])) ($(Data[section][4][1][2])) \n")
+			write(f, "ps$(section)lp1 = V2 ($(Data[section][4][2][1])) ($(Data[section][4][2][2])) \n")
+			write(f, "ps$(section)lp2 = V2 ($(Data[section][4][3][1])) ($(Data[section][4][3][2])) \n")
+			write(f, "ps$(section)lp3 = V2 ($(Data[section][4][4][1])) ($(Data[section][4][4][2])) \n")
 
-			write(f, "p$(section)r = $(Data[section][5]) \n")
+			write(f, "ps$(section)r = $(Data[section][5]) \n")
 
 			write(f, "\n")
 		end
@@ -3498,28 +3566,27 @@ version = "4.1.0+0"
 
 # ╔═╡ Cell order:
 # ╟─89d5d4d4-a5f0-11f0-275d-edfe9355555d
-# ╠═4b0d698d-7921-4bf0-b5d4-0bf680d992e5
+# ╟─4b0d698d-7921-4bf0-b5d4-0bf680d992e5
 # ╟─fb7eb31f-8d28-4e05-b994-29a85e359b14
 # ╟─56a5a75a-20ff-443e-992a-c8a5957b7a90
 # ╟─40561c16-193e-4349-bc16-a7d9ceb55f62
 # ╟─1a6c670b-551f-435a-83ca-646516a0a368
 # ╟─ec47fa62-62ea-4bf8-a57f-9e6b10b5fa0b
 # ╟─65781f50-667a-44c0-beb2-466dfb293d36
-# ╠═77bbea27-c0fa-4320-ab84-ff91730410e3
-# ╠═7290e07c-eedc-429f-a2fa-7130dae8da37
-# ╠═c2b940ae-7013-4184-916f-cc2c6c3bb718
+# ╟─77bbea27-c0fa-4320-ab84-ff91730410e3
+# ╟─7290e07c-eedc-429f-a2fa-7130dae8da37
+# ╟─c2b940ae-7013-4184-916f-cc2c6c3bb718
 # ╟─23866f8f-bdff-45be-afcd-91d3c87a200e
 # ╟─3e5014a8-e39f-4d3c-bb2f-122dea8482bb
-# ╠═e24903de-8706-4d29-aaf0-2005799675e1
-# ╠═36384dca-f055-4055-bda6-6bad98bce04d
+# ╟─e24903de-8706-4d29-aaf0-2005799675e1
 # ╟─4e7e1ddb-8a03-4818-be9e-fa31698faf07
 # ╟─1f21d0d2-43a3-489b-9b77-d09d0824f799
 # ╟─4acc88bf-4bbf-49b5-8006-920901d8ddc9
-# ╠═7e4039e8-ed6c-46eb-a079-9df82d4272d6
-# ╠═d1889b73-726a-468b-9bb9-e69cd81a796b
+# ╟─7e4039e8-ed6c-46eb-a079-9df82d4272d6
+# ╟─d1889b73-726a-468b-9bb9-e69cd81a796b
 # ╟─6316022b-a071-4d6b-be2a-d786c8edad45
 # ╟─d51bd461-3106-4b8d-9d3a-66c7fb6c8ab1
-# ╠═43b474fc-51fa-4aef-86fa-cba0eb59bcf9
+# ╟─43b474fc-51fa-4aef-86fa-cba0eb59bcf9
 # ╟─9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
 # ╟─7c80bb36-5cef-4e21-bd84-53f347f6dfe0
 # ╟─20f45d03-754e-4d6a-b1ad-431745281c4e
@@ -3528,7 +3595,8 @@ version = "4.1.0+0"
 # ╟─65e1301d-9baa-4c84-9bbf-0a82ed444c29
 # ╟─e93e7b4b-069f-44c5-8a0a-d1236ee4b2cc
 # ╟─7e3efafc-2d86-4e36-ad67-bbb12de0a0c0
-# ╠═e4ead9dc-7b59-4f4c-ae3f-83f4a842dedb
+# ╟─e4ead9dc-7b59-4f4c-ae3f-83f4a842dedb
+# ╟─238c67d2-2ca6-4d0a-b805-c457f7d508af
 # ╟─a74f6353-4c78-49e3-998f-baec3f10377d
 # ╟─2fd068a7-9f7f-49ab-986b-c15593d89eee
 # ╟─b0aa65a1-3433-4b48-9196-d47e6e35379e
@@ -3544,14 +3612,16 @@ version = "4.1.0+0"
 # ╟─5d979de0-beb0-41df-a5cd-779eec0e611f
 # ╟─92eaacb2-756d-4f8e-b9c3-c02353c14417
 # ╟─0f7c4d6c-e748-4de0-8166-47d03f4129ec
+# ╟─fb37070c-676f-4b74-b8ed-41ba4d230cdd
 # ╟─61b7a669-218b-4cc2-a45b-ea70cdda0250
 # ╟─9d1db807-3229-4d28-b78b-325f9c82c60d
 # ╟─0edf5251-3d74-4f2c-bced-88fdb511d2f8
-# ╟─7cb1c106-ccfe-48eb-af87-0eb6812a4000
+# ╠═7cb1c106-ccfe-48eb-af87-0eb6812a4000
 # ╟─b4612166-cbe9-4b21-b630-e08481294a03
 # ╟─4886ddbb-9cc1-483c-8441-bd2b1961d540
 # ╟─8047ae16-5263-46a7-8ef9-ee6a82c9f520
 # ╟─071cf1e8-2cb9-40d6-8930-90ce150e22fb
+# ╟─cefd6d07-04f8-4c48-bb20-392113262348
 # ╟─8e992360-1373-4168-bc59-a7b04792befa
 # ╟─08812d58-0a6f-4845-94fe-5c9a965a118c
 # ╟─c31c4aba-1cb8-4d45-9e25-634f929b67e6
