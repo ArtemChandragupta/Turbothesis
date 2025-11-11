@@ -1225,15 +1225,6 @@ begin
     		lines!(ax, Pr.xc, Pr.yc, color = :gray , linewidth = 1)
     		lines!(ax, Pr.xp, Pr.yp, color = :black, linewidth = 2)
     		lines!(ax, Pr.xs, Pr.ys, color = :black, linewidth = 2)
-
-			# m = 10000
-
-			# Треугольники скоростей
-		    # lines!(ax, [0, R.c₁ * cosd(α₁)/m], [0, R.c₁ * sind(α₁)/m], color=:red)
-			# arrows2d!(ax, [0], [0], [c₁ * cosd(α₁)], [c₁ * sind(α₁)], color=:red)
-		    # lines!(ax, [0, R.w₁ * cosd(β₁)/m], [0, R.w₁ * sind(β₁)/m], color=:red)
-    		# lines!(ax, [l, l + c₂ * cosd(α₂)], [ξ, ξ + c₂ * sind(α₂)], color=:blue)
-	    	# lines!(ax, [l, l + w₂ * cosd(β₂)], [ξ, ξ + w₂ * sind(β₂)], color=:blue)
     
 	    	fig
 		end
@@ -1617,12 +1608,6 @@ begin
     		lines!(ax, Pr.xc, Pr.yc, color = :gray , linewidth = 1)
     		lines!(ax, Pr.xp, Pr.yp, color = :black, linewidth = 2)
     		lines!(ax, Pr.xs, Pr.ys, color = :black, linewidth = 2)
-
-			# Треугольники скоростей
-		    # lines!(ax, [0, 0.02 * cosd(Pr.α₁)], [0, 0.02 * sind(Pr.α₁)], color=:red)
-    		# lines!(ax,
-				  #  [Pr.l, Pr.l + 0.03 * cosd(Pr.α₂)], 
-				  #  [Pr.ξ, Pr.ξ + 0.03 * sind(Pr.α₂)], color=:blue)
 
 	    	fig
 		end
@@ -3668,20 +3653,20 @@ version = "4.1.0+0"
 # ╟─8845a7bd-f62c-4531-953e-5aabd6b8e708
 # ╟─5d979de0-beb0-41df-a5cd-779eec0e611f
 # ╟─92eaacb2-756d-4f8e-b9c3-c02353c14417
-# ╠═0f7c4d6c-e748-4de0-8166-47d03f4129ec
-# ╠═fb37070c-676f-4b74-b8ed-41ba4d230cdd
+# ╟─0f7c4d6c-e748-4de0-8166-47d03f4129ec
+# ╟─fb37070c-676f-4b74-b8ed-41ba4d230cdd
 # ╟─61b7a669-218b-4cc2-a45b-ea70cdda0250
 # ╟─9d1db807-3229-4d28-b78b-325f9c82c60d
 # ╟─0edf5251-3d74-4f2c-bced-88fdb511d2f8
 # ╟─7cb1c106-ccfe-48eb-af87-0eb6812a4000
 # ╟─b4612166-cbe9-4b21-b630-e08481294a03
 # ╟─4886ddbb-9cc1-483c-8441-bd2b1961d540
-# ╠═8047ae16-5263-46a7-8ef9-ee6a82c9f520
+# ╟─8047ae16-5263-46a7-8ef9-ee6a82c9f520
 # ╟─071cf1e8-2cb9-40d6-8930-90ce150e22fb
 # ╟─cefd6d07-04f8-4c48-bb20-392113262348
 # ╟─8e992360-1373-4168-bc59-a7b04792befa
 # ╟─08812d58-0a6f-4845-94fe-5c9a965a118c
-# ╟─c31c4aba-1cb8-4d45-9e25-634f929b67e6
+# ╠═c31c4aba-1cb8-4d45-9e25-634f929b67e6
 # ╟─8678ac5d-fea0-4697-b2e6-799e72afda5a
 # ╟─1ae0f50a-c021-41cd-a389-cec934e34e26
 # ╟─ef9bc959-20a8-44aa-9093-725c4734dd8d
