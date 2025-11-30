@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.20
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -1028,8 +1028,8 @@ begin
 	function calc_conf(b, c, ρ)
 		c̄    = c/b
 		t̄ₒₚₜ = ρ.β₁ > 0 ? 
-			(0.55(1-c̄) * (sind(ρ.β₁      )/ sind(ρ.β⃰₂) * (180/ (180 - (       ρ.β₁ + ρ.β⃰₂)) )^(1/3) )) : 
-			(0.55(1-c̄) * (sind(180 + ρ.β₁)/ sind(ρ.β⃰₂) * (180/ (180 - ( 180 + ρ.β₁ + ρ.β⃰₂)) )^(1/3) ))
+			(0.55(1-c̄) * (sind(ρ.β₁    )/sind(ρ.β⃰₂) * 180/(180-(    ρ.β₁+ρ.β⃰₂)) )^(1/3) ) : 
+			(0.55(1-c̄) * (sind(180+ρ.β₁)/sind(ρ.β⃰₂) * 180/(180-(180+ρ.β₁+ρ.β⃰₂)) )^(1/3) )
 		tₒₚₜ  = t̄ₒₚₜ * b
 		Lᵒ    = 2π * ρ.r
 		z     = round(Lᵒ / tₒₚₜ)
@@ -1045,7 +1045,7 @@ end
 begin
 	function calc_conf_2(b, r, c, ρ, α₂)
 		c̄    = c/b
-		t̄ₒₚₜ = 0.55(1-c̄) * sind(ρ.α₁)/sind(180 + α₂) * (180/(-(ρ.α₁ + α₂)) )^(1/3)
+		t̄ₒₚₜ = 0.55(1-c̄) * (sind(ρ.α₁)/sind(180 + α₂) * 180/(-(ρ.α₁ + α₂)) )^(1/3)
 		tₒₚₜ  = t̄ₒₚₜ * b
 		Lᵒ    = 2π * r
 		z     = round(Lᵒ / tₒₚₜ)
@@ -1125,14 +1125,17 @@ end
 
 # ╔═╡ 20f45d03-754e-4d6a-b1ad-431745281c4e
 begin
-	Pr1 = profile_build(R, 1, 0.003  , 0.001 , 11, 3, l̄, 0  )
-	Pr2 = profile_build(R, 2, 0.00285, 0.0008, 11, 3, l̄, Pr1)
-	Pr3 = profile_build(R, 3, 0.00235, 0.0007, 11, 3, l̄, Pr1)
-	Pr4 = profile_build(R, 4, 0.00175, 0.0006, 11, 3, l̄, Pr1)
-	Pr5 = profile_build(R, 5, 0.00125, 0.0005, 11, 3, l̄, Pr1)
+	Pr1 = profile_build(R, 1, 0.003  , 0.001 , 11, 6, l̄, 0  )
+	Pr2 = profile_build(R, 2, 0.00285, 0.0008, 11, 6, l̄, Pr1)
+	Pr3 = profile_build(R, 3, 0.00235, 0.0007, 11, 6, l̄, Pr1)
+	Pr4 = profile_build(R, 4, 0.00175, 0.0006, 11, 6, l̄, Pr1)
+	Pr5 = profile_build(R, 5, 0.00125, 0.0005, 11, 6, l̄, Pr1)
 
 	md"### ∮ Построение профилей рабочих лопаток"
 end
+
+# ╔═╡ d826b48a-d8d8-4083-bfa7-8b302d20b344
+Pr1.Z.z
 
 # ╔═╡ 9d1db807-3229-4d28-b78b-325f9c82c60d
 begin
@@ -1508,14 +1511,17 @@ end
 
 # ╔═╡ 7e3efafc-2d86-4e36-ad67-bbb12de0a0c0
 begin
-	Prs1 = profile_build_2(S, R, 1, 0.004, 0.001, 10, 3, l̄, 0)
-	Prs2 = profile_build_2(S, R, 2, 0.004, 0.001, 10, 3, l̄, Prs1)
-	Prs3 = profile_build_2(S, R, 3, 0.004, 0.001, 10, 3, l̄, Prs1)
-	Prs4 = profile_build_2(S, R, 4, 0.004, 0.001, 10, 3, l̄, Prs1)
-	Prs5 = profile_build_2(S, R, 5, 0.004, 0.001, 10, 3, l̄, Prs1)
+	Prs1 = profile_build_2(S, R, 1, 0.005, 0.001, 15, 4, l̄, 0)
+	Prs2 = profile_build_2(S, R, 2, 0.005, 0.001, 15, 4, l̄, Prs1)
+	Prs3 = profile_build_2(S, R, 3, 0.005, 0.001, 15, 4, l̄, Prs1)
+	Prs4 = profile_build_2(S, R, 4, 0.005, 0.001, 15, 4, l̄, Prs1)
+	Prs5 = profile_build_2(S, R, 5, 0.005, 0.001, 15, 4, l̄, Prs1)
 
 	md"### ∮ Построение профилей сопловых лопаток"
 end
+
+# ╔═╡ 87d7fcf2-9662-4e0e-8ba3-763662928879
+Prs1.Z.z
 
 # ╔═╡ 071cf1e8-2cb9-40d6-8930-90ce150e22fb
 begin
@@ -3619,7 +3625,7 @@ version = "4.1.0+0"
 # ╟─7290e07c-eedc-429f-a2fa-7130dae8da37
 # ╟─c2b940ae-7013-4184-916f-cc2c6c3bb718
 # ╟─23866f8f-bdff-45be-afcd-91d3c87a200e
-# ╟─3e5014a8-e39f-4d3c-bb2f-122dea8482bb
+# ╠═3e5014a8-e39f-4d3c-bb2f-122dea8482bb
 # ╟─e24903de-8706-4d29-aaf0-2005799675e1
 # ╟─1f21d0d2-43a3-489b-9b77-d09d0824f799
 # ╟─4e7e1ddb-8a03-4818-be9e-fa31698faf07
@@ -3631,15 +3637,17 @@ version = "4.1.0+0"
 # ╟─43b474fc-51fa-4aef-86fa-cba0eb59bcf9
 # ╟─9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
 # ╟─7c80bb36-5cef-4e21-bd84-53f347f6dfe0
-# ╟─20f45d03-754e-4d6a-b1ad-431745281c4e
+# ╠═20f45d03-754e-4d6a-b1ad-431745281c4e
 # ╟─ba361882-01ce-426b-8725-90f00d00be4a
 # ╟─44ec2743-fcc2-41fd-a7eb-0e86202ccb6b
 # ╟─65e1301d-9baa-4c84-9bbf-0a82ed444c29
 # ╟─e93e7b4b-069f-44c5-8a0a-d1236ee4b2cc
-# ╟─7e3efafc-2d86-4e36-ad67-bbb12de0a0c0
+# ╠═7e3efafc-2d86-4e36-ad67-bbb12de0a0c0
 # ╟─e4ead9dc-7b59-4f4c-ae3f-83f4a842dedb
 # ╟─238c67d2-2ca6-4d0a-b805-c457f7d508af
 # ╟─a74f6353-4c78-49e3-998f-baec3f10377d
+# ╟─d826b48a-d8d8-4083-bfa7-8b302d20b344
+# ╟─87d7fcf2-9662-4e0e-8ba3-763662928879
 # ╟─2fd068a7-9f7f-49ab-986b-c15593d89eee
 # ╟─b0aa65a1-3433-4b48-9196-d47e6e35379e
 # ╟─7e82ca6c-5c36-4c0d-ba07-914ff604f107
@@ -3666,7 +3674,7 @@ version = "4.1.0+0"
 # ╟─cefd6d07-04f8-4c48-bb20-392113262348
 # ╟─8e992360-1373-4168-bc59-a7b04792befa
 # ╟─08812d58-0a6f-4845-94fe-5c9a965a118c
-# ╠═c31c4aba-1cb8-4d45-9e25-634f929b67e6
+# ╟─c31c4aba-1cb8-4d45-9e25-634f929b67e6
 # ╟─8678ac5d-fea0-4697-b2e6-799e72afda5a
 # ╟─1ae0f50a-c021-41cd-a389-cec934e34e26
 # ╟─ef9bc959-20a8-44aa-9093-725c4734dd8d
