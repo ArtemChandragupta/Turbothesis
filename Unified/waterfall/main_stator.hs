@@ -54,17 +54,21 @@ p5 = Waterfall.fromPath2D (Path2D.pathFrom2D ps5c1e
     , Path2D.bezierTo2D ps5lp3 ps5lp2 ps5lp0
     ])
 
-lofter :: Solids.Solid
-lofter = Transforms.translate (V3 psxs 0 0) (Transforms.mirror (V3 0 1 0) (Loft.loft
+blade :: Solids.Solid
+blade = Transforms.translate (V3 psxs 0 0) (Transforms.mirror (V3 0 1 0) (Booleans.union3D
+    (Loft.loft
     [ (Transforms.translate (V3 0 0 psru) p1)
     , (Transforms.translate (V3 0 0 ps1r) p1)
+    ])
+    (Loft.loft
+    [ (Transforms.translate (V3 0 0 ps1r) p1)
     , (Transforms.translate (V3 0 0 ps2r) p2)
     , (Transforms.translate (V3 0 0 ps3r) p3)
     , (Transforms.translate (V3 0 0 ps4r) p4)
     , (Transforms.translate (V3 0 0 ps5r) p5)
-    ]))
+    ])))
 
 main :: IO ()
 main = do
-    Waterfall.writeSTEP "blade_stator.step" lofter
-    Waterfall.SVG.writeDiagramSVG "blade_stator.svg" (Waterfall.solidDiagram (V3 0 0 1) (Waterfall.uScale 10 lofter ))
+    Waterfall.writeSTEP "blade_stator.step" blade
+    Waterfall.SVG.writeDiagramSVG "blade_stator.svg" (Waterfall.solidDiagram (V3 0 0 1) (Waterfall.uScale 10 blade ))
