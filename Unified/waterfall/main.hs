@@ -55,13 +55,14 @@ p5 = Waterfall.fromPath2D (Path2D.pathFrom2D p5c1e
     ])
 
 lofter :: Solids.Solid
-lofter = Transforms.mirror (V3 0 1 0) (Loft.loft
-    [ (Transforms.translate (V3 0 0 p1r) p1)
+lofter = Transforms.translate (V3 pxs 0 0) (Transforms.mirror (V3 0 1 0) (Loft.loft
+    [ (Transforms.translate (V3 0 0 pru) p1)
+    , (Transforms.translate (V3 0 0 p1r) p1)
     , (Transforms.translate (V3 0 0 p2r) p2)
     , (Transforms.translate (V3 0 0 p3r) p3)
     , (Transforms.translate (V3 0 0 p4r) p4)
     , (Transforms.translate (V3 0 0 p5r) p5)
-    ])
+    ]))
 
 main :: IO ()
 main = do

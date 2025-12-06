@@ -1117,7 +1117,13 @@ begin
 			Z = (; z, t )
 		end
 
-		(; R₁, R₂, l, ξ, r, b, α₁, β₁, α₂, β₂, β₁ₚ, β₂ₚ, β₁ₛ, β₂ₛ, xc, yc, xp, yp, xs, ys, cntr, ctr1, ctr2, cₘₐₓ, Z)
+		# Вычисление "утопления" лопатки - радиуса, на который нужно добавить ещё один корневой профиль, чтобы он не выступал за хвостовик
+		Rᵤ = √( r^2 - (ξ + R₂ - cntr[2])^2 )
+
+		# Вычисление сдвига лопатки - изначально 0 в центроиде, но удобно сразу сдвинуть координату по оси
+		Xₛ = l̄.xl²[end - 1] + cntr[1]
+
+		(; R₁, R₂, l, ξ, r, b, α₁, β₁, α₂, β₂, β₁ₚ, β₂ₚ, β₁ₛ, β₂ₛ, xc, yc, xp, yp, xs, ys, cntr, ctr1, ctr2, cₘₐₓ, Z, Rᵤ, Xₛ)
 	end
 
 	md"Λ Построение профиля"
@@ -1407,7 +1413,9 @@ function transformProfile(Pr)
         c2 = (c2s, c2e, c2m     ),
         pl = (pls, ple, pl1, pl2),
         sl = (sls, sle, sl1, sl2),
-		rl = 1000Pr.r
+		rl = 1000Pr.r,
+		ru = 1000Pr.Rᵤ,
+		xs = 1000Pr.Xₛ
     )
 end
 
@@ -1416,6 +1424,8 @@ function write_Haskell(Data)
 	open("waterfall/Data.hs", "w") do f
 		write(f, "module Data where \n")
 		write(f, "import Linear (V3 (..), V2 (..), zero) \n")
+		write(f, "pru = $(Data[1][6]) \n")
+		write(f, "pxs = $(Data[1][7]) \n")
 		for section in 1:length(Data)
 			write(f, "p$(section)c1s = V2 ($(Data[section][1][1][1])) ($(Data[section][1][1][2])) \n")
 			write(f, "p$(section)c1e = V2 ($(Data[section][1][2][1])) ($(Data[section][1][2][2])) \n")
@@ -1503,7 +1513,13 @@ begin
 			Z = (; z, t )
 		end
 
-		(; R₁, R₂, l, ξ, r, b, α₁, α₂, α₁ₚ, α₂ₚ, α₁ₛ, α₂ₛ, xc, yc, xp, yp, xs, ys, cntr, ctr1, ctr2, cₘₐₓ, Z)
+		# Вычисление "утопления" лопатки - радиуса, на который нужно добавить ещё один корневой профиль, чтобы он не выступал за хвостовик
+		Rᵤ = √( r^2 - (ξ - R₂ - cntr[2])^2 )
+
+		# Вычисление сдвига лопатки - изначально 0 в центроиде, но удобно сразу сдвинуть координату по оси
+		Xₛ = l̄.xl₁[end - 1] + cntr[1]
+
+		(; R₁, R₂, l, ξ, r, b, α₁, α₂, α₁ₚ, α₂ₚ, α₁ₛ, α₂ₛ, xc, yc, xp, yp, xs, ys, cntr, ctr1, ctr2, cₘₐₓ, Z, Rᵤ, Xₛ)
 	end
 
 	md"Λ Построение профиля сопловой лопатки"
@@ -1793,15 +1809,19 @@ function transformProfile_2(Pr)
         c2 = (c2s, c2e, c2m     ),
         pl = (pls, ple, pl1, pl2),
         sl = (sls, sle, sl1, sl2),
-		rl = 1000Pr.r
+		rl = 1000Pr.r,
+		ru = 1000Pr.Rᵤ,
+		xs = 1000Pr.Xₛ
     )
 end
 
 # ╔═╡ c31c4aba-1cb8-4d45-9e25-634f929b67e6
 function write_Haskell_2(Data)
-	open("waterfall/Data2.hs", "w") do f
-		write(f, "module Data2 where \n")
+	open("waterfall/Data_stator.hs", "w") do f
+		write(f, "module Data_stator where \n")
 		write(f, "import Linear (V3 (..), V2 (..), zero) \n")
+		write(f, "psru = $(Data[1][6]) \n")
+		write(f, "psxs = $(Data[1][7]) \n")
 		for section in 1:length(Data)
 			write(f, "ps$(section)c1s = V2 ($(Data[section][1][1][1])) ($(Data[section][1][1][2])) \n")
 			write(f, "ps$(section)c1e = V2 ($(Data[section][1][2][1])) ($(Data[section][1][2][2])) \n")
@@ -3625,7 +3645,7 @@ version = "4.1.0+0"
 # ╟─7290e07c-eedc-429f-a2fa-7130dae8da37
 # ╟─c2b940ae-7013-4184-916f-cc2c6c3bb718
 # ╟─23866f8f-bdff-45be-afcd-91d3c87a200e
-# ╠═3e5014a8-e39f-4d3c-bb2f-122dea8482bb
+# ╟─3e5014a8-e39f-4d3c-bb2f-122dea8482bb
 # ╟─e24903de-8706-4d29-aaf0-2005799675e1
 # ╟─1f21d0d2-43a3-489b-9b77-d09d0824f799
 # ╟─4e7e1ddb-8a03-4818-be9e-fa31698faf07
@@ -3637,7 +3657,7 @@ version = "4.1.0+0"
 # ╟─43b474fc-51fa-4aef-86fa-cba0eb59bcf9
 # ╟─9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
 # ╟─7c80bb36-5cef-4e21-bd84-53f347f6dfe0
-# ╠═20f45d03-754e-4d6a-b1ad-431745281c4e
+# ╟─20f45d03-754e-4d6a-b1ad-431745281c4e
 # ╟─ba361882-01ce-426b-8725-90f00d00be4a
 # ╟─44ec2743-fcc2-41fd-a7eb-0e86202ccb6b
 # ╟─65e1301d-9baa-4c84-9bbf-0a82ed444c29

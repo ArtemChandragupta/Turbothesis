@@ -12,7 +12,7 @@ import qualified Waterfall.Loft as Loft
 import qualified Waterfall.Path.Common as Path
 import qualified Waterfall.TwoD.Path2D as Path2D
 
-import Data2
+import Data_stator
 
 p1 :: Waterfall.Path
 p1 = Waterfall.fromPath2D (Path2D.pathFrom2D ps1c1e
@@ -55,13 +55,14 @@ p5 = Waterfall.fromPath2D (Path2D.pathFrom2D ps5c1e
     ])
 
 lofter :: Solids.Solid
-lofter = Transforms.mirror (V3 0 1 0) (Loft.loft
-    [ (Transforms.translate (V3 0 0 ps1r) p1)
+lofter = Transforms.translate (V3 psxs 0 0) (Transforms.mirror (V3 0 1 0) (Loft.loft
+    [ (Transforms.translate (V3 0 0 psru) p1)
+    , (Transforms.translate (V3 0 0 ps1r) p1)
     , (Transforms.translate (V3 0 0 ps2r) p2)
     , (Transforms.translate (V3 0 0 ps3r) p3)
     , (Transforms.translate (V3 0 0 ps4r) p4)
     , (Transforms.translate (V3 0 0 ps5r) p5)
-    ])
+    ]))
 
 main :: IO ()
 main = do
