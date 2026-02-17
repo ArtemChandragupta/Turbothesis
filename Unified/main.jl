@@ -926,7 +926,49 @@ begin
 	md"λ Кривая Эрмита"
 end
 
-# ╔═╡ 8845a7bd-f62c-4531-953e-5aabd6b8e708
+# ╔═╡ 5d979de0-beb0-41df-a5cd-779eec0e611f
+begin
+	function thickness(xp, yp, xs, ys)
+		c̄ = []
+	
+		for i in 1:length(xp)
+			j  = argmin(  √( (xp[i]-xs[j])^2 + (yp[i]-ys[j])^2 ) for j in 1:length(xs))
+			cᵢ = minimum( √( (xp[i]-xs[j])^2 + (yp[i]-ys[j])^2 ) for j in 1:length(xs))
+		
+			push!(c̄, (; i, j, cᵢ))
+		end
+
+		max = argmax(item -> item.cᵢ, c̄)
+
+		xₘ = ( xp[max.i] + xs[max.j] ) / 2
+		yₘ = ( yp[max.i] + ys[max.j] ) / 2
+		cₘ = max.cᵢ / 2
+
+		(; pₘ = (xₘ, yₘ), cₘ)
+	end
+
+	md"λ Вычисление толщины профиля"
+end
+
+# ╔═╡ 456abb60-9448-4a7b-9331-04c38e6d7cc0
+begin
+	function calc_con(ϕ₁, ϕ₂, r, b, c, type)
+		c̄    = c/b
+		t̄ₒₚₜ = type == 2 ?
+			0.55(1-c̄) * (sind(ϕ₁+90)/sind(90-ϕ₂) * 180/(ϕ₂-ϕ₁) )^(1/3) :
+			0.55(1-c̄) * (sind(-ϕ₁+90)/sind(90+ϕ₂) * 180/(-ϕ₂+ϕ₁) )^(1/3)
+		tₒₚₜ  = t̄ₒₚₜ * b
+		Lᵒ    = 2π * r
+		z     = round(Lᵒ / tₒₚₜ)
+		t     = Lᵒ / z
+
+		(; c̄, t̄ₒₚₜ, tₒₚₜ, Lᵒ, z, t)
+	end
+
+	md"λ Вычисление числа лопаток"
+end
+
+# ╔═╡ 93863518-c9c4-46f4-a33b-a7b32e815ad0
 begin
 	function centroid(x1, y1, x2, y2, θ₁ₚ, θ₁ₛ, θ₂ₚ, θ₂ₛ, l, ξ, R₁, R₂)
     	total_area  = 0.0
@@ -935,7 +977,7 @@ begin
 
 		function circular_centroid(R, θ₁, θ₂, cx, cy)
 			θ = - θ₁ + θ₂
-		    A = (R^2 / 2) * (θ - sin(θ))
+		    A = abs((R^2 / 2) * (θ - sin(θ)))
 		    d = (4R * sin(θ/2)^3) / (3(θ - sin(θ)))
 	    	bisector_angle = (θ₁ + θ₂)/2
 
@@ -981,38 +1023,14 @@ begin
 	md"λ Вычисление центроида"
 end
 
-# ╔═╡ 5d979de0-beb0-41df-a5cd-779eec0e611f
+# ╔═╡ 41052bef-706d-4ba9-935f-772889053a94
 begin
-	function thickness(xp, yp, xs, ys)
-		c̄ = []
-	
-		for i in 1:length(xp)
-			j  = argmin(  √( (xp[i]-xs[j])^2 + (yp[i]-ys[j])^2 ) for j in 1:length(xs))
-			cᵢ = minimum( √( (xp[i]-xs[j])^2 + (yp[i]-ys[j])^2 ) for j in 1:length(xs))
-		
-			push!(c̄, (; i, j, cᵢ))
-		end
-
-		max = argmax(item -> item.cᵢ, c̄)
-
-		xₘ = ( xp[max.i] + xs[max.j] ) / 2
-		yₘ = ( yp[max.i] + ys[max.j] ) / 2
-		cₘ = max.cᵢ / 2
-
-		(; pₘ = (xₘ, yₘ), cₘ)
-	end
-
-	md"λ Вычисление толщины профиля"
-end
-
-# ╔═╡ 92eaacb2-756d-4f8e-b9c3-c02353c14417
-begin
-	function distance(xp, yp, xs, ys, Δ)
+	function distance(xt, yt, xb, yb, Δ)
 		d̄ = []
 	
-		for i in 1:length(xp)
-			j  = argmin( √( (xp[i]-xs[j])^2 + (yp[i]-ys[j]-Δ)^2 ) for j in 1:length(xs))
-			dᵢ = minimum(√( (xp[i]-xs[j])^2 + (yp[i]-ys[j]-Δ)^2 ) for j in 1:length(xs))
+		for i in 1:length(xt)
+			j  = argmin( √( (xt[i]-xb[j])^2 + (yt[i]-yb[j]-Δ)^2 ) for j in 1:length(xb))
+			dᵢ = minimum(√( (xt[i]-xb[j])^2 + (yt[i]-yb[j]-Δ)^2 ) for j in 1:length(xb))
 		
 			push!(d̄, (; j, dᵢ))
 		end
@@ -1023,107 +1041,74 @@ begin
 	md"λ Вычисление расстояния между профилями"
 end
 
-# ╔═╡ 0f7c4d6c-e748-4de0-8166-47d03f4129ec
+# ╔═╡ c4fabc38-a030-4e61-96d5-4d4ecdf0c5e2
 begin
-	function calc_conf(b, c, ρ)
-		c̄    = c/b
-		t̄ₒₚₜ = ρ.β₁ > 0 ? 
-			(0.55(1-c̄) * (sind(ρ.β₁    )/sind(ρ.β⃰₂) * 180/(180-(    ρ.β₁+ρ.β⃰₂)) )^(1/3) ) : 
-			(0.55(1-c̄) * (sind(180+ρ.β₁)/sind(ρ.β⃰₂) * 180/(180-(180+ρ.β₁+ρ.β⃰₂)) )^(1/3) )
-		tₒₚₜ  = t̄ₒₚₜ * b
-		Lᵒ    = 2π * ρ.r
-		z     = round(Lᵒ / tₒₚₜ)
-		t     = Lᵒ / z
+	function profile_build(S, R, type, n, R₁, R₂, Δ₁, Δ₂, l̄, Pr)
+		# Углы средней линии
+		ϕ₁ = type == 2 ? R[n].β₁ - 90 : S[3].α₂ + 90
+		ϕ₂ = type == 2 ? 90 - R[n].β⃰₂ : R[n].α₁ - 90
 
-		(; c̄, t̄ₒₚₜ, tₒₚₜ, Lᵒ, z, t)
-	end
-
-	md"λ Вычисление числа лопаток"
-end
-
-# ╔═╡ fb37070c-676f-4b74-b8ed-41ba4d230cdd
-begin
-	function calc_conf_2(b, r, c, ρ, α₂)
-		c̄    = c/b
-		t̄ₒₚₜ = 0.55(1-c̄) * (sind(ρ.α₁)/sind(180 + α₂) * 180/(-(ρ.α₁ + α₂)) )^(1/3)
-		tₒₚₜ  = t̄ₒₚₜ * b
-		Lᵒ    = 2π * r
-		z     = round(Lᵒ / tₒₚₜ)
-		t     = Lᵒ / z
-
-		(; c̄, t̄ₒₚₜ, tₒₚₜ, Lᵒ, z, t)
-	end
-
-	md"λ Вычисление числа сопловых лопаток"
-end
-
-# ╔═╡ 61b7a669-218b-4cc2-a45b-ea70cdda0250
-begin
-	function profile_build(R, n, R₁, R₂, Δ₁, Δ₂, l̄, Pr1)
-		# Нормализация углов
-		if R[n].β₁ < 0
-			β₁ₜₑₘₚ = 180 + R[n].β₁
-		else
-			β₁ₜₑₘₚ = R[n].β₁
-		end
-	    α₁, β₁ = R[n].α₁ - 90, β₁ₜₑₘₚ - 90
-    	α₂, β₂ = 90 + R[n].α₂, 90 - R[n].β⃰₂
-
+		if ϕ₁ < -90; ϕ₁ = 180 + ϕ₁; end
+		
 	    # Углы для построения профиля
-    	β₁ₚ, β₂ₚ = β₁ + Δ₁, β₂ - Δ₂
-    	β₁ₛ, β₂ₛ = β₁ - Δ₁, β₂ + Δ₂
+    	ϕ₁ᵗ, ϕ₂ᵗ = ϕ₁ + Δ₁, ϕ₂ - Δ₂
+    	ϕ₁ᵇ, ϕ₂ᵇ = ϕ₁ - Δ₁, ϕ₂ + Δ₂
 
-		r = R[n].r
-		l = R[n].b - 2tand(l̄.β₁) * (r - R[1].r)
-		ξ = l * (R[n].w₁u + R[n].w₂u) / (R[n].w₁u / tand(β₁) + R[n].w₂u / tand(β₂))
+		if type == 2 
+			r = R[n].r
+			l = R[n].b - 2tand(l̄.β₁) * (r - R[1].r)
+			ξ = l * (R[n].w₁u+R[n].w₂u) / (R[n].w₁u/tand(ϕ₁) + R[n].w₂u/tand(ϕ₂))
+		elseif type == 1
+			r = R[1].r + l̄.ll₁[end] * (n-1)/4
+			l = l̄.bl₁[end] - 2tand(l̄.β₁) * (l̄.ll₁[end] * ((5 - n)/4) )
+			ξ = l * (S[3].c₂u+R[n].c₁u) / (S[3].c₂u/tand(ϕ₁) + R[n].c₁u/tand(ϕ₂))
+		end
 
 		# Длина хорды
 		b = √(l^2 + ξ^2)
 
 		# Точки для сплайнов
-    	p1 = ( R₁ * cosd(90 + β₁ₚ)    ,  R₁ * sind(90 + β₁ₚ)    )
-    	p2 = ( R₂ * cosd(90 + β₂ₚ) + l,  R₂ * sind(90 + β₂ₚ) + ξ)
-    	s1 = (-R₁ * cosd(90 + β₁ₛ)    , -R₁ * sind(90 + β₁ₛ)    )
-    	s2 = (-R₂ * cosd(90 + β₂ₛ) + l, -R₂ * sind(90 + β₂ₛ) + ξ)
+    	t1 = (-R₁ * sind(ϕ₁ᵗ)    ,  R₁ * cosd(ϕ₁ᵗ)    )
+    	t2 = (-R₂ * sind(ϕ₂ᵗ) + l,  R₂ * cosd(ϕ₂ᵗ) + ξ)
+    	b1 = ( R₁ * sind(ϕ₁ᵇ)    , -R₁ * cosd(ϕ₁ᵇ)    )
+    	b2 = ( R₂ * sind(ϕ₂ᵇ) + l, -R₂ * cosd(ϕ₂ᵇ) + ξ)
 
 	    # Построение сплайнов оригинального профиля
-		cline = hermite_polynomial(0, 0 , tand(β₁ ), l, ξ , tand(β₂ ))
-    	pline = hermite_polynomial(p1..., tand(β₁ₚ), p2..., tand(β₂ₚ))
-    	sline = hermite_polynomial(s1..., tand(β₁ₛ), s2..., tand(β₂ₛ))
+		cline = hermite_polynomial(0, 0 , tand(ϕ₁ ), l, ξ , tand(ϕ₂ ))
+    	tline = hermite_polynomial(t1..., tand(ϕ₁ᵗ), t2..., tand(ϕ₂ᵗ))
+    	bline = hermite_polynomial(b1..., tand(ϕ₁ᵇ), b2..., tand(ϕ₂ᵇ))
 
 		xc = range(0    , l    , 200)
-    	xp = range(p1[1], p2[1], 200)
-    	xs = range(s1[1], s2[1], 200)
+    	xt = range(t1[1], t2[1], 200)
+    	xb = range(b1[1], b2[1], 200)
 
 	    yc = cline.(xc)
-    	yp = pline.(xp)
-    	ys = sline.(xs)
+    	yt = tline.(xt)
+    	yb = bline.(xb)
 
 		# Вычисление центроида
-    	cntr, ctr1, ctr2 = centroid(xp,yp,xs,ys,
-									deg2rad(90 + β₁ₚ), deg2rad(360 - 90 + β₁ₛ),
-									deg2rad(90 + β₂ₚ), deg2rad(    - 90 + β₂ₛ),
+    	cntr, ctr1, ctr2 = centroid(xt,yt,xb,yb,
+									deg2rad(90 + ϕ₁ᵗ), deg2rad(360 - 90 + ϕ₁ᵇ),
+									deg2rad(90 + ϕ₂ᵗ), deg2rad(    - 90 + ϕ₂ᵇ),
 									l,ξ, R₁,R₂)
 
 		# Вычисление наибольшей толщины профиля и положения этого сечения
-		cₘₐₓ = thickness(xp, yp, xs, ys)
+		cₘₐₓ = thickness(xt, yt, xb, yb)
 
 		# Вычисление оптимального числа лопаток
-		if n == 1
-			Z = calc_conf(b, cₘₐₓ.cₘ, R[n])
+		scope = type == 2 ? 1 : 5
+		if n == scope
+			Z = calc_con(ϕ₁, ϕ₂, r, b, cₘₐₓ.cₘ, type)
 		else
-			z = Pr1.Z.z
+			z = Pr.Z.z
 			t = 2π * r / z
 			Z = (; z, t )
 		end
 
-		# Вычисление "утопления" лопатки - радиуса, на который нужно добавить ещё один корневой профиль, чтобы он не выступал за хвостовик
-		Rᵤ = √( r^2 - (ξ + R₂ - cntr[2])^2 )
+		# Вычисление положения по оси x - изначально 0 в центроиде
+		Xₛ = type == 2 ? l̄.xl²[end - 1] + cntr[1] : l̄.xl₁[end - 1] + cntr[1]
 
-		# Вычисление сдвига лопатки - изначально 0 в центроиде, но удобно сразу сдвинуть координату по оси
-		Xₛ = l̄.xl²[end - 1] + cntr[1]
-
-		(; R₁, R₂, l, ξ, r, b, α₁, β₁, α₂, β₂, β₁ₚ, β₂ₚ, β₁ₛ, β₂ₛ, xc, yc, xp, yp, xs, ys, cntr, ctr1, ctr2, cₘₐₓ, Z, Rᵤ, Xₛ)
+		(; type, R₁, R₂, l, ξ, r, b, ϕ₁, ϕ₂, ϕ₁ᵗ, ϕ₂ᵗ, ϕ₁ᵇ, ϕ₂ᵇ, xc, yc, xt, yt, xb, yb, cntr, ctr1, ctr2, cₘₐₓ, Z, Xₛ)
 	end
 
 	md"Λ Построение профиля"
@@ -1131,41 +1116,50 @@ end
 
 # ╔═╡ 20f45d03-754e-4d6a-b1ad-431745281c4e
 begin
-	Pr1 = profile_build(R, 1, 0.003  , 0.001 , 11, 6, l̄, 0  )
-	Pr2 = profile_build(R, 2, 0.00285, 0.0008, 11, 6, l̄, Pr1)
-	Pr3 = profile_build(R, 3, 0.00235, 0.0007, 11, 6, l̄, Pr1)
-	Pr4 = profile_build(R, 4, 0.00175, 0.0006, 11, 6, l̄, Pr1)
-	Pr5 = profile_build(R, 5, 0.00125, 0.0005, 11, 6, l̄, Pr1)
+	Pr1 = profile_build(S, R, 2, 1, 0.003  , 0.001 , 11, 6, l̄, 0  )
+	Pr2 = profile_build(S, R, 2, 2, 0.00285, 0.0008, 11, 6, l̄, Pr1)
+	Pr3 = profile_build(S, R, 2, 3, 0.00235, 0.0007, 11, 6, l̄, Pr1)
+	Pr4 = profile_build(S, R, 2, 4, 0.00175, 0.0006, 11, 6, l̄, Pr1)
+	Pr5 = profile_build(S, R, 2, 5, 0.00125, 0.0005, 11, 6, l̄, Pr1)
 
-	md"### ∮ Построение профилей рабочих лопаток"
+	Prs5 = profile_build(S, R, 1, 5, 0.005, 0.001, 15, 4, l̄, 0    )
+	Prs1 = profile_build(S, R, 1, 1, 0.005, 0.001, 15, 4, l̄, Prs5 )
+	Prs2 = profile_build(S, R, 1, 2, 0.005, 0.001, 15, 4, l̄, Prs5 )
+	Prs3 = profile_build(S, R, 1, 3, 0.005, 0.001, 15, 4, l̄, Prs5 )
+	Prs4 = profile_build(S, R, 1, 4, 0.005, 0.001, 15, 4, l̄, Prs5 )
+	
+	md"### ∮ Построение профилей рабочих и сопловых лопаток"
 end
 
-# ╔═╡ d826b48a-d8d8-4083-bfa7-8b302d20b344
-Pr1.Z.z
+# ╔═╡ 8a624d99-6d74-4012-b28e-60ce7f7a4754
+Prs1.Z
 
-# ╔═╡ 9d1db807-3229-4d28-b78b-325f9c82c60d
+# ╔═╡ f3210104-8de0-4394-997c-8cc2858c800a
 begin
 	function profile_show(Pr)
 		with_theme(theme_latexfonts()) do
 			fig = Figure(figure_padding = 0)
     		ax = Axis(fig[1, 1], aspect = DataAspect())
-			hidespines!(ax)
-    		hidedecorations!(ax)
+			hidespines!(ax); hidedecorations!(ax)
 
-		    # Отображаем центроид
+			mod = Pr.type == 2 ? 1 : -1
+			dir = Pr.type == 2 ? :up : :down
+			pnt = Pr.type == 2 ? 2 : 1
+
+			# Отображаем центроид
     		scatter!(ax, Pr.cntr, color=:gray, markersize=10)
 
 			# Отображение толщины
 			arc!(ax, color = :gray, linewidth = 1, Pr.cₘₐₓ.pₘ, Pr.cₘₐₓ.cₘ, 0, 2π)
 
-			α  = atan(Pr.ξ / Pr.l) + pi/2 #+ 3π/4
-			dl = 0.2Pr.l * cos(α)
+			α  = atan(Pr.ξ / Pr.l) + pi/2
+			dl = Pr.type == 2 ? 0.2Pr.l * cos(α) : 0.3Pr.l * cos(α)
     	    diam_points = [
 				(Pr.cₘₐₓ.pₘ[1]+Pr.cₘₐₓ.cₘ*cos(α), Pr.cₘₐₓ.pₘ[2]+Pr.cₘₐₓ.cₘ*sin(α)),
 				(Pr.cₘₐₓ.pₘ[1]-Pr.cₘₐₓ.cₘ*cos(α), Pr.cₘₐₓ.pₘ[2]-Pr.cₘₐₓ.cₘ*sin(α)),
 				(
-					Pr.cₘₐₓ.pₘ[1]-Pr.cₘₐₓ.cₘ*cos(α) - dl,
-					Pr.cₘₐₓ.pₘ[2]-Pr.cₘₐₓ.cₘ*sin(α) - dl * tan(α)
+					Pr.cₘₐₓ.pₘ[1]+mod*(-Pr.cₘₐₓ.cₘ*cos(α) - dl),
+					Pr.cₘₐₓ.pₘ[2]+mod*(-Pr.cₘₐₓ.cₘ*sin(α) - dl * tan(α))
 				)
         	]
 
@@ -1173,7 +1167,7 @@ begin
 				   [diam_points[2], diam_points[3]]
 				  )
 			bracket!(ax, color=:gray, linewidth = 0, width = 0,
-					 diam_points[2], diam_points[3],
+					 diam_points[pnt], diam_points[3],
 					 text  = "c = $(round(Int, Pr.cₘₐₓ.cₘ * 2000)) mm"
 					)
 			arrows2d!(ax, color = :gray, argmode = :endpoint,
@@ -1184,7 +1178,6 @@ begin
 					 )
 
 			# Контуры окружностей
-
 			diam_points_1 = [
 				(0 + Pr.R₁ * cos(α), 0 + Pr.R₁ * sin(α)),
 				(0 - Pr.R₁ * cos(α), 0 - Pr.R₁ * sin(α)),
@@ -1201,21 +1194,32 @@ begin
 			diam_points_2 = [
 				(Pr.l + Pr.R₂ * cos(α)     , Pr.ξ + Pr.R₂ * sin(α)),
 				(Pr.l - Pr.R₂ * cos(α)     , Pr.ξ - Pr.R₂ * sin(α)),
-				(Pr.l - Pr.R₂ * cos(α) - dl, Pr.ξ - Pr.R₂ * sin(α) - dl * tan(α)),
+				(Pr.l - mod * (Pr.R₂ * cos(α) + dl), 
+				 Pr.ξ - mod * (Pr.R₂ * sin(α) + dl * tan(α))),
         	]
-			lines!(ax, color = :gray, linewidth = 1,
-				   [diam_points_2[1], diam_points_2[3]]
-				  )
-			bracket!(ax, color = :gray, linewidth = 0, width = 0,
-					 diam_points_2[3], diam_points_2[2],
-					 text = "⌀ $(round(Int, 2000Pr.R₂)) mm"
-					)
+			if Pr.type == 2
+				lines!(ax, color = :gray, linewidth = 1,
+					   [diam_points_2[1], diam_points_2[3]]
+					  )
+				bracket!(ax, color = :gray, linewidth = 0, width = 0,
+						 diam_points_2[3], diam_points_2[2],
+						 text = "⌀ $(round(Int, 2000Pr.R₂)) mm"
+						)
+			elseif Pr.type == 1
+				lines!(ax, color = :gray, linewidth = 1,
+					   [diam_points_2[2], diam_points_2[3]]
+					  )
+				bracket!(ax, color = :gray, linewidth = 0, width = 0,
+						 diam_points_2[3], diam_points_2[1],
+						 text = "⌀ $(round(Int, 2000Pr.R₂)) mm"
+						)
+			end
 
 			# Хорда
 			lines!(ax, color = :gray, linewidth = 1, linestyle = :dash,
 				   [0, Pr.l], [0, Pr.ξ]
 				  )
-			bracket!(ax, color = :gray, linewidth = 1, 0, 0, Pr.l, Pr.ξ,
+			bracket!(ax, color = :gray, linewidth = 1, 0, 0, Pr.l, Pr.ξ, orientation = dir,
 					 text = "b = $(round(Int, Pr.b * 10^3)) mm"
 					)
 
@@ -1224,16 +1228,16 @@ begin
 
 			# Дуги скругления
 			arc!(ax, color = :black, linewidth = 2, (0   , 0   ), Pr.R₁,
-				 deg2rad(90 + Pr.β₁ₚ), deg2rad(360 - 90 + Pr.β₁ₛ)
+				 deg2rad(90 + Pr.ϕ₁ᵗ), deg2rad(360 - 90 + Pr.ϕ₁ᵇ)
 				)
 			arc!(ax, color = :black, linewidth = 2, (Pr.l, Pr.ξ), Pr.R₂,
-				 deg2rad(90 + Pr.β₂ₚ), deg2rad(     -90 + Pr.β₂ₛ)
+				 deg2rad(90 + Pr.ϕ₂ᵗ), deg2rad(     -90 + Pr.ϕ₂ᵇ)
 				)
     
 		    # Профиль лопатки
     		lines!(ax, Pr.xc, Pr.yc, color = :gray , linewidth = 1)
-    		lines!(ax, Pr.xp, Pr.yp, color = :black, linewidth = 2)
-    		lines!(ax, Pr.xs, Pr.ys, color = :black, linewidth = 2)
+    		lines!(ax, Pr.xt, Pr.yt, color = :black, linewidth = 2)
+    		lines!(ax, Pr.xb, Pr.yb, color = :black, linewidth = 2)
     
 	    	fig
 		end
@@ -1242,23 +1246,22 @@ begin
 	md"👁 Отображение одного профиля"
 end
 
-# ╔═╡ ba361882-01ce-426b-8725-90f00d00be4a
-profile_show(Pr1)
+# ╔═╡ a799d3e9-e95e-4f5a-aa80-96d428751e02
+profile_show(Pr4)
 
-# ╔═╡ 0edf5251-3d74-4f2c-bced-88fdb511d2f8
+# ╔═╡ fcc47753-9b48-4bf2-8b0e-02b8f8417fe7
 begin
 	function profile_shift(Pr)
 
-		Δ = Pr.Z.t
+		Δ = Pr.type == 2 ? Pr.Z.t : -Pr.Z.t
 
 		with_theme(theme_latexfonts()) do
 			fig = Figure()
     		ax = Axis(fig[1, 1], aspect = DataAspect())
-			hidespines!(ax)
-    		hidedecorations!(ax)
+			hidespines!(ax); hidedecorations!(ax)
 
 			# Расстояния между профилями
-			ds = distance(Pr.xp, Pr.yp, Pr.xs, Pr.ys, Δ)
+			ds = Pr.type == 2 ? distance(Pr.xt, Pr.yt, Pr.xb, Pr.yb, Δ) : distance(Pr.xb, Pr.yb, Pr.xt, Pr.yt, Δ)
 
 			distances = [1000d.dᵢ for d in ds]
 
@@ -1267,32 +1270,41 @@ begin
 
 			colors = [cgrad(:viridis, [0, 1])[d] for d in norm_distances]
 
-			for i in 1:length(Pr.xp)
-				lines!(ax, color = colors[i], linewidth=4,
-					   [Pr.xp[i], Pr.xs[ds[i].j]    ],
-					   [Pr.yp[i], Pr.ys[ds[i].j] + Δ]
-				  	)
+			if Pr.type == 2
+				for i in 1:length(Pr.xt)
+					lines!(ax, color = colors[i], linewidth=4,
+						   [Pr.xt[i], Pr.xb[ds[i].j]    ],
+						   [Pr.yt[i], Pr.yb[ds[i].j] + Δ]
+					  	)
+				end
+			elseif Pr.type == 1
+				for i in 1:length(Pr.xt)
+					lines!(ax, color = colors[i], linewidth=4,
+						   [Pr.xb[i], Pr.xt[ds[i].j]    ],
+						   [Pr.yb[i], Pr.yt[ds[i].j] + Δ]
+					  	)
+				end
 			end
 
 			# Дуги скругления
 			arc!(ax, color = :black, linewidth = 2, (0   , 0   ),
-				 Pr.R₁, deg2rad(90 + Pr.β₁ₚ), deg2rad(360 - 90 + Pr.β₁ₛ)
+				 Pr.R₁, deg2rad(90 + Pr.ϕ₁ᵗ), deg2rad(360 - 90 + Pr.ϕ₁ᵇ)
 				)
 			arc!(ax, color = :black, linewidth = 2, (Pr.l, Pr.ξ),
-				 Pr.R₂, deg2rad(90 + Pr.β₂ₚ), deg2rad(     -90 + Pr.β₂ₛ)
+				 Pr.R₂, deg2rad(90 + Pr.ϕ₂ᵗ), deg2rad(     -90 + Pr.ϕ₂ᵇ)
 				)
 
 		    # Профиль лопатки
-    		lines!(ax, Pr.xp, Pr.yp, color = :black, linewidth = 2)
-	    	lines!(ax, Pr.xs, Pr.ys, color = :black, linewidth = 2)
+    		lines!(ax, Pr.xt, Pr.yt, color = :black, linewidth = 2)
+	    	lines!(ax, Pr.xb, Pr.yb, color = :black, linewidth = 2)
 
 			# Дуги скругления
-			arc!(ax, (0   ,        Δ), Pr.R₁, deg2rad(90 + Pr.β₁ₚ), deg2rad(360 - 90 + Pr.β₁ₛ), color = :black, linewidth = 2)
-			arc!(ax, (Pr.l, Pr.ξ + Δ), Pr.R₂, deg2rad(90 + Pr.β₂ₚ), deg2rad(     -90 + Pr.β₂ₛ), color = :black, linewidth = 2)
+			arc!(ax, (0   ,        Δ), Pr.R₁, deg2rad(90 + Pr.ϕ₁ᵗ), deg2rad(360 - 90 + Pr.ϕ₁ᵇ), color = :black, linewidth = 2)
+			arc!(ax, (Pr.l, Pr.ξ + Δ), Pr.R₂, deg2rad(90 + Pr.ϕ₂ᵗ), deg2rad(     -90 + Pr.ϕ₂ᵇ), color = :black, linewidth = 2)
 
 		    # Профиль лопатки
-    		lines!(ax, Pr.xp, Pr.yp .+ Δ, color = :black, linewidth = 2)
-    		lines!(ax, Pr.xs, Pr.ys .+ Δ, color = :black, linewidth = 2)
+    		lines!(ax, Pr.xt, Pr.yt .+ Δ, color = :black, linewidth = 2)
+    		lines!(ax, Pr.xb, Pr.yb .+ Δ, color = :black, linewidth = 2)
 
 			Colorbar(fig[1, 2], limits=(min_dist,max_dist), minorticksvisible=true,
 					 label = L"t, \ м м"
@@ -1305,10 +1317,10 @@ begin
 	md"👁 Отображение конфузорности"
 end
 
-# ╔═╡ 44ec2743-fcc2-41fd-a7eb-0e86202ccb6b
-profile_shift(Pr1)
+# ╔═╡ 875fe360-eeb8-4a6a-bb39-caf94901ae52
+profile_shift(Pr5)
 
-# ╔═╡ 7cb1c106-ccfe-48eb-af87-0eb6812a4000
+# ╔═╡ f2c9597e-84c3-4e0a-8fc0-73131b7254ce
 begin
 	function profiles_show(Pr1, Pr2, Pr3, Pr4, Pr5)
     	Pr = [Pr1, Pr2, Pr3, Pr4, Pr5]
@@ -1333,18 +1345,18 @@ begin
     	        n_points = 100
             
 	            # Первая дуга (входная кромка)
-				angles1 = range(deg2rad(90 + Pr[i].β₁ₚ), deg2rad(360 - 90 + Pr[i].β₁ₛ), length=n_points)
+				angles1 = range(deg2rad(90 + Pr[i].ϕ₁ᵗ), deg2rad(360 - 90 + Pr[i].ϕ₁ᵇ), length=n_points)
 				arc1_points = [Point2f(arc_center1[1] + Pr[i].R₁ * cos(θ), arc_center1[2] + Pr[i].R₁ * sin(θ)) for θ in angles1]
             
 	            # Вторая дуга (выходная кромка)
-				angles2 = range(deg2rad(90 + Pr[i].β₂ₚ), deg2rad(-90 + Pr[i].β₂ₛ), length=n_points)
+				angles2 = range(deg2rad(90 + Pr[i].ϕ₂ᵗ), deg2rad(-90 + Pr[i].ϕ₂ᵇ), length=n_points)
 				arc2_points = [Point2f(arc_center2[1] + Pr[i].R₂ * cos(θ), arc_center2[2] + Pr[i].R₂ * sin(θ)) for θ in angles2]
 
 	            # Полный контур профиля, включая дуги
     	        full_contour = vcat(
-					[Point2f(x - cx, y - cy) for (x, y) in zip(Pr[i].xp, Pr[i].yp)],
+					[Point2f(x - cx, y - cy) for (x, y) in zip(Pr[i].xt, Pr[i].yt)],
                 	arc2_points,
-					reverse([Point2f(x - cx, y - cy) for (x, y) in zip(Pr[i].xs, Pr[i].ys)]),
+					reverse([Point2f(x - cx, y - cy) for (x, y) in zip(Pr[i].xb, Pr[i].yb)]),
                 	arc1_points
             	)
 
@@ -1353,8 +1365,8 @@ begin
 
         	    # Контуры поверх заливки
             	lines!(ax, Pr[i].xc .- cx, Pr[i].yc .- cy, color=color, linewidth=1)
-            	lines!(ax, Pr[i].xp .- cx, Pr[i].yp .- cy, color=color, linewidth=2)
-	            lines!(ax, Pr[i].xs .- cx, Pr[i].ys .- cy, color=color, linewidth=2)
+            	lines!(ax, Pr[i].xt .- cx, Pr[i].yt .- cy, color=color, linewidth=2)
+	            lines!(ax, Pr[i].xb .- cx, Pr[i].yb .- cy, color=color, linewidth=2)
 				lines!(ax, color = color, linewidth = 2,
 					   [p[1] for p in arc1_points], [p[2] for p in arc1_points]
 					  )
@@ -1372,41 +1384,41 @@ begin
 	md"👁 Отображение всех профилей"
 end
 
-# ╔═╡ 65e1301d-9baa-4c84-9bbf-0a82ed444c29
+# ╔═╡ 9c6f53f7-7037-4dce-99b6-687b1473d5d7
 profiles_show(Pr1, Pr2, Pr3, Pr4, Pr5)
 
-# ╔═╡ b4612166-cbe9-4b21-b630-e08481294a03
+# ╔═╡ e3eb9ae9-4a31-4ce2-9ca7-607abd52e8f6
 function transformProfile(Pr)
 	cx = -1000Pr.cntr[1]
 	cy = -1000Pr.cntr[2]
 
-    c1s = (cx + 1000Pr.R₁ * cosd(90  +  Pr.β₁ₚ            ),
-		   cy + 1000Pr.R₁ * sind(90  +  Pr.β₁ₚ            ))
-    c1e = (cx - 1000Pr.R₁ * cosd(90  +  Pr.β₁ₛ            ),
-		   cy - 1000Pr.R₁ * sind(90  +  Pr.β₁ₛ            ))
-	c1m = (cx + 1000Pr.R₁ * cosd(180 + (Pr.β₁ₚ + Pr.β₁ₛ)/2),
-		   cy + 1000Pr.R₁ * sind(180 + (Pr.β₁ₚ + Pr.β₁ₛ)/2))
+    c1s = (cx + 1000Pr.R₁ * cosd(90  +  Pr.ϕ₁ᵗ            ),
+		   cy + 1000Pr.R₁ * sind(90  +  Pr.ϕ₁ᵗ            ))
+    c1e = (cx - 1000Pr.R₁ * cosd(90  +  Pr.ϕ₁ᵇ            ),
+		   cy - 1000Pr.R₁ * sind(90  +  Pr.ϕ₁ᵇ            ))
+	c1m = (cx + 1000Pr.R₁ * cosd(180 + (Pr.ϕ₁ᵗ + Pr.ϕ₁ᵇ)/2),
+		   cy + 1000Pr.R₁ * sind(180 + (Pr.ϕ₁ᵗ + Pr.ϕ₁ᵇ)/2))
     
-	c2s = (cx + 1000Pr.l + 1000Pr.R₂ * cosd(90 + Pr.β₂ₚ               ),
-		   cy + 1000Pr.ξ + 1000Pr.R₂ * sind(90 + Pr.β₂ₚ               ))
-	c2e = (cx + 1000Pr.l - 1000Pr.R₂ * cosd(90 + Pr.β₂ₛ               ),
-		   cy + 1000Pr.ξ - 1000Pr.R₂ * sind(90 + Pr.β₂ₛ               ))
-	c2m = (cx + 1000Pr.l + 1000Pr.R₂ * cosd(    (Pr.β₂ₚ + Pr.β₂ₛ) / 2 ),
-		   cy + 1000Pr.ξ + 1000Pr.R₂ * sind(    (Pr.β₂ₚ + Pr.β₂ₛ) / 2 ))
+	c2s = (cx + 1000Pr.l + 1000Pr.R₂ * cosd(90 + Pr.ϕ₂ᵗ               ),
+		   cy + 1000Pr.ξ + 1000Pr.R₂ * sind(90 + Pr.ϕ₂ᵗ               ))
+	c2e = (cx + 1000Pr.l - 1000Pr.R₂ * cosd(90 + Pr.ϕ₂ᵇ               ),
+		   cy + 1000Pr.ξ - 1000Pr.R₂ * sind(90 + Pr.ϕ₂ᵇ               ))
+	c2m = (cx + 1000Pr.l + 1000Pr.R₂ * cosd(    (Pr.ϕ₂ᵗ + Pr.ϕ₂ᵇ) / 2 ),
+		   cy + 1000Pr.ξ + 1000Pr.R₂ * sind(    (Pr.ϕ₂ᵗ + Pr.ϕ₂ᵇ) / 2 ))
     
-    pls = (cx + 1000Pr.xp[1]  , cy + 1000Pr.yp[1]  )
-    ple = (cx + 1000Pr.xp[end], cy + 1000Pr.yp[end])
-    pl1 = (cx + 1000Pr.xp[1]   +                (Pr.xp[end] - Pr.xp[1]) * 1000/3,
-		   cy + 1000Pr.yp[1]   + tand(Pr.β₁ₚ) * (Pr.xp[end] - Pr.xp[1]) * 1000/3)
-    pl2 = (cx + 1000Pr.xp[end] -                (Pr.xp[end] - Pr.xp[1]) * 1000/3,
-		   cy + 1000Pr.yp[end] - tand(Pr.β₂ₚ) * (Pr.xp[end] - Pr.xp[1]) * 1000/3)
+    pls = (cx + 1000Pr.xt[1]  , cy + 1000Pr.yt[1]  )
+    ple = (cx + 1000Pr.xt[end], cy + 1000Pr.yt[end])
+    pl1 = (cx + 1000Pr.xt[1]   +                (Pr.xt[end] - Pr.xt[1]) * 1000/3,
+		   cy + 1000Pr.yt[1]   + tand(Pr.ϕ₁ᵗ) * (Pr.xt[end] - Pr.xt[1]) * 1000/3)
+    pl2 = (cx + 1000Pr.xt[end] -                (Pr.xt[end] - Pr.xt[1]) * 1000/3,
+		   cy + 1000Pr.yt[end] - tand(Pr.ϕ₂ᵗ) * (Pr.xt[end] - Pr.xt[1]) * 1000/3)
     
-    sls = (cx + 1000Pr.xs[1]  , cy + 1000Pr.ys[1]  )
-    sle = (cx + 1000Pr.xs[end], cy + 1000Pr.ys[end])
-	sl1 = (cx + 1000Pr.xs[1]   +                (Pr.xs[end] - Pr.xs[1]) * 1000/3,
-		   cy + 1000Pr.ys[1]   + tand(Pr.β₁ₛ) * (Pr.xs[end] - Pr.xs[1]) * 1000/3)
-    sl2 = (cx + 1000Pr.xs[end] -                (Pr.xs[end] - Pr.xs[1]) * 1000/3,
-		   cy + 1000Pr.ys[end] - tand(Pr.β₂ₛ) * (Pr.xs[end] - Pr.xs[1]) * 1000/3)
+    sls = (cx + 1000Pr.xb[1]  , cy + 1000Pr.yb[1]  )
+    sle = (cx + 1000Pr.xb[end], cy + 1000Pr.yb[end])
+	sl1 = (cx + 1000Pr.xb[1]   +                (Pr.xb[end] - Pr.xb[1]) * 1000/3,
+		   cy + 1000Pr.yb[1]   + tand(Pr.ϕ₁ᵇ) * (Pr.xb[end] - Pr.xb[1]) * 1000/3)
+    sl2 = (cx + 1000Pr.xb[end] -                (Pr.xb[end] - Pr.xb[1]) * 1000/3,
+		   cy + 1000Pr.yb[end] - tand(Pr.ϕ₂ᵇ) * (Pr.xb[end] - Pr.xb[1]) * 1000/3)
 
     (
         c1 = (c1s, c1e, c1m     ),
@@ -1414,18 +1426,16 @@ function transformProfile(Pr)
         pl = (pls, ple, pl1, pl2),
         sl = (sls, sle, sl1, sl2),
 		rl = 1000Pr.r,
-		ru = 1000Pr.Rᵤ,
 		xs = 1000Pr.Xₛ
     )
 end
 
-# ╔═╡ 4886ddbb-9cc1-483c-8441-bd2b1961d540
-function write_Haskell(Data)
-	open("waterfall/Data.hs", "w") do f
-		write(f, "module Data where \n")
+# ╔═╡ c83ce798-1dfb-4ce1-84fe-1b2f2798e8ec
+function write_Haskell(Data, name)
+	open("waterfall/$(name).hs", "w") do f
+		write(f, "module $(name) where \n")
 		write(f, "import Linear (V3 (..), V2 (..), zero) \n")
-		write(f, "pru = $(Data[1][6]) \n")
-		write(f, "pxs = $(Data[1][7]) \n")
+		write(f, "pxs = $(Data[1][6]) \n")
 		for section in 1:length(Data)
 			write(f, "p$(section)c1s = V2 ($(Data[section][1][1][1])) ($(Data[section][1][1][2])) \n")
 			write(f, "p$(section)c1e = V2 ($(Data[section][1][2][1])) ($(Data[section][1][2][2])) \n")
@@ -1452,405 +1462,15 @@ function write_Haskell(Data)
 	end
 end
 
-# ╔═╡ e93e7b4b-069f-44c5-8a0a-d1236ee4b2cc
+# ╔═╡ e12ca256-c439-4eac-83f0-e7ccff7c749b
 begin
-	write_Haskell(transformProfile.([Pr1, Pr2, Pr3, Pr4, Pr5]))
+	write_Haskell(transformProfile.([Pr1, Pr2, Pr3, Pr4, Pr5]), "Data")
 	md"Запись профилей рабочих лопаток для waterfall-cad"
 end
 
-# ╔═╡ 8047ae16-5263-46a7-8ef9-ee6a82c9f520
+# ╔═╡ 0fb5895e-2d20-4716-86ba-3ee7a3c55433
 begin
-	function profile_build_2(S, R, n, R₁, R₂, Δ₁, Δ₂, l̄, Prs1)
-		# Нормализация углов
-		α₁ = S[3].α₂ - 90
-		α₂ = R[n].α₁ + 90
-
-	    # Углы для построения профиля
-    	α₁ₚ, α₂ₚ = α₁ - Δ₁, α₂ + Δ₂
-    	α₁ₛ, α₂ₛ = α₁ + Δ₁, α₂ - Δ₂
-
-		r = R[1].r + l̄.ll₁[end] * (n-1)/4
-		l = l̄.bl₁[end] - 2tand(l̄.β₁) * (l̄.ll₁[end] * ((5 - n)/4) )
-		ξ = l * (S[3].c₂u + R[n].c₁u) / (S[3].c₂u / tand(α₁) + R[n].c₁u / tand(α₂))
-
-		# Длина хорды
-		b = √(l^2 + ξ^2)
-
-		# Точки для сплайнов
-    	p1 = ( R₁ * cosd(90 + α₁ₚ)    ,  R₁ * sind(90 + α₁ₚ)    )
-    	p2 = ( R₂ * cosd(90 + α₂ₚ) + l,  R₂ * sind(90 + α₂ₚ) + ξ)
-    	s1 = (-R₁ * cosd(90 + α₁ₛ)    , -R₁ * sind(90 + α₁ₛ)    )
-    	s2 = (-R₂ * cosd(90 + α₂ₛ) + l, -R₂ * sind(90 + α₂ₛ) + ξ)
-
-	    # Построение сплайнов оригинального профиля
-		cline = hermite_polynomial(0, 0 , tand(α₁ ), l, ξ , tand(α₂ ))
-    	pline = hermite_polynomial(p1..., tand(α₁ₚ), p2..., tand(α₂ₚ))
-    	sline = hermite_polynomial(s1..., tand(α₁ₛ), s2..., tand(α₂ₛ))
-
-		xc = range(0    , l    , 200)
-    	xp = range(p1[1], p2[1], 200)
-    	xs = range(s1[1], s2[1], 200)
-
-	    yc = cline.(xc)
-    	yp = pline.(xp)
-    	ys = sline.(xs)
-
-		# Вычисление центроида
-    	cntr, ctr1, ctr2 = centroid(xp,yp,xs,ys,
-									deg2rad(90 + α₁ₚ), deg2rad(    - 90 + α₁ₛ),
-									deg2rad(90 + α₂ₚ), deg2rad(360 - 90 + α₂ₛ),
-									l,ξ, R₁,R₂)
-
-		# Вычисление наибольшей толщины профиля и положения этого сечения
-		cₘₐₓ = thickness(xp, yp, xs, ys)
-
-		# Вычисление оптимального числа лопаток
-		if n == 1
-			Z = calc_conf_2(b, r, cₘₐₓ.cₘ, R[n], S[3].α₂)
-		else
-			z = Prs1.Z.z
-			t = 2π * r / z
-			Z = (; z, t )
-		end
-
-		# Вычисление "утопления" лопатки - радиуса, на который нужно добавить ещё один корневой профиль, чтобы он не выступал за хвостовик
-		Rᵤ = √( r^2 - (ξ - R₂ - cntr[2])^2 )
-
-		# Вычисление сдвига лопатки - изначально 0 в центроиде, но удобно сразу сдвинуть координату по оси
-		Xₛ = l̄.xl₁[end - 1] + cntr[1]
-
-		(; R₁, R₂, l, ξ, r, b, α₁, α₂, α₁ₚ, α₂ₚ, α₁ₛ, α₂ₛ, xc, yc, xp, yp, xs, ys, cntr, ctr1, ctr2, cₘₐₓ, Z, Rᵤ, Xₛ)
-	end
-
-	md"Λ Построение профиля сопловой лопатки"
-end
-
-# ╔═╡ 7e3efafc-2d86-4e36-ad67-bbb12de0a0c0
-begin
-	Prs1 = profile_build_2(S, R, 1, 0.005, 0.001, 15, 4, l̄, 0)
-	Prs2 = profile_build_2(S, R, 2, 0.005, 0.001, 15, 4, l̄, Prs1)
-	Prs3 = profile_build_2(S, R, 3, 0.005, 0.001, 15, 4, l̄, Prs1)
-	Prs4 = profile_build_2(S, R, 4, 0.005, 0.001, 15, 4, l̄, Prs1)
-	Prs5 = profile_build_2(S, R, 5, 0.005, 0.001, 15, 4, l̄, Prs1)
-
-	md"### ∮ Построение профилей сопловых лопаток"
-end
-
-# ╔═╡ 87d7fcf2-9662-4e0e-8ba3-763662928879
-Prs1.Z.z
-
-# ╔═╡ 071cf1e8-2cb9-40d6-8930-90ce150e22fb
-begin
-	function profile_show_2(Pr)
-		with_theme(theme_latexfonts()) do
-			fig = Figure(figure_padding = 0)
-    		ax = Axis(fig[1, 1], aspect = DataAspect())
-			hidespines!(ax)
-    		hidedecorations!(ax)
-
-		    # Отображаем центроид
-    		scatter!(ax, Pr.cntr, color=:gray, markersize=10)
-
-			# Отображение толщины
-			arc!(ax, color = :gray, linewidth = 1, Pr.cₘₐₓ.pₘ, Pr.cₘₐₓ.cₘ, 0, 2π)
-
-			α  = atan(Pr.ξ / Pr.l) + pi/2
-			dl = 0.3Pr.l * cos(α)
-    	    diam_points = [
-				(Pr.cₘₐₓ.pₘ[1]+Pr.cₘₐₓ.cₘ*cos(α), Pr.cₘₐₓ.pₘ[2]+Pr.cₘₐₓ.cₘ*sin(α)),
-				(Pr.cₘₐₓ.pₘ[1]-Pr.cₘₐₓ.cₘ*cos(α), Pr.cₘₐₓ.pₘ[2]-Pr.cₘₐₓ.cₘ*sin(α)),
-				(
-					Pr.cₘₐₓ.pₘ[1]+Pr.cₘₐₓ.cₘ*cos(α) + dl,
-					Pr.cₘₐₓ.pₘ[2]+Pr.cₘₐₓ.cₘ*sin(α) + dl * tan(α)
-				)
-        	]
-
-			lines!(ax, color = :gray, linewidth = 1, linestyle = :dash, 
-				   [diam_points[2], diam_points[3]]
-				  )
-			bracket!(ax, color=:gray, linewidth = 0, width = 0,
-					 diam_points[1], diam_points[3],
-					 text  = "c = $(round(Int, Pr.cₘₐₓ.cₘ * 2000)) mm"
-					)
-			arrows2d!(ax, color = :gray, argmode = :endpoint,
-					  shaftwidth = 1, tipwidth = 8, tiplength = 6,
-					  tailwidth = 8, taillength = 6,
-					  tail = Point2f[(0, 0), (1, -0.5), (1, 0.5)],
-					  diam_points[1], diam_points[2]
-					 )
-
-			# Контуры окружностей
-
-			diam_points_1 = [
-				(0 + Pr.R₁ * cos(α), 0 + Pr.R₁ * sin(α)),
-				(0 - Pr.R₁ * cos(α), 0 - Pr.R₁ * sin(α)),
-				(0 + Pr.R₁ * cos(α) + dl, 0 + Pr.R₁ * sin(α) + dl * tan(α))
-        	]
-			lines!(ax, color = :gray, linewidth = 1,
-				   [diam_points_1[2], diam_points_1[3]]
-				  )
-			bracket!(ax, color = :gray, linewidth = 0, width = 0,
-					 diam_points_1[3], diam_points_1[1],
-					 text = "⌀ $(round(Int, 2000Pr.R₁)) mm"
-					)
-
-			diam_points_2 = [
-				(Pr.l + Pr.R₂ * cos(α)     , Pr.ξ + Pr.R₂ * sin(α)),
-				(Pr.l - Pr.R₂ * cos(α)     , Pr.ξ - Pr.R₂ * sin(α)),
-				(Pr.l + Pr.R₂ * cos(α) + dl, Pr.ξ + Pr.R₂ * sin(α) + dl * tan(α)),
-        	]
-			lines!(ax, color = :gray, linewidth = 1,
-				   [diam_points_2[2], diam_points_2[3]]
-				  )
-			bracket!(ax, color = :gray, linewidth = 0, width = 0,
-					 diam_points_2[3], diam_points_2[1],
-					 text = "⌀ $(round(Int, 2000Pr.R₂)) mm"
-					)
-
-			# Хорда
-			lines!(ax, color = :gray, linewidth = 1, linestyle = :dash,
-				   [0, Pr.l], [0, Pr.ξ]
-				  )
-			bracket!(ax, color = :gray, linewidth = 1, 0, 0, Pr.l, Pr.ξ, orientation = :down,
-					 text = "b = $(round(Int, Pr.b * 10^3)) mm"
-					)
-
-			arc!(ax, (0   , 0   ), Pr.R₁, 0, 2π, color = :gray, linewidth = 1)
-			arc!(ax, (Pr.l, Pr.ξ), Pr.R₂, 0, 2π, color = :gray, linewidth = 1)
-
-			# Дуги скругления
-			arc!(ax, color = :black, linewidth = 2, (0   , 0   ), Pr.R₁,
-				 deg2rad(90 + Pr.α₁ₚ), deg2rad(- 90 + Pr.α₁ₛ)
-				)
-			arc!(ax, color = :black, linewidth = 2, (Pr.l, Pr.ξ), Pr.R₂,
-				 deg2rad(90 + Pr.α₂ₚ), deg2rad(360     -90 + Pr.α₂ₛ)
-				)
-    
-		    # Профиль лопатки
-    		lines!(ax, Pr.xc, Pr.yc, color = :gray , linewidth = 1)
-    		lines!(ax, Pr.xp, Pr.yp, color = :black, linewidth = 2)
-    		lines!(ax, Pr.xs, Pr.ys, color = :black, linewidth = 2)
-
-	    	fig
-		end
-	end
-
-	md"👁 Отображение одного профиля сопловой лопатки"
-end
-
-# ╔═╡ e4ead9dc-7b59-4f4c-ae3f-83f4a842dedb
-profile_show_2(Prs1)
-
-# ╔═╡ cefd6d07-04f8-4c48-bb20-392113262348
-begin
-	function profile_shift_2(Pr)
-
-		Δ = Pr.Z.t
-
-		with_theme(theme_latexfonts()) do
-			fig = Figure()
-    		ax = Axis(fig[1, 1], aspect = DataAspect())
-			hidespines!(ax)
-    		hidedecorations!(ax)
-
-			# Расстояния между профилями
-			ds = distance(Pr.xp, Pr.yp, Pr.xs, Pr.ys, -Δ)
-
-			distances = [1000d.dᵢ for d in ds]
-
-			min_dist, max_dist = extrema(distances)
-    		norm_distances = (distances .- min_dist) ./ (max_dist - min_dist)
-
-			colors = [cgrad(:viridis, [0, 1])[d] for d in norm_distances]
-
-			for i in 1:length(Pr.xp)
-				lines!(ax, color = colors[i], linewidth=4,
-					   [Pr.xp[i], Pr.xs[ds[i].j]    ],
-					   [Pr.yp[i], Pr.ys[ds[i].j] - Δ]
-				  	)
-			end
-
-			# Дуги скругления
-			arc!(ax, color = :black, linewidth = 2, (0   , 0   ), Pr.R₁,
-				 deg2rad(90 + Pr.α₁ₚ), deg2rad(- 90 + Pr.α₁ₛ)
-				)
-			arc!(ax, color = :black, linewidth = 2, (Pr.l, Pr.ξ), Pr.R₂,
-				 deg2rad(90 + Pr.α₂ₚ), deg2rad(360     -90 + Pr.α₂ₛ)
-				)
-
-		    # Профиль лопатки
-    		lines!(ax, Pr.xp, Pr.yp, color = :black, linewidth = 2)
-	    	lines!(ax, Pr.xs, Pr.ys, color = :black, linewidth = 2)
-
-			# Дуги скругления
-			arc!(ax, (0   ,      - Δ), Pr.R₁, deg2rad(90 + Pr.α₁ₚ), deg2rad(- 90 + Pr.α₁ₛ), color = :black, linewidth = 2)
-			arc!(ax, (Pr.l, Pr.ξ - Δ), Pr.R₂, deg2rad(90 + Pr.α₂ₚ), deg2rad(360     -90 + Pr.α₂ₛ), color = :black, linewidth = 2)
-
-		    # Профиль лопатки
-    		lines!(ax, Pr.xp, Pr.yp .- Δ, color = :black, linewidth = 2)
-    		lines!(ax, Pr.xs, Pr.ys .- Δ, color = :black, linewidth = 2)
-
-			Colorbar(fig[1, 2], limits=(min_dist,max_dist), minorticksvisible=true,
-					 label = L"t, \ м м"
-					)
-    
-	    	fig
-		end
-	end
-
-	md"👁 Отображение конфузорности сопловой лопатки"
-end
-
-# ╔═╡ 238c67d2-2ca6-4d0a-b805-c457f7d508af
-profile_shift_2(Prs1)
-
-# ╔═╡ 8e992360-1373-4168-bc59-a7b04792befa
-begin
-	function profiles_show_2(Pr1, Pr2, Pr3, Pr4, Pr5)
-    	Pr = [Pr1, Pr2, Pr3, Pr4, Pr5]
-    	with_theme(theme_latexfonts()) do
-        	fig = Figure(figure_padding = 0)
-	        ax = Axis(fig[1, 1], aspect = DataAspect())
-	        hidespines!(ax)
-    	    hidedecorations!(ax)
-
-        	colors = cgrad(:viridis, 6, categorical = true)
-
-	        for i in 1:5
-    	        cx = Pr[i].cntr[1]
-        	    cy = Pr[i].cntr[2]
-            	color = colors[i]  # Цвет текущего профиля
-
-	            # Скорректированные центры для дуг
-    	        arc_center1 = (0 - cx, 0 - cy)
-        	    arc_center2 = (Pr[i].l - cx, Pr[i].ξ - cy)
-
-	            # Создаем точки для дуг с высоким разрешением
-    	        n_points = 100
-            
-	            # Первая дуга (входная кромка)
-				angles1 = range(deg2rad(90 + Pr[i].α₁ₚ), deg2rad(- 90 + Pr[i].α₁ₛ), length=n_points)
-				arc1_points = [Point2f(arc_center1[1] + Pr[i].R₁ * cos(θ), arc_center1[2] + Pr[i].R₁ * sin(θ)) for θ in angles1]
-            
-	            # Вторая дуга (выходная кромка)
-				angles2 = range(deg2rad(90 + Pr[i].α₂ₚ), deg2rad(360 -90 + Pr[i].α₂ₛ), length=n_points)
-				arc2_points = [Point2f(arc_center2[1] + Pr[i].R₂ * cos(θ), arc_center2[2] + Pr[i].R₂ * sin(θ)) for θ in angles2]
-
-	            # Полный контур профиля, включая дуги
-    	        full_contour = vcat(
-					[Point2f(x - cx, y - cy) for (x, y) in zip(Pr[i].xp, Pr[i].yp)],
-                	arc2_points,
-					reverse([Point2f(x - cx, y - cy) for (x, y) in zip(Pr[i].xs, Pr[i].ys)]),
-                	arc1_points
-            	)
-
-	            # Заливка профилей
-    	        poly!(ax, full_contour, color=(color, 0.7))
-
-        	    # Контуры поверх заливки
-            	lines!(ax, Pr[i].xc .- cx, Pr[i].yc .- cy, color=color, linewidth=1)
-            	lines!(ax, Pr[i].xp .- cx, Pr[i].yp .- cy, color=color, linewidth=2)
-	            lines!(ax, Pr[i].xs .- cx, Pr[i].ys .- cy, color=color, linewidth=2)
-				lines!(ax, color = color, linewidth = 2,
-					   [p[1] for p in arc1_points], [p[2] for p in arc1_points]
-					  )
-				lines!(ax, color = color, linewidth = 2,
-					   [p[1] for p in arc2_points], [p[2] for p in arc2_points]
-					  )
-        	end
-
-			save("assets/profiles2.svg", fig)
-
-        	fig
-    	end
-	end
-
-	md"👁 Отображение всех профилей"
-end
-
-# ╔═╡ a74f6353-4c78-49e3-998f-baec3f10377d
-profiles_show_2(Prs1, Prs2, Prs3, Prs4, Prs5)
-
-# ╔═╡ 08812d58-0a6f-4845-94fe-5c9a965a118c
-function transformProfile_2(Pr)
-	cx = -1000Pr.cntr[1]
-	cy = -1000Pr.cntr[2]
-
-    c1s = (cx + 1000Pr.R₁ * cosd(90 + Pr.α₁ₚ            ),
-		   cy + 1000Pr.R₁ * sind(90 + Pr.α₁ₚ            ))
-    c1e = (cx - 1000Pr.R₁ * cosd(90 + Pr.α₁ₛ            ),
-		   cy - 1000Pr.R₁ * sind(90 + Pr.α₁ₛ            ))
-	c1m = (cx + 1000Pr.R₁ * cosd(    (Pr.α₁ₚ + Pr.α₁ₛ)/2),
-		   cy + 1000Pr.R₁ * sind(    (Pr.α₁ₚ + Pr.α₁ₛ)/2))
-    
-	c2s = (cx + 1000Pr.l + 1000Pr.R₂ * cosd(90  +  Pr.α₂ₚ               ),
-		   cy + 1000Pr.ξ + 1000Pr.R₂ * sind(90  +  Pr.α₂ₚ               ))
-	c2e = (cx + 1000Pr.l - 1000Pr.R₂ * cosd(90  +  Pr.α₂ₛ               ),
-		   cy + 1000Pr.ξ - 1000Pr.R₂ * sind(90  +  Pr.α₂ₛ               ))
-	c2m = (cx + 1000Pr.l + 1000Pr.R₂ * cosd(180 + (Pr.α₂ₚ + Pr.α₂ₛ) / 2 ),
-		   cy + 1000Pr.ξ + 1000Pr.R₂ * sind(180 + (Pr.α₂ₚ + Pr.α₂ₛ) / 2 ))
-    
-    pls = (cx + 1000Pr.xp[1]  , cy + 1000Pr.yp[1]  )
-    ple = (cx + 1000Pr.xp[end], cy + 1000Pr.yp[end])
-    pl1 = (cx + 1000Pr.xp[1]   +                (Pr.xp[end] - Pr.xp[1]) * 1000/3,
-		   cy + 1000Pr.yp[1]   + tand(Pr.α₁ₚ) * (Pr.xp[end] - Pr.xp[1]) * 1000/3)
-    pl2 = (cx + 1000Pr.xp[end] -                (Pr.xp[end] - Pr.xp[1]) * 1000/3,
-		   cy + 1000Pr.yp[end] - tand(Pr.α₂ₚ) * (Pr.xp[end] - Pr.xp[1]) * 1000/3)
-    
-    sls = (cx + 1000Pr.xs[1]  , cy + 1000Pr.ys[1]  )
-    sle = (cx + 1000Pr.xs[end], cy + 1000Pr.ys[end])
-	sl1 = (cx + 1000Pr.xs[1]   +                (Pr.xs[end] - Pr.xs[1]) * 1000/3,
-		   cy + 1000Pr.ys[1]   + tand(Pr.α₁ₛ) * (Pr.xs[end] - Pr.xs[1]) * 1000/3)
-    sl2 = (cx + 1000Pr.xs[end] -                (Pr.xs[end] - Pr.xs[1]) * 1000/3,
-		   cy + 1000Pr.ys[end] - tand(Pr.α₂ₛ) * (Pr.xs[end] - Pr.xs[1]) * 1000/3)
-
-    (
-        c1 = (c1s, c1e, c1m     ),
-        c2 = (c2s, c2e, c2m     ),
-        pl = (pls, ple, pl1, pl2),
-        sl = (sls, sle, sl1, sl2),
-		rl = 1000Pr.r,
-		ru = 1000Pr.Rᵤ,
-		xs = 1000Pr.Xₛ
-    )
-end
-
-# ╔═╡ c31c4aba-1cb8-4d45-9e25-634f929b67e6
-function write_Haskell_2(Data)
-	open("waterfall/Data_stator.hs", "w") do f
-		write(f, "module Data_stator where \n")
-		write(f, "import Linear (V3 (..), V2 (..), zero) \n")
-		write(f, "psru = $(Data[1][6]) \n")
-		write(f, "psxs = $(Data[1][7]) \n")
-		for section in 1:length(Data)
-			write(f, "ps$(section)c1s = V2 ($(Data[section][1][1][1])) ($(Data[section][1][1][2])) \n")
-			write(f, "ps$(section)c1e = V2 ($(Data[section][1][2][1])) ($(Data[section][1][2][2])) \n")
-			write(f, "ps$(section)c1m = V2 ($(Data[section][1][3][1])) ($(Data[section][1][3][2])) \n")
-
-			write(f, "ps$(section)c2s = V2 ($(Data[section][2][1][1])) ($(Data[section][2][1][2])) \n")
-			write(f, "ps$(section)c2e = V2 ($(Data[section][2][2][1])) ($(Data[section][2][2][2])) \n")
-			write(f, "ps$(section)c2m = V2 ($(Data[section][2][3][1])) ($(Data[section][2][3][2])) \n")
-
-			write(f, "ps$(section)ls0 = V2 ($(Data[section][3][1][1])) ($(Data[section][3][1][2])) \n")
-			write(f, "ps$(section)ls1 = V2 ($(Data[section][3][2][1])) ($(Data[section][3][2][2])) \n")
-			write(f, "ps$(section)ls2 = V2 ($(Data[section][3][3][1])) ($(Data[section][3][3][2])) \n")
-			write(f, "ps$(section)ls3 = V2 ($(Data[section][3][4][1])) ($(Data[section][3][4][2])) \n")
-
-			write(f, "ps$(section)lp0 = V2 ($(Data[section][4][1][1])) ($(Data[section][4][1][2])) \n")
-			write(f, "ps$(section)lp1 = V2 ($(Data[section][4][2][1])) ($(Data[section][4][2][2])) \n")
-			write(f, "ps$(section)lp2 = V2 ($(Data[section][4][3][1])) ($(Data[section][4][3][2])) \n")
-			write(f, "ps$(section)lp3 = V2 ($(Data[section][4][4][1])) ($(Data[section][4][4][2])) \n")
-
-			write(f, "ps$(section)r = $(Data[section][5]) \n")
-
-			write(f, "\n")
-		end
-	end
-end
-
-# ╔═╡ 2fd068a7-9f7f-49ab-986b-c15593d89eee
-begin
-	write_Haskell_2(transformProfile_2.([Prs1, Prs2, Prs3, Prs4, Prs5]))
+	write_Haskell(transformProfile.([Prs1, Prs2, Prs3, Prs4, Prs5]), "Data_stator")
 	md"Запись профилей сопловых лопаток для waterfall-cad"
 end
 
@@ -2088,7 +1708,7 @@ PlutoUI = "~0.7.62"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.12.1"
+julia_version = "1.12.4"
 manifest_format = "2.0"
 project_hash = "832f7853c2ec3552ca1b52be9bbe64aacf5ef079"
 
@@ -2359,7 +1979,7 @@ version = "0.9.5"
 [[deps.Downloads]]
 deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
-version = "1.6.0"
+version = "1.7.0"
 
 [[deps.EarCut_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2799,7 +2419,7 @@ version = "0.6.4"
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "OpenSSL_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
-version = "8.11.1+1"
+version = "8.15.0+0"
 
 [[deps.LibGit2]]
 deps = ["LibGit2_jll", "NetworkOptions", "Printf", "SHA"]
@@ -2937,7 +2557,7 @@ version = "0.3.4"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
-version = "2025.5.20"
+version = "2025.11.4"
 
 [[deps.NaNMath]]
 deps = ["OpenLibm_jll"]
@@ -3006,7 +2626,7 @@ version = "0.8.7+0"
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "3.5.1+0"
+version = "3.5.4+0"
 
 [[deps.OpenSpecFun_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl"]
@@ -3075,7 +2695,7 @@ version = "0.44.2+0"
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "Random", "SHA", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-version = "1.12.0"
+version = "1.12.1"
 weakdeps = ["REPL"]
 
     [deps.Pkg.extensions]
@@ -3615,9 +3235,9 @@ uuid = "1317d2d5-d96f-522e-a858-c73665f53c3e"
 version = "2022.0.0+0"
 
 [[deps.p7zip_jll]]
-deps = ["Artifacts", "Libdl"]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
-version = "17.5.0+2"
+version = "17.7.0+0"
 
 [[deps.x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -3658,17 +3278,12 @@ version = "4.1.0+0"
 # ╟─9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
 # ╟─7c80bb36-5cef-4e21-bd84-53f347f6dfe0
 # ╟─20f45d03-754e-4d6a-b1ad-431745281c4e
-# ╟─ba361882-01ce-426b-8725-90f00d00be4a
-# ╟─44ec2743-fcc2-41fd-a7eb-0e86202ccb6b
-# ╟─65e1301d-9baa-4c84-9bbf-0a82ed444c29
-# ╟─e93e7b4b-069f-44c5-8a0a-d1236ee4b2cc
-# ╠═7e3efafc-2d86-4e36-ad67-bbb12de0a0c0
-# ╟─e4ead9dc-7b59-4f4c-ae3f-83f4a842dedb
-# ╟─238c67d2-2ca6-4d0a-b805-c457f7d508af
-# ╟─a74f6353-4c78-49e3-998f-baec3f10377d
-# ╟─d826b48a-d8d8-4083-bfa7-8b302d20b344
-# ╟─87d7fcf2-9662-4e0e-8ba3-763662928879
-# ╟─2fd068a7-9f7f-49ab-986b-c15593d89eee
+# ╟─a799d3e9-e95e-4f5a-aa80-96d428751e02
+# ╟─875fe360-eeb8-4a6a-bb39-caf94901ae52
+# ╟─9c6f53f7-7037-4dce-99b6-687b1473d5d7
+# ╟─e12ca256-c439-4eac-83f0-e7ccff7c749b
+# ╟─0fb5895e-2d20-4716-86ba-3ee7a3c55433
+# ╠═8a624d99-6d74-4012-b28e-60ce7f7a4754
 # ╟─b0aa65a1-3433-4b48-9196-d47e6e35379e
 # ╟─7e82ca6c-5c36-4c0d-ba07-914ff604f107
 # ╟─48f45b5a-03af-4b1c-bdb9-16964246e85c
@@ -3678,23 +3293,16 @@ version = "4.1.0+0"
 # ╟─0654861a-f4d5-4adb-b929-8e7e6ae78b89
 # ╟─bd295267-109a-4c84-bba3-7cdd0d682b18
 # ╟─ca7636ed-2d30-4086-bc61-ef31ab371969
-# ╟─8845a7bd-f62c-4531-953e-5aabd6b8e708
 # ╟─5d979de0-beb0-41df-a5cd-779eec0e611f
-# ╟─92eaacb2-756d-4f8e-b9c3-c02353c14417
-# ╟─0f7c4d6c-e748-4de0-8166-47d03f4129ec
-# ╟─fb37070c-676f-4b74-b8ed-41ba4d230cdd
-# ╟─61b7a669-218b-4cc2-a45b-ea70cdda0250
-# ╟─9d1db807-3229-4d28-b78b-325f9c82c60d
-# ╟─0edf5251-3d74-4f2c-bced-88fdb511d2f8
-# ╟─7cb1c106-ccfe-48eb-af87-0eb6812a4000
-# ╟─b4612166-cbe9-4b21-b630-e08481294a03
-# ╟─4886ddbb-9cc1-483c-8441-bd2b1961d540
-# ╟─8047ae16-5263-46a7-8ef9-ee6a82c9f520
-# ╟─071cf1e8-2cb9-40d6-8930-90ce150e22fb
-# ╟─cefd6d07-04f8-4c48-bb20-392113262348
-# ╟─8e992360-1373-4168-bc59-a7b04792befa
-# ╟─08812d58-0a6f-4845-94fe-5c9a965a118c
-# ╟─c31c4aba-1cb8-4d45-9e25-634f929b67e6
+# ╟─456abb60-9448-4a7b-9331-04c38e6d7cc0
+# ╟─93863518-c9c4-46f4-a33b-a7b32e815ad0
+# ╟─41052bef-706d-4ba9-935f-772889053a94
+# ╟─c4fabc38-a030-4e61-96d5-4d4ecdf0c5e2
+# ╟─f3210104-8de0-4394-997c-8cc2858c800a
+# ╟─fcc47753-9b48-4bf2-8b0e-02b8f8417fe7
+# ╟─f2c9597e-84c3-4e0a-8fc0-73131b7254ce
+# ╟─e3eb9ae9-4a31-4ce2-9ca7-607abd52e8f6
+# ╟─c83ce798-1dfb-4ce1-84fe-1b2f2798e8ec
 # ╟─8678ac5d-fea0-4697-b2e6-799e72afda5a
 # ╟─1ae0f50a-c021-41cd-a389-cec934e34e26
 # ╟─ef9bc959-20a8-44aa-9093-725c4734dd8d
