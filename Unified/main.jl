@@ -698,7 +698,7 @@ begin
 	function typst_vars(nt; prefix = "")
 	    modified_nt = add_suffix_to_names(replace_letters_in_names(nt), prefix)
 
-	    lines = ["#let $k = num($(v)) \n#let Raw$k = $(v)" for (k, v) in pairs(modified_nt)]
+	    lines = ["#let $k = $(v)" for (k, v) in pairs(modified_nt)]
 	    join(lines, "\n")
 	end
 	
@@ -717,8 +717,8 @@ begin
 									"⃰"    => "s",
 									"_"   => "",
 									"ₒₚₜ" => "0",
-									"¹"   => "1",
-									"²"   => "2",
+									"¹"   => "11",
+									"²"   => "22",
 								   )) for name in keys(nt)]
 	    return NamedTuple{Tuple(new_names)}(values(nt))
 	end
@@ -729,6 +729,41 @@ begin
 	end
 
 	md"ʧ Парсер для typst"
+end
+
+# ╔═╡ fdfad875-453c-4a56-ad68-2b56bdeb2a16
+begin
+	open("vars.typ", "w") do file
+    	write(file,
+			  typst_vars(TASK; prefix ="TA"), "\n \n",
+			  typst_vars(CONST; prefix ="CO"), "\n \n",
+			  typst_vars(Å; prefix ="A"), "\n \n",
+			  typst_vars(C; prefix ="C"), "\n \n",
+			  typst_vars(T; prefix ="T"), "\n \n",
+			  typst_vars(l̄; prefix ="L"), "\n \n",
+
+			  typst_vars(ɤ; prefix ="SI"),    "\n",
+			  typst_vars(P[1]; prefix ="P1"), "\n",
+			  typst_vars(P[2]; prefix ="P2"), "\n",
+			  typst_vars(P[3]; prefix ="P3"), "\n",
+			  typst_vars(P[4]; prefix ="P4"), "\n \n",
+			  
+			  typst_vars(S[1]; prefix ="S1"), "\n",
+			  typst_vars(S[2]; prefix ="S2"), "\n",
+			  typst_vars(S[3]; prefix ="S3"), "\n",
+			  typst_vars(S[4]; prefix ="S4"), "\n \n",
+			  
+			  typst_vars(R[1]; prefix ="R1"), "\n",
+			  typst_vars(R[2]; prefix ="R2"), "\n",
+			  typst_vars(R[3]; prefix ="R3"), "\n",
+			  typst_vars(R[4]; prefix ="R4"), "\n",
+			  typst_vars(R[5]; prefix ="R5"), "\n \n",
+			  
+			 )
+	end
+
+	md"Запись в файл"
+
 end
 
 # ╔═╡ 48f45b5a-03af-4b1c-bdb9-16964246e85c
@@ -3262,16 +3297,16 @@ version = "4.1.0+0"
 # ╟─7290e07c-eedc-429f-a2fa-7130dae8da37
 # ╟─c2b940ae-7013-4184-916f-cc2c6c3bb718
 # ╟─23866f8f-bdff-45be-afcd-91d3c87a200e
-# ╠═3e5014a8-e39f-4d3c-bb2f-122dea8482bb
+# ╟─3e5014a8-e39f-4d3c-bb2f-122dea8482bb
 # ╟─e24903de-8706-4d29-aaf0-2005799675e1
 # ╟─1f21d0d2-43a3-489b-9b77-d09d0824f799
-# ╟─4e7e1ddb-8a03-4818-be9e-fa31698faf07
+# ╠═4e7e1ddb-8a03-4818-be9e-fa31698faf07
 # ╟─4acc88bf-4bbf-49b5-8006-920901d8ddc9
 # ╟─7e4039e8-ed6c-46eb-a079-9df82d4272d6
 # ╟─d1889b73-726a-468b-9bb9-e69cd81a796b
 # ╟─6316022b-a071-4d6b-be2a-d786c8edad45
 # ╟─d51bd461-3106-4b8d-9d3a-66c7fb6c8ab1
-# ╟─43b474fc-51fa-4aef-86fa-cba0eb59bcf9
+# ╠═43b474fc-51fa-4aef-86fa-cba0eb59bcf9
 # ╟─9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
 # ╟─7c80bb36-5cef-4e21-bd84-53f347f6dfe0
 # ╟─20f45d03-754e-4d6a-b1ad-431745281c4e
@@ -3280,8 +3315,9 @@ version = "4.1.0+0"
 # ╟─9c6f53f7-7037-4dce-99b6-687b1473d5d7
 # ╟─e12ca256-c439-4eac-83f0-e7ccff7c749b
 # ╟─0fb5895e-2d20-4716-86ba-3ee7a3c55433
+# ╠═fdfad875-453c-4a56-ad68-2b56bdeb2a16
 # ╟─b0aa65a1-3433-4b48-9196-d47e6e35379e
-# ╟─7e82ca6c-5c36-4c0d-ba07-914ff604f107
+# ╠═7e82ca6c-5c36-4c0d-ba07-914ff604f107
 # ╟─48f45b5a-03af-4b1c-bdb9-16964246e85c
 # ╟─f30d5837-75df-4219-b2c0-7771b7d4ea47
 # ╟─18159b8a-c05b-4191-9eae-71f7b7646e7d
