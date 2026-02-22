@@ -66,4 +66,4 @@ blade = Transforms.translate (V3 pxs 0 0) (Transforms.mirror (V3 0 1 0) (Loft.lo
 main :: IO ()
 main = do
     Waterfall.writeSTEP "blade.step" blade
-    Waterfall.SVG.writeDiagramSVG "blade.svg" (Waterfall.solidDiagram (V3 0 0 1) (Waterfall.uScale 10 blade ))
+    Waterfall.SVG.writeDiagramSVG "blade.svg" (Waterfall.solidDiagram (V3 0 1 1) (Waterfall.uScale 30 blade ))

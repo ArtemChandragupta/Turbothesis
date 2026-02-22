@@ -12,7 +12,7 @@
   )
   set page(
     paper: "a4",
-    margin: (left:3cm, right:1.5cm, y:2cm),
+    margin: (left:3cm, right:1cm, y:2cm),
   )
   set par(
     justify: true,
@@ -28,12 +28,45 @@
     supplement: [Рисунок],
     numbering: (..num) => numbering("1.1", counter(heading).get().first(), num.pos().first())
   )
-  set ref(supplement: [рисунке])
+  set ref(supplement: it => {
+    if it.func() == heading {
+      "разделе"
+    } else if it.func() == figure {
+      "рисунке"
+    } else {
+      ""    
+    }
+  })
+  set ref(supplement: it => {
+    if it.func() == heading {
+      "разделе"
+    } else if it.func() == figure {
+      if it.kind == table {
+        "таблице"
+      } else if it.kind == image {
+        "рисунке"
+      } else {
+        it.supplement
+      }
+    } else {
+      ""
+    }
+  })
+  
   show figure: it => {
     linebreak()
     it
     linebreak()
   }
+  show figure.where(kind: table): it => {
+    set figure.caption(position: top)
+    show figure.caption: it => align(left, it)
+    set block(breakable: true)
+    set text(size: 10pt)
+    show figure.caption: set text(size:14pt)
+    set math.equation(numbering: none, supplement: [table-eq])
+  it
+}
   
   set list(marker: [--])
   set figure.caption(separator: [ --- ])
@@ -117,18 +150,21 @@
     numbering: (..num) => numbering("(1.1)", counter(heading).get().first(), num.pos().first())
   )
   show math.equation.where(block: true): it => {
-    linebreak()
-    it
-    linebreak()
-  }
+    if it.supplement != [table-eq] {
+      linebreak()
+      it
+      linebreak()
+  } else {it}
+}
 
-  set-num(
-    exponent: "eng",
-    product: math.dot
-  )
+  // set-num(
+  //   // exponent: "eng",
+  //   product: math.dot
+  // )
   set-round(
     mode: "figures",
     precision: 4,
+    pad: false
   )
 
   body

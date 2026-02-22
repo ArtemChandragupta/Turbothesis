@@ -378,6 +378,53 @@ begin
 	md"λ Расчет по ступеням"
 end
 
+# ╔═╡ 23866f8f-bdff-45be-afcd-91d3c87a200e
+begin
+	function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
+	    T = @NamedTuple{F::Float64, ρK::Float64, σ::Float64, Δρ::Float64}
+	    tasks = []
+	    
+	    F_list = collect(F_range)
+	    
+	    for chunk_start in 1:6:length(F_list)  # 6 потоков
+	        chunk_end = min(chunk_start + 5, length(F_list))
+	        chunk = F_list[chunk_start:chunk_end]
+	        
+	        task = Threads.@spawn begin
+	            local_valid = T[]
+	            for F in chunk
+	                for ρK in ρK_range
+	                    Params = (; α₁, F, ρK, β⃰₂)
+	                    RR, a, b, c, ɤ = swirl_reverse(P[end], S[end], Params)
+	                    Δρ = sum(r.Δρ for r in RR)
+	                    p̄  = [r.p₂ for r in RR]
+	
+	                    if abs(Δρ) < 0.1 &&
+	                    all(p̄[i] < p̄[i+1] for i in 1:4) &&
+	                    all(RR[i].ρT < RR[i+1].ρT for i in 1:4) &&
+	                    all(RR[i].ρK < RR[i+1].ρK for i in 1:4)
+	                        
+	                        pₘ = (p̄[5] - p̄[1]) / 5
+	                        σ  = (abs(p̄[1]-pₘ) + abs(p̄[2]-pₘ) + abs(p̄[3]-pₘ) +
+								  abs(p̄[4]-pₘ) + abs(p̄[5]-pₘ)) / 5pₘ
+	                        
+	                        result = (; F, ρK, σ, Δρ)
+	                        push!(local_valid, result)
+	                    end
+	                end
+	            end
+	            local_valid
+	        end
+	        push!(tasks, task)
+	    end
+	    
+	    results = fetch.(tasks)
+	    return reduce(vcat, results)
+	end
+	
+	md"Λ Варьирование для закрутки потока"
+end
+
 # ╔═╡ 3e5014a8-e39f-4d3c-bb2f-122dea8482bb
 begin
 	function swirl_reverse(Params, mid, swirl_params)
@@ -613,53 +660,6 @@ begin
 	md"### ∮ Расчет по ступеням"
 end
 
-# ╔═╡ 23866f8f-bdff-45be-afcd-91d3c87a200e
-begin
-	function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
-	    T = @NamedTuple{F::Float64, ρK::Float64, σ::Float64, Δρ::Float64}
-	    tasks = []
-	    
-	    F_list = collect(F_range)
-	    
-	    for chunk_start in 1:6:length(F_list)  # 6 потоков
-	        chunk_end = min(chunk_start + 5, length(F_list))
-	        chunk = F_list[chunk_start:chunk_end]
-	        
-	        task = Threads.@spawn begin
-	            local_valid = T[]
-	            for F in chunk
-	                for ρK in ρK_range
-	                    Params = (; α₁, F, ρK, β⃰₂)
-	                    RR, a, b, c, ɤ = swirl_reverse(P[end], S[end], Params)
-	                    Δρ = sum(r.Δρ for r in RR)
-	                    p̄  = [r.p₂ for r in RR]
-	
-	                    if abs(Δρ) < 0.1 &&
-	                    all(p̄[i] < p̄[i+1] for i in 1:4) &&
-	                    all(RR[i].ρT < RR[i+1].ρT for i in 1:4) &&
-	                    all(RR[i].ρK < RR[i+1].ρK for i in 1:4)
-	                        
-	                        pₘ = (p̄[5] - p̄[1]) / 5
-	                        σ  = (abs(p̄[1]-pₘ) + abs(p̄[2]-pₘ) + abs(p̄[3]-pₘ) +
-								  abs(p̄[4]-pₘ) + abs(p̄[5]-pₘ)) / 5pₘ
-	                        
-	                        result = (; F, ρK, σ, Δρ)
-	                        push!(local_valid, result)
-	                    end
-	                end
-	            end
-	            local_valid
-	        end
-	        push!(tasks, task)
-	    end
-	    
-	    results = fetch.(tasks)
-	    return reduce(vcat, results)
-	end
-	
-	md"Λ Варьирование для закрутки потока"
-end
-
 # ╔═╡ 7e4039e8-ed6c-46eb-a079-9df82d4272d6
 @bind Cα₁ PlutoUI.NumberField(13:40, default=21)
 
@@ -698,7 +698,7 @@ begin
 	function typst_vars(nt; prefix = "")
 	    modified_nt = add_suffix_to_names(replace_letters_in_names(nt), prefix)
 
-	    lines = ["#let $k = $(v)" for (k, v) in pairs(modified_nt)]
+	    lines = ["#let $k = num($(v)) \n#let Raw$k = $(v)" for (k, v) in pairs(modified_nt)]
 	    join(lines, "\n")
 	end
 	
@@ -735,12 +735,14 @@ end
 begin
 	open("vars.typ", "w") do file
     	write(file,
+			  "#import \"@preview/zero:0.6.1\": * \n \n",
+			  
 			  typst_vars(TASK; prefix ="TA"), "\n \n",
 			  typst_vars(CONST; prefix ="CO"), "\n \n",
 			  typst_vars(Å; prefix ="A"), "\n \n",
 			  typst_vars(C; prefix ="C"), "\n \n",
 			  typst_vars(T; prefix ="T"), "\n \n",
-			  typst_vars(l̄; prefix ="L"), "\n \n",
+			  # typst_vars(l̄; prefix ="L"), "\n \n",
 
 			  typst_vars(ɤ; prefix ="SI"),    "\n",
 			  typst_vars(P[1]; prefix ="P1"), "\n",
@@ -779,7 +781,7 @@ begin
 	        color2 = viridis_cmap[0.8]
 			
 			fig = Figure(size=(800, 400))
-			ax = Axis(fig[1,1],aspect = DataAspect(), title = "Продольное сечение", xminorticksvisible=true, yminorticksvisible=true)
+			ax = Axis(fig[1,1],aspect = DataAspect(), xminorticksvisible=true, yminorticksvisible=true)
 			
 			for i in 1:Int(length(l̄.ll₁)/2)
 				poly!(ax, color = color1, Point2f[
@@ -798,6 +800,8 @@ begin
 					(1000l̄.xl₁[2i-1], 0              )
 				])
 			end
+
+			save("assets/plots/geometry.svg", fig)
 	
 			fig
 		end
@@ -829,7 +833,7 @@ begin
 			contour!(ax, Φ➞,Ψ➞,H_matrix, levels = [T.Nₜ], color = "#b8860b" )
 			scatter!(ax, Φ, Ψ, color = "#e75480", markersize=8)
 	
-			save("assets/G.svg", fig)
+			save("assets/plots/G.svg", fig)
 		
 			fig
 		end
@@ -894,7 +898,7 @@ begin
 	        colgap!(fig.layout, 1, 10)
 	        colgap!(fig.layout, 3, 10)
 	        
-			save("assets/var.svg", fig)
+			save("assets/plots/var.svg", fig)
 	        fig
 	    end
 	end
@@ -928,7 +932,7 @@ begin
 					  )
 			scatterlines!(ax2, 1:length(R), [r.p₂ for r in R], label = "p₂")
 	
-			save("assets/goodies.svg", fig)
+			save("assets/plots/goodies.svg", fig)
 	
 			fig
 		end
@@ -1143,7 +1147,7 @@ begin
 		# Вычисление положения по оси x - изначально 0 в центроиде
 		Xₛ = type == 2 ? l̄.xl²[end - 1] + cntr[1] : l̄.xl₁[end - 1] + cntr[1]
 
-		(; type, R₁, R₂, l, ξ, r, b, ϕ₁, ϕ₂, ϕ₁ᵗ, ϕ₂ᵗ, ϕ₁ᵇ, ϕ₂ᵇ, xc, yc, xt, yt, xb, yb, cntr, ctr1, ctr2, cₘₐₓ, Z, Xₛ)
+		(; type, n, R₁, R₂, l, ξ, r, b, ϕ₁, ϕ₂, ϕ₁ᵗ, ϕ₂ᵗ, ϕ₁ᵇ, ϕ₂ᵇ, xc, yc, xt, yt, xb, yb, cntr, ctr1, ctr2, cₘₐₓ, Z, Xₛ)
 	end
 
 	md"Λ Построение профиля"
@@ -1270,6 +1274,8 @@ begin
     		lines!(ax, Pr.xc, Pr.yc, color = :gray , linewidth = 1)
     		lines!(ax, Pr.xt, Pr.yt, color = :black, linewidth = 2)
     		lines!(ax, Pr.xb, Pr.yb, color = :black, linewidth = 2)
+
+			save("assets/profiles/$(Pr.type)/profile$(Pr.n).svg", fig)
     
 	    	fig
 		end
@@ -1279,7 +1285,7 @@ begin
 end
 
 # ╔═╡ a799d3e9-e95e-4f5a-aa80-96d428751e02
-profile_show(Pr4)
+profile_show(Prs5)
 
 # ╔═╡ fcc47753-9b48-4bf2-8b0e-02b8f8417fe7
 begin
@@ -1341,6 +1347,8 @@ begin
 			Colorbar(fig[1, 2], limits=(min_dist,max_dist), minorticksvisible=true,
 					 label = L"t, \ м м"
 					)
+
+			save("assets/profiles/$(Pr.type)/shift$(Pr.n).svg", fig)
     
 	    	fig
 		end
@@ -1350,7 +1358,7 @@ begin
 end
 
 # ╔═╡ 875fe360-eeb8-4a6a-bb39-caf94901ae52
-profile_shift(Prs5)
+profile_shift(Pr5)
 
 # ╔═╡ f2c9597e-84c3-4e0a-8fc0-73131b7254ce
 begin
@@ -1407,7 +1415,7 @@ begin
 					  )
         	end
 
-			save("assets/profiles.svg", fig)
+			save("assets/profiles/$(Pr1.type)/profiles.svg", fig)
 
         	fig
     	end
@@ -3315,7 +3323,7 @@ version = "4.1.0+0"
 # ╟─9c6f53f7-7037-4dce-99b6-687b1473d5d7
 # ╟─e12ca256-c439-4eac-83f0-e7ccff7c749b
 # ╟─0fb5895e-2d20-4716-86ba-3ee7a3c55433
-# ╠═fdfad875-453c-4a56-ad68-2b56bdeb2a16
+# ╟─fdfad875-453c-4a56-ad68-2b56bdeb2a16
 # ╟─b0aa65a1-3433-4b48-9196-d47e6e35379e
 # ╠═7e82ca6c-5c36-4c0d-ba07-914ff604f107
 # ╟─48f45b5a-03af-4b1c-bdb9-16964246e85c
@@ -3326,12 +3334,12 @@ version = "4.1.0+0"
 # ╟─bd295267-109a-4c84-bba3-7cdd0d682b18
 # ╟─ca7636ed-2d30-4086-bc61-ef31ab371969
 # ╟─5d979de0-beb0-41df-a5cd-779eec0e611f
-# ╟─456abb60-9448-4a7b-9331-04c38e6d7cc0
+# ╠═456abb60-9448-4a7b-9331-04c38e6d7cc0
 # ╟─93863518-c9c4-46f4-a33b-a7b32e815ad0
-# ╟─41052bef-706d-4ba9-935f-772889053a94
-# ╟─c4fabc38-a030-4e61-96d5-4d4ecdf0c5e2
+# ╠═41052bef-706d-4ba9-935f-772889053a94
+# ╠═c4fabc38-a030-4e61-96d5-4d4ecdf0c5e2
 # ╟─f3210104-8de0-4394-997c-8cc2858c800a
-# ╟─fcc47753-9b48-4bf2-8b0e-02b8f8417fe7
+# ╠═fcc47753-9b48-4bf2-8b0e-02b8f8417fe7
 # ╟─f2c9597e-84c3-4e0a-8fc0-73131b7254ce
 # ╟─e3eb9ae9-4a31-4ce2-9ca7-607abd52e8f6
 # ╟─c83ce798-1dfb-4ce1-84fe-1b2f2798e8ec

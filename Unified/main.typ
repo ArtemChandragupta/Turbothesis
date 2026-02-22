@@ -69,20 +69,20 @@
 
 == Исходные данные для расчета тепловой схемы
 
-// + Полезная мощность $N = num(TAN) "Вт" $;
++ Полезная мощность $N = TAN "Вт" $;
 + Температура газа перед турбиной $T_3^* = TATs3 "K;"$
-// + Параметры наружного воздуха $P_н = num(TAPₙ) "Па" $, $T_н = TATₙ "K;" $
++ Параметры наружного воздуха $P_н = TAPₙ "Па" $, $T_н = TATₙ "K;" $
 + Топливо --- природный газ;
 + Прототип установки --- ГТЭ-65, изображен в приложении Б;
 + Частота вращения вала ГТУ --- $n = TAn "об/мин" $;
 
 Примем два упрощения при расчете в разделе 1:
 + Охлаждение турбины не учитывается, расход охладителя равен нулю.
-// + Не учитывается зависимость теплоемкости газа от температуры рабочего тела, принимается по рекомендациям пособия @PERV;
++ Не учитывается зависимость теплоемкости газа от температуры рабочего тела, принимается по рекомендациям пособия @PERV;
 
 == Схема газотурбинной установки
 
-Рассматриваемая установка является одновальной ГТУ простого типа, тепловая схема такой установки изображена на @HeatScheme[рисунке], цикл --- на @HeatGraph[рисунке].
+Рассматриваемая установка является одновальной ГТУ простого типа, тепловая схема такой установки изображена на @HeatScheme, цикл --- на @HeatGraph.
 
 #figure(
   {
@@ -128,10 +128,10 @@
       xaxis: (format-ticks: none), yaxis: (format-ticks: none),
       cycle: (black,),
 
-      let y1 = CTs1,
-      let y2 = CTs1 * calc.pow(Aπsₖ, (COkₙ - 1)/COkₙ),
-      let y3 = TATs3,
-      let y4 = TTs2ₜ,
+      let y1 = RawCTs1,
+      let y2 = RawCTs1 * calc.pow(RawAπsₖ, (RawCOkₙ - 1)/RawCOkₙ),
+      let y3 = RawTATs3,
+      let y4 = RawTTs2ₜ,
     
       let cc1 = 1 / calc.ln(y3/y2),
       let cc2 = 1 / calc.ln(y4/y1),
@@ -166,7 +166,7 @@
 
 == Результаты расчета
 
-// Графики на рисунках @ne[], @phi[] и @He[] отражают результаты расчета. Полные результаты расчета смотреть в Приложении Б.
+Графики на рисунках @ne[], @phi[] и @He[] отражают результаты расчета. Полные результаты расчета смотреть в Приложении Б.
 
 #let csv_data = (
   csv("A2GTP/1.csv").slice(2),
@@ -208,413 +208,933 @@
   ),
   caption: [Зависимость эффективного КПД ГТУ от степени повышения давления в компрессоре, при различных значениях температуры]
 ) <ne>
-// #figure(
-//   lq.diagram(
-//     width: 15cm, height:10cm, legend: (position: bottom),
-//     ylabel: $H_e$, xlabel: $pi_k^*$,
-//     cycle: (
-//       (color: red,    mark: "o"),
-//       (color: orange, mark: "^"),
-//       (color: green,  mark: "s"),
-//       (color: blue,   mark: "v"),
-//       (color: purple, mark: "d"),
-//     ),
-//     ..for i in range(csv_data.len()) {
-//       let Tt = 1443 + 50 * i
-//       (lq.plot(pik,He.at(i), stroke:1.5pt, mark-size: 5pt, smooth:true, label:$T_3^* = Tt "K "$),)
-//     }
-//   ),
-//   caption: [Зависимость эффективной удельной работы ГТУ от степени повышения давления в компрессоре, при различных значениях температуры]
-// ) <phi>
-// #figure(
-//   lq.diagram(
-//     width: 15cm, height:8cm,
-//     ylabel: $phi$, xlabel: $pi_k^*$,
-//     cycle: (
-//       (color: red,    mark: "o"),
-//       (color: orange, mark: "^"),
-//       (color: green,  mark: "s"),
-//       (color: blue,   mark: "v"),
-//       (color: purple, mark: "d"),
-//     ),
-//     ..for i in range(csv_data.len()) {
-//       let Tt = 1443 + 50 * i
-//       (lq.plot(pik,Phi.at(i), stroke:1.5pt, mark-size: 5pt, smooth:true, label:$T_3^* = Tt "K "$),)
-//     }
-//   ),
-//   caption: [Зависимость коэффициента полезной работы ГТУ от степени повышения давления в компрессоре, при различных значениях температуры]
-// ) <He>
+#figure(
+  lq.diagram(
+    width: 15cm, height:10cm, legend: (position: bottom),
+    ylabel: $H_e$, xlabel: $pi_k^*$,
+    cycle: (
+      (color: red,    mark: "o"),
+      (color: orange, mark: "^"),
+      (color: green,  mark: "s"),
+      (color: blue,   mark: "v"),
+      (color: purple, mark: "d"),
+    ),
+    ..for i in range(csv_data.len()) {
+      let Tt = 1443 + 50 * i
+      (lq.plot(pik,He.at(i), stroke:1.5pt, mark-size: 5pt, smooth:true, label:$T_3^* = Tt "K "$),)
+    }
+  ),
+  caption: [Зависимость эффективной удельной работы ГТУ от степени повышения давления в компрессоре, при различных значениях температуры]
+) <phi>
+#figure(
+  lq.diagram(
+    width: 15cm, height:8cm,
+    ylabel: $phi$, xlabel: $pi_k^*$,
+    cycle: (
+      (color: red,    mark: "o"),
+      (color: orange, mark: "^"),
+      (color: green,  mark: "s"),
+      (color: blue,   mark: "v"),
+      (color: purple, mark: "d"),
+    ),
+    ..for i in range(csv_data.len()) {
+      let Tt = 1443 + 50 * i
+      (lq.plot(pik,Phi.at(i), stroke:1.5pt, mark-size: 5pt, smooth:true, label:$T_3^* = Tt "K "$),)
+    }
+  ),
+  caption: [Зависимость коэффициента полезной работы ГТУ от степени повышения давления в компрессоре, при различных значениях температуры]
+) <He>
 
-// == Определение оптимальных значений параметров цикла
+== Определение оптимальных значений параметров цикла
 
-// Максимальный КПД установки достигается при максимальной температуре газа перед турбиной – $ATs0 "K."$ Жаростойкость материала лопаток турбины позволяет выдерживать такую температуру, поэтому в качестве входной температуры на турбину выбрана именно эта температура. Экстремум графика зависимости эффективного КПД ГТУ от степени повышения давления в компрессоре наблюдается при $pi_к^* = 24 $ и $eta_e = 0.360 $. Выбор такой степени сжатия не оправдан, т. к. при нём слишком низкие значения эффективной удельной работы и коэффициента полезной работы. Экстремум графика зависимости эффективной удельной работы ГТУ от степени повышения давления в компрессоре наблюдается при $pi_к^* = Aπsₖ $, значение эффективного КПД ГТУ при этом $eta_e = 0.346 $. Коэффициент полезной работы ГТУ с увеличением степени повышения давления $pi_к^*$ монотонно уменьшается, однако уменьшение $pi_к^*$ с целью его увеличения нецелесообразно, поскольку величина коэффициента полезной работы ГТУ увеличивается незначительно, при этом снижается величина эффективного внутреннего КПД и эффективной удельной работы.
+Максимальный КПД установки достигается при максимальной температуре газа перед турбиной – $ATs0 "K."$ Жаростойкость материала лопаток турбины позволяет выдерживать такую температуру, поэтому в качестве входной температуры на турбину выбрана именно эта температура. Экстремум графика зависимости эффективного КПД ГТУ от степени повышения давления в компрессоре наблюдается при $pi_к^* = 24 $ и $eta_e = 0.360 $. Выбор такой степени сжатия не оправдан, т. к. при нём слишком низкие значения эффективной удельной работы и коэффициента полезной работы. Экстремум графика зависимости эффективной удельной работы ГТУ от степени повышения давления в компрессоре наблюдается при $pi_к^* = Aπsₖ $, значение эффективного КПД ГТУ при этом $eta_e = 0.346 $. Коэффициент полезной работы ГТУ с увеличением степени повышения давления $pi_к^*$ монотонно уменьшается, однако уменьшение $pi_к^*$ с целью его увеличения нецелесообразно, поскольку величина коэффициента полезной работы ГТУ увеличивается незначительно, при этом снижается величина эффективного внутреннего КПД и эффективной удельной работы.
 
-// Таким образом, для дальнейших расчетов принимаем:
+Таким образом, для дальнейших расчетов принимаем:
 
-// $T_3^* = ATs0 "K," pi_k^* = Aπsₖ. $
+$T_3^* = ATs0 "K," pi_k^* = Aπsₖ. $
 
-// = Газодинамический расчет компрессора
+= Газодинамический расчет компрессора
 
-// Рассчет производится по методике Ю. С. Подбуева. Продольный разрез компрессора прототипа представлен на @comp-1.
+Рассчет производится по методике Ю. С. Подбуева. Продольный разрез компрессора прототипа представлен на @comp-1.
 
-// #figure(
-//   image("assets/profiles.svg"),
-//   caption: "Продольный разрез компрессора ГТЭ-65"
-// ) <comp-1>
+#figure(
+  image("assets/profiles/2/profiles.svg"),
+  caption: "Продольный разрез компрессора ГТЭ-65"
+) <comp-1>
 
-// == Газодинамический расчет осевого компрессора
+== Газодинамический расчет осевого компрессора
 
-// #figure(
-//   image("assets/comp/COMP-full.png"),
-//   caption: [Схема многоступенчатого осевого компрессора]
-// ) <COMP-full>
+#figure(
+  image("assets/comp/COMP-full.png"),
+  caption: [Схема многоступенчатого осевого компрессора]
+) <COMP-full>
 
-// #figure(
-//   image("assets/comp/COMP-lopatki2.png"),
-//   caption: [Схема первой и последней ступеней компрессора]
-// ) <COMP-lop>
+#figure(
+  image("assets/comp/COMP-lopatki2.png"),
+  caption: [Схема первой и последней ступеней компрессора]
+) <COMP-lop>
 
-// При приближенном расчете осевого компрессора основными расчетными сечениями являются: сечение 1-1 на входе в первую ступень и сечение 2-2 на выходе из последней ступени (@COMP-full[рис.]). Определим параметры $P$ и $T$ в этих двух сечениях:
+При приближенном расчете осевого компрессора основными расчетными сечениями являются: сечение 1-1 на входе в первую ступень и сечение 2-2 на выходе из последней ступени (@COMP-full[рис.]). Определим параметры $P$ и $T$ в этих двух сечениях:
 
-// Давление воздуха в сечении 1-1:
-// $ P_1^* = sigma_"вх"^* dot P_н = COσsᵢₙ dot TAPₙ = CPs1 "Па", $
+Давление воздуха в сечении 1-1:
+$ P_1^* = sigma_"вх"^* dot P_н = COσsᵢₙ dot TAPₙ = CPs1 "Па", $
 
-// #noind где $sigma_"вх"^*$ --- #context box(baseline: 100% - measure([a]).height, [коэффициент уменьшения полного давления во входной части \ компрессора (принимаем $sigma_"вх"^*=COσsᵢₙ$).]) \ \
+#noind где $sigma_"вх"^*$ --- #context box(baseline: 100% - measure([a]).height, [коэффициент уменьшения полного давления во входной части \ компрессора (принимаем $sigma_"вх"^*=COσsᵢₙ$).]) \ \
 
-// Температура в сечении 1-1:
-// $ T_1^* = T_н = CTs1 "K;" $
+Температура в сечении 1-1:
+$ T_1^* = T_н = CTs1 "K;" $
 
-// Давление воздуха в сечении К-К:
-// $ P_к^* = P_н dot pi_к^* = TAPₙ dot Aπsₖ = CPsₖ "Па", $
+Давление воздуха в сечении К-К:
+$ P_к^* = P_н dot pi_к^* = TAPₙ dot Aπsₖ = CPsₖ "Па", $
 
-// #noind где $pi_k^*$ --- #context box(baseline: 100% - measure([a]).height, [степень повышения давления компрессора (из первичного расчета\ $pi_k^*=Aπsₖ$).]) \ \
+#noind где $pi_k^*$ --- #context box(baseline: 100% - measure([a]).height, [степень повышения давления компрессора (из первичного расчета\ $pi_k^*=Aπsₖ$).]) \ \
 
-// Давление в сечении 2-2:
-// $ P_2^* = P_к^* / sigma_"вых"^* = CPsₖ / COσsₒᵤₜ = CPs2 "Па", $
+Давление в сечении 2-2:
+$ P_2^* = P_к^* / sigma_"вых"^* = CPsₖ / COσsₒᵤₜ = CPs2 "Па", $
 
-// #noind где $sigma_"вых"^*$ --- #context box(baseline: 100% - measure([a]).height, [коэффициент уменьшения полного давления в выходной части \ компрессора (принимаем $sigma_"вых"^*=COσsₒᵤₜ$).]) \ \
+#noind где $sigma_"вых"^*$ --- #context box(baseline: 100% - measure([a]).height, [коэффициент уменьшения полного давления в выходной части \ компрессора (принимаем $sigma_"вых"^*=COσsₒᵤₜ$).]) \ \
 
-// Значение плотностей:
-// $ rho_1 = P^*_1 / (R_в dot T_1^*) = CPs1 / (CORₙ dot CTs1) = Cρ1 " кг/м"^3; $
+Значение плотностей:
+$ rho_1 = P^*_1 / (R_в dot T_1^*) = CPs1 / (CORₙ dot CTs1) = Cρ1 " кг/м"^3; $
 
-// Примем КПД компрессора $eta_"ад"^* = 0.88$, тогда:
-// $ rho_2 = rho_1 (P_2^* / P_1^*)^(1/n) = Cρ1 (CPs2 / CPs1)^(1/Cnₖ) = Cρ2 " кг/м"^3, $
+Примем КПД компрессора $eta_"ад"^* = 0.88$, тогда:
+$ rho_2 = rho_1 (P_2^* / P_1^*)^(1/n) = Cρ1 (CPs2 / CPs1)^(1/Cnₖ) = Cρ2 " кг/м"^3, $
 
-// #noind где $n$ --- показатель политропы определяется из равенства:
+#noind где $n$ --- показатель политропы определяется из равенства:
 
-// $
-//   k_в / (k_в-1) dot eta_"ад"^* = n/(n-1) \
-//   // COkₙ / (COkₙ - 1) dot COηₐ = n/(n-1) => n = Cnₖ;
-// $
+$
+  k_в / (k_в-1) dot eta_"ад"^* = n/(n-1) \
+  // COkₙ / (COkₙ - 1) dot COηₐ = n/(n-1) => n = Cnₖ;
+$
 
-// Примем величины осевой составляющей абсолютных скоростей в сечениях 1-1 и 2-2 соответственно $C_(z_1) = COcᶻ1 "м/с" $ и $C_(z_2) = COcᶻ2 "м/с" $. Втулочное отношение выберем $nu_1 = D_"вт"_1 "/" D_"н"_1 = COν1 $. Расход воздуха $G_"в" = AGₙ "кг/с" $.
+Примем величины осевой составляющей абсолютных скоростей в сечениях 1-1 и 2-2 соответственно $C_(z_1) = COcᶻ1 "м/с" $ и $C_(z_2) = COcᶻ2 "м/с" $. Втулочное отношение выберем $nu_1 = D_"вт"_1 "/" D_"н"_1 = COν1 $. Расход воздуха $G_"в" = AGₙ "кг/с" $.
 
-// Из уравнения расхода первой ступени выразим значение наружного диаметра на входе в компрессор:
-// $ G_в &= rho_1 dot pi/4 dot (D^2_н_1 - D^2_"вт"_1) dot C_z_1 = rho_1 dot pi/4 dot ( 1 - nu_1^2) dot D^2_н_1 dot C_z_1, $
+Из уравнения расхода первой ступени выразим значение наружного диаметра на входе в компрессор:
+$ G_в &= rho_1 dot pi/4 dot (D^2_н_1 - D^2_"вт"_1) dot C_z_1 = rho_1 dot pi/4 dot ( 1 - nu_1^2) dot D^2_н_1 dot C_z_1, $
 
-// #noind откуда,
-// $ D_Н_1 &= sqrt( (4 G_в)/(rho_1 dot pi dot (1-nu_1^2) dot C_z_1) ) = \  &= sqrt( (4 dot AGₙ) / (Cρ1 dot pi dot (1-COν1^2) dot COcᶻ1 ) ) = CD1 " м"; $
+#noind откуда,
+$ D_Н_1 &= sqrt( (4 G_в)/(rho_1 dot pi dot (1-nu_1^2) dot C_z_1) ) = \  &= sqrt( (4 dot AGₙ) / (Cρ1 dot pi dot (1-COν1^2) dot COcᶻ1 ) ) = CD1 " м"; $
 
-// Диаметр втулки первой ступени:
-// $ D_"вт"_1 = nu_1 dot D_Н_1 = COν1 dot CD1 = CDᵥₜ1 "м;" $
+Диаметр втулки первой ступени:
+$ D_"вт"_1 = nu_1 dot D_Н_1 = COν1 dot CD1 = CDᵥₜ1 "м;" $
 
-// #block(breakable: false)[Средний диаметр первой ступени:
-// $ D_"ср"_1 = (D_Н_1 + D_"вт"_1)/2 = (CD1 + CDᵥₜ1)/2 = CDₘ1 "м;" $]
+#block(breakable: false)[Средний диаметр первой ступени:
+$ D_"ср"_1 = (D_Н_1 + D_"вт"_1)/2 = (CD1 + CDᵥₜ1)/2 = CDₘ1 "м;" $]
 
-// Длина рабочей лопатки первой ступени:
-// $ l_1 = (D_н_1 - D_"вт"_1)/2 = (CD1 - CDᵥₜ1)/2 = Cl1 "м;" $
+Длина рабочей лопатки первой ступени:
+$ l_1 = (D_н_1 - D_"вт"_1)/2 = (CD1 - CDᵥₜ1)/2 = Cl1 "м;" $
 
-// Размеры проходного сечения 2-2:
-// $ F_2 = G_в / (C_z_2 dot rho_2) = AGₙ / (COcᶻ2 dot Cρ2) = CF2 " м"^2; $
+Размеры проходного сечения 2-2:
+$ F_2 = G_в / (C_z_2 dot rho_2) = AGₙ / (COcᶻ2 dot Cρ2) = CF2 " м"^2; $
 
-// Принимаем в проточной части $D_"ср" = "const" $, тогда:
-// $ nu_2 = (pi dot D_"ср"^2 - F_2) / (pi dot D_"ср"^2 + F) = (pi dot CDₘ1^2 - CF2)/(pi dot CDₘ1^2 + CF2) = Cν2; $
+Принимаем в проточной части $D_"ср" = "const" $, тогда:
+$ nu_2 = (pi dot D_"ср"^2 - F_2) / (pi dot D_"ср"^2 + F) = (pi dot CDₘ1^2 - CF2)/(pi dot CDₘ1^2 + CF2) = Cν2; $
 
-// Длина рабочей лопатки на последней ступени:
-// $ l_2 &= (1-nu_2) sqrt(F_2/(pi (1 - nu_2^2))) = \ &= (1-Cν2) sqrt(CF2/(pi (1 - Cν2^2))) = Cl2 "м;" $
+Длина рабочей лопатки на последней ступени:
+$ l_2 &= (1-nu_2) sqrt(F_2/(pi (1 - nu_2^2))) = \ &= (1-Cν2) sqrt(CF2/(pi (1 - Cν2^2))) = Cl2 "м;" $
 
-// Для обеспечения требуемой частоты вращения необходимо задать окружную скорость на наружном диаметре первой ступени $u_н_1 = Cuₙ1 "м/с" $, тогда:
+Для обеспечения требуемой частоты вращения необходимо задать окружную скорость на наружном диаметре первой ступени $u_н_1 = Cuₙ1 "м/с" $, тогда:
 
-// $ n = (60 dot u_н_1) / (pi dot D_н_1) = (60 dot Cuₙ1) / (pi dot CD1) = TAn "об/мин". $
+$ n = (60 dot u_н_1) / (pi dot D_н_1) = (60 dot Cuₙ1) / (pi dot CD1) = TAn "об/мин". $
 
-// Таким образом, для соединения вала турбоагрегата с валом генератора необходимо использовать редуктор, понижающий обороты до $3000 "об/мин"$, передаточное отношение которого $Z = 3000 "/" TAn $.
+Таким образом, для соединения вала турбоагрегата с валом генератора необходимо использовать редуктор, понижающий обороты до $3000 "об/мин"$, передаточное отношение которого $Z = 3000 "/" TAn $.
 
-// Адиабатический напор в проточной части компрессора по полным параметрам:
+Адиабатический напор в проточной части компрессора по полным параметрам:
 
-// $ H^*_"ад. пр. ч." &= k_в/(k_в-1) dot R_в dot T_1^* dot [ (P_2^* / P_1^*)^((k_в-1)/k_в)-1] = \ &= COkₙ/(COkₙ-1) dot CORₙ dot CTs1 dot [ (CPs2/CPs1)^( (COkₙ-1)/COkₙ ) ] = CHsₐ "Дж/кг"; $
+$ H^*_"ад. пр. ч." &= k_в/(k_в-1) dot R_в dot T_1^* dot [ (P_2^* / P_1^*)^((k_в-1)/k_в)-1] = \ &= COkₙ/(COkₙ-1) dot CORₙ dot CTs1 dot [ (CPs2/CPs1)^( (COkₙ-1)/COkₙ ) ] = CHsₐ "Дж/кг"; $
 
-// Приближенная величина теоретического напора или удельная работа, затрачиваемая на сжатие 1 кг воздуха:
-// $ H_к^* = H^*_"ад. пр. ч." / eta^*_"ад" = CHsₐ / COηsₐ = CHsₖ "Дж/кг"; $
+Приближенная величина теоретического напора или удельная работа, затрачиваемая на сжатие 1 кг воздуха:
+$ H_к^* = H^*_"ад. пр. ч." / eta^*_"ад" = CHsₐ / COηsₐ = CHsₖ "Дж/кг"; $
 
-// Выберем средний теоретический напор $h_"ср" = COhₘ "Дж/кг" $.
+Выберем средний теоретический напор $h_"ср" = COhₘ "Дж/кг" $.
 
-// Число ступеней компрессора:
-// $ i = ceil( H_к^* / h_"ср") = ceil(CHsₖ / COhₘ) = Ci; $
+Число ступеней компрессора:
+$ i = ceil( H_к^* / h_"ср") = ceil(CHsₖ / COhₘ) = Ci; $
 
-// Теоретический напор в первой ступени:
-// $ h_1 = (0.6 dots 0.7) dot h_"ср" = COk1 dot COhₘ = Ch1 "Дж/кг"; $
+Теоретический напор в первой ступени:
+$ h_1 = (0.6 dots 0.7) dot h_"ср" = COk1 dot COhₘ = Ch1 "Дж/кг"; $
 
-// Теоретический напор в средних ступенях:
-// $ h_"ср. ст." = (1.1 dots 1.2) dot h_"ср" = Ckₘ dot COhₘ = Ch2 "Дж/кг"; $
+Теоретический напор в средних ступенях:
+$ h_"ср. ст." = (1.1 dots 1.2) dot h_"ср" = Ckₘ dot COhₘ = Ch2 "Дж/кг"; $
 
-// #block(breakable: false)[Теоретический напор в последней ступени:
-// $ h_п = (0.95 dots 1) dot h_"ср" = 1 dot COhₘ = COhₘ "Дж/кг"; $]
+#block(breakable: false)[Теоретический напор в последней ступени:
+$ h_п = (0.95 dots 1) dot h_"ср" = 1 dot COhₘ = COhₘ "Дж/кг"; $]
 
-// Считая рост напора в ступенях от и его падение в ступенях линейным, изобразим распределение напора на @Ras[рисунке]:
+Считая рост напора в ступенях от и его падение в ступенях линейным, изобразим распределение напора на @Ras:
 
-// #figure(
-//   text()[
-//     #show: lq.cond-set(lq.grid.with(kind: "x"), stroke:none)
-//     #show lq.selector(lq.label): set align(top + right)
+#figure(
+  text()[
+    #show: lq.cond-set(lq.grid.with(kind: "x"), stroke:none)
+    #show lq.selector(lq.label): set align(top + right)
   
-//     #lq.diagram(
-//       legend: (position: right + bottom),
-//       width: 15cm, height: 8cm,
-//       xlim: (0.1,16.9), ylim: (1.5e4,3.1e4),
-//       xlabel: $i$,      ylabel: $h,"Дж/кг"$,
-//       xaxis: (tick-distance:1, subticks:none,),
+    #lq.diagram(
+      legend: (position: right + bottom),
+      width: 15cm, height: 8cm,
+      xlim: (0.1,16.9), ylim: (1.5e4,3.1e4),
+      xlabel: $i$,      ylabel: $h,"Дж/кг"$,
+      xaxis: (tick-distance:1, subticks:none,),
 
-//       let h1 = RawCh1,
-//       let h2 = RawCh2,
-//       let hm = RawCOhₘ,
+      let h1 = RawCh1,
+      let h2 = RawCh2,
+      let hm = RawCOhₘ,
 
-//       lq.bar(
-//         (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16),
-//         (
-//           h1,
-//           (h1 + (h2 - h1)*1/7),
-//           (h1 + (h2 - h1)*2/7),
-//           (h1 + (h2 - h1)*3/7),
-//           (h1 + (h2 - h1)*4/7),
-//           (h1 + (h2 - h1)*5/7),
-//           (h1 + (h2 - h1)*6/7),
-//           h2, h2, h2, h2, h2, h2, h2,
-//           (h2 + hm)/2, hm
-//         ), fill: aqua,
-//       ),
+      lq.bar(
+        (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16),
+        (
+          h1,
+          (h1 + (h2 - h1)*1/7),
+          (h1 + (h2 - h1)*2/7),
+          (h1 + (h2 - h1)*3/7),
+          (h1 + (h2 - h1)*4/7),
+          (h1 + (h2 - h1)*5/7),
+          (h1 + (h2 - h1)*6/7),
+          h2, h2, h2, h2, h2, h2, h2,
+          (h2 + hm)/2, hm
+        ), fill: aqua,
+      ),
 
-//       lq.plot( (-1,17),(h2,h2), label: $h_"ср.ст."$, mark: none,
-//         stroke:(dash:(10pt, 4pt), thickness:1.5pt, paint:olive)
-//       ),
-//       lq.plot( (-1,17),(hm,hm), label: $h_"ср"$, mark: none,
-//         stroke:(dash:(10pt, 4pt), thickness:1.5pt, paint:red)
-//       ),
-//       lq.plot( (-1,17),(h1,h1), label: $h_1$, mark: none,
-//         stroke:(dash:(10pt, 4pt), thickness:1.5pt, paint: fuchsia)
-//       ),
-//     )
-//   ],
-//   caption: [Распределение теоретического напора по ступеням компрессора]
-// ) <Ras>
+      lq.plot( (-1,17),(h2,h2), label: $h_"ср.ст."$, mark: none,
+        stroke:(dash:(10pt, 4pt), thickness:1.5pt, paint:olive)
+      ),
+      lq.plot( (-1,17),(hm,hm), label: $h_"ср"$, mark: none,
+        stroke:(dash:(10pt, 4pt), thickness:1.5pt, paint:red)
+      ),
+      lq.plot( (-1,17),(h1,h1), label: $h_1$, mark: none,
+        stroke:(dash:(10pt, 4pt), thickness:1.5pt, paint: fuchsia)
+      ),
+    )
+  ],
+  caption: [Распределение теоретического напора по ступеням компрессора]
+) <Ras>
 
-// В результате распределения напоров соблюдается условие:
+В результате распределения напоров соблюдается условие:
 
-// $ sum h_i = H_k^* = CHsₖ "Дж/кг". $
+$ sum h_i = H_k^* = CHsₖ "Дж/кг". $
 
-// Уточняем величину окружной скорости на среднем диаметре первой ступени:
-// $ u_"ср"_1 = (pi dot D_"ср"_1 dot n)/60 = (pi dot CDₘ1 dot TAn)/60 = Cuₘ1 "м/c"; $
+Уточняем величину окружной скорости на среднем диаметре первой ступени:
+$ u_"ср"_1 = (pi dot D_"ср"_1 dot n)/60 = (pi dot CDₘ1 dot TAn)/60 = Cuₘ1 "м/c"; $
 
-// Производим расчет первой ступени по среднему диаметру:
+Производим расчет первой ступени по среднему диаметру:
 
-// #block(breakable: false)[Коэффициент расхода на среднем диаметре:
-// $ phi = C_z_1 / u_"ср"_1 = COcᶻ1 / Cuₘ1 = CΦ1; $]
+#block(breakable: false)[Коэффициент расхода на среднем диаметре:
+$ phi = C_z_1 / u_"ср"_1 = COcᶻ1 / Cuₘ1 = CΦ1; $]
 
-// Коэффициент теоретического напора:
-// $ dash(h)_1 = h_1/u^2_"ср"_1 = Ch1 / Cuₘ1^2 = Ch̄1; $
+Коэффициент теоретического напора:
+$ dash(h)_1 = h_1/u^2_"ср"_1 = Ch1 / Cuₘ1^2 = Ch̄1; $
 
-// Отношение:
-// $ dash(h)_1 / phi = Ch̄1 / CΦ1 = Cotn; $
+Отношение:
+$ dash(h)_1 / phi = Ch̄1 / CΦ1 = Cotn; $
 
-// Зададим степень реактивности $Omega = COΩ $ и найдем:
-// $ Omega / phi = COΩ / CΦ1 = Cotm; $
+Зададим степень реактивности $Omega = COΩ $ и найдем:
+$ Omega / phi = COΩ / CΦ1 = Cotm; $
 
-// По графику на @otn[рисунке] находим $(dash(h)_1/phi)_(b/t=1) = CP0ᵍ;$
+По графику на @otn находим $(dash(h)_1/phi)_(b/t=1) = CP0ᵍ;$
 
-// Коэффициент:
-// $ J = ((dash(h)_1 / phi))  / (dash(h)_1/phi)_(b/t=1) = Cotn / CP0ᵍ = CJ; $
+Коэффициент:
+$ J = ((dash(h)_1 / phi))  / (dash(h)_1/phi)_(b/t=1) = Cotn / CP0ᵍ = CJ; $
 
-// Пользуясь графиком на @J[рисунке] определяем $b/t = 1/Ctb -> t/b = Ctb.$
+Пользуясь графиком на @J определяем $b/t = 1/Ctb -> t/b = Ctb.$
 
-// При постоянной вдоль радиуса хорде относительный шаг у втулки первой ступени:
-// $ (t/b)_"вт" = t/b dot D_"вт"_1 / D_"ср"_1 = Ctb dot CDᵥₜ1/CDₘ1 = Ctbem. $
+При постоянной вдоль радиуса хорде относительный шаг у втулки первой ступени:
+$ (t/b)_"вт" = t/b dot D_"вт"_1 / D_"ср"_1 = Ctb dot CDᵥₜ1/CDₘ1 = Ctbem. $
 
-// #figure(
-//   {
-//     show lq.selector(lq.legend): set grid(row-gutter: 8pt)
-//     lq.diagram(
-//       legend: (inset:10pt),
-//       width: 15cm, height: 9cm, ylim: (0.6, 0.87), xlim: (0, 1.5),
-//       xlabel: $Omega"/"phi$, ylabel: $(dash(h)_1"/"phi)_(b/t=1)$,
+#figure(
+  {
+    show lq.selector(lq.legend): set grid(row-gutter: 8pt)
+    lq.diagram(
+      legend: (inset:10pt),
+      width: 15cm, height: 9cm, ylim: (0.6, 0.87), xlim: (0, 1.5),
+      xlabel: $Omega"/"phi$, ylabel: $(dash(h)_1"/"phi)_(b/t=1)$,
 
-//       let lx = lq.linspace(0.11, 1.368),
+      let lx = lq.linspace(0.11, 1.368),
 
-//       lq.plot(mark: none, stroke: 2pt,
-//         lx, lx.map(lx => 0.935 - 0.777*lx + 0.503 * lx * lx)
-//       ),
-//       lq.plot(mark:none, stroke:(dash:(10pt, 4pt), thickness: 1.5pt),
-//         (RawCotm,RawCotm),(0.6, RawCP0ᵍ), label: $Omega"/"phi = Cotm$
-//       ),
-//       lq.plot(mark:none, stroke:(dash:(10pt, 4pt), thickness: 1.5pt),
-//         (0,RawCotm),(RawCP0ᵍ,RawCP0ᵍ), label: $(dash(h)_1 "/" phi)_(b/t=1)=CJ$
-//       )
-//     )
-//   },
-//   caption: [график зависимости $(dash(h)_1/phi)_(b/t=1)$ от $Omega/phi$]
-// ) <otn>
+      lq.plot(mark: none, stroke: 2pt,
+        lx, lx.map(lx => 0.935 - 0.777*lx + 0.503 * lx * lx)
+      ),
+      lq.plot(mark:none, stroke:(dash:(10pt, 4pt), thickness: 1.5pt),
+        (RawCotm,RawCotm),(0.6, RawCP0ᵍ), label: $Omega"/"phi = Cotm$
+      ),
+      lq.plot(mark:none, stroke:(dash:(10pt, 4pt), thickness: 1.5pt),
+        (0,RawCotm),(RawCP0ᵍ,RawCP0ᵍ), label: $(dash(h)_1 "/" phi)_(b/t=1)=CJ$
+      )
+    )
+  },
+  caption: [график зависимости $(dash(h)_1/phi)_(b/t=1)$ от $Omega/phi$]
+) <otn>
 
-// #figure(
-//   lq.diagram(
-//     width: 15cm, height: 9cm, ylim: (0.6, 1.7), xlim:(0.4,2),
-//     xlabel: $b"/"t$, ylabel: $J$,
+#figure(
+  lq.diagram(
+    width: 15cm, height: 9cm, ylim: (0.6, 1.7), xlim:(0.4,2),
+    xlabel: $b"/"t$, ylabel: $J$,
 
-//     lq.plot(mark: none, stroke: 2pt,
-//       (0.5, 0.551, 0.6  , 0.7  , 0.9 , 1, 1.279, 1.653, 1.886),
-//       (0.6, 0.654, 0.697, 0.788, 0.94, 1, 1.194, 1.447, 1.595),
-//     ),
-//     lq.plot(mark:none, stroke: (dash: (10pt, 4pt), thickness: 2pt ),
-//       (0.4,1/RawCtb),(RawCJ, RawCJ), label: $J = CJ$
-//     ),
-//     lq.plot(mark:none, stroke: (dash: (10pt, 4pt), thickness: 2pt ),
-//       (1/RawCtb,1/RawCtb),(0,RawCJ), label: $b"/"t = #calc.round(digits: 4,1/RawCtb)$
-//     )
-//   ),
-//   caption: [график зависимости коэффициента $J$ от густоты решетки]
-// ) <J>
+    lq.plot(mark: none, stroke: 2pt,
+      (0.5, 0.551, 0.6  , 0.7  , 0.9 , 1, 1.279, 1.653, 1.886),
+      (0.6, 0.654, 0.697, 0.788, 0.94, 1, 1.194, 1.447, 1.595),
+    ),
+    lq.plot(mark:none, stroke: (dash: (10pt, 4pt), thickness: 2pt ),
+      (0.4,1/RawCtb),(RawCJ, RawCJ), label: $J = CJ$
+    ),
+    lq.plot(mark:none, stroke: (dash: (10pt, 4pt), thickness: 2pt ),
+      (1/RawCtb,1/RawCtb),(0,RawCJ), label: $b"/"t = #calc.round(digits: 4,1/RawCtb)$
+    )
+  ),
+  caption: [график зависимости коэффициента $J$ от густоты решетки]
+) <J>
 
-// Окружные скорости на входе и на выходе из рабочего колеса принимаем одинаковыми, т. е. $u_"ср"_1 = u_"ср"_2 = u = Cu "м/с" $.
+Окружные скорости на входе и на выходе из рабочего колеса принимаем одинаковыми, т. е. $u_"ср"_1 = u_"ср"_2 = u = Cu "м/с" $.
 
-// Проекция абсолютной скорости на окружное направление входной скорости на входе в рабочее колесо:
-// $ C_u_1 &= u(1-Omega) - h_1/(2u) = \ &= Cu dot (1-COΩ) - Ch1 / (2 dot Cu) = Ccᵤ1 "м/с"; $
+Проекция абсолютной скорости на окружное направление входной скорости на входе в рабочее колесо:
+$ C_u_1 &= u(1-Omega) - h_1/(2u) = \ &= Cu dot (1-COΩ) - Ch1 / (2 dot Cu) = Ccᵤ1 "м/с"; $
 
-// На выходе из рабочего колеса:
-// $ C_u_2 &= u(1-Omega) + h_1/(2u) = \ &= Cu dot (1-COΩ) + Ch1 / (2 dot Cu) = Ccᵤ2 "м/с"; $
+На выходе из рабочего колеса:
+$ C_u_2 &= u(1-Omega) + h_1/(2u) = \ &= Cu dot (1-COΩ) + Ch1 / (2 dot Cu) = Ccᵤ2 "м/с"; $
 
-// Абсолютная скорость на входе в рабочее колесо:
-// $ C_1 = sqrt(C^2_z_1 + C^2_u_1) = sqrt( COcᶻ1^2 + COcᶻ2^2 ) = Cc1 "м/с"; $
+Абсолютная скорость на входе в рабочее колесо:
+$ C_1 = sqrt(C^2_z_1 + C^2_u_1) = sqrt( COcᶻ1^2 + COcᶻ2^2 ) = Cc1 "м/с"; $
 
-// Угол наклона вектора абсолютной скорости на входе в рабочее колесо:
-// $ a_1 = "arcctg" (C_u_1/C_z_1) = "arctg" ( Ccᵤ1/COcᶻ1 ) = Cα1 degree; $
+Угол наклона вектора абсолютной скорости на входе в рабочее колесо:
+$ a_1 = "arcctg" (C_u_1/C_z_1) = "arctg" ( Ccᵤ1/COcᶻ1 ) = Cα1 degree; $
 
-// Температура воздуха перед рабочим колесом:
-// $ T_1 = T_1^* - C_1^2 / (2 dot k_в/(k_в-1) dot R_в) = CTs1 - Cc1^2 / (2 dot COkₙ/(COkₙ-1) dot CORₙ) = CT1 "K"; $
+Температура воздуха перед рабочим колесом:
+$ T_1 = T_1^* - C_1^2 / (2 dot k_в/(k_в-1) dot R_в) = CTs1 - Cc1^2 / (2 dot COkₙ/(COkₙ-1) dot CORₙ) = CT1 "K"; $
 
-// #block(breakable: false)[Проекция относительной скорости $W$ на окружное направление входной скорости на входе в рабочее колесо:
-// $ W_u_1 = C_u_1 - u = Ccᵤ1 - Cu = Cwᵤ1 "м/с"; $]
+#block(breakable: false)[Проекция относительной скорости $W$ на окружное направление входной скорости на входе в рабочее колесо:
+$ W_u_1 = C_u_1 - u = Ccᵤ1 - Cu = Cwᵤ1 "м/с"; $]
 
-// Относительная скорость на входе в колесо:
-// $ W_1 = sqrt(C^2_z_1 + W^2_u_1) = sqrt(COcᶻ1^2 + (Cwᵤ1)^2) = Cw1 "м/с"; $
+Относительная скорость на входе в колесо:
+$ W_1 = sqrt(C^2_z_1 + W^2_u_1) = sqrt(COcᶻ1^2 + (Cwᵤ1)^2) = Cw1 "м/с"; $
 
-// Число Маха по относительной скорости на входе в рабочее колесо первой ступени:
-// $ M_W_1 = W_1 / sqrt(k_в dot R_в dot T_1) = Cw1 / sqrt(COkₙ dot CORₙ dot CT1) = CMʷ1; $
+Число Маха по относительной скорости на входе в рабочее колесо первой ступени:
+$ M_W_1 = W_1 / sqrt(k_в dot R_в dot T_1) = Cw1 / sqrt(COkₙ dot CORₙ dot CT1) = CMʷ1; $
 
-// Наклон входной относительной скорости при отсчете от отрицательного направления оси $u$ характеризуется углом $beta$:
-// $ beta_1 = "arcctg" (W_u_1/C_z_1) = "arcctg" (Cwᵤ1 / COcᶻ1) = Cβ1 degree; $
+Наклон входной относительной скорости при отсчете от отрицательного направления оси $u$ характеризуется углом $beta$:
+$ beta_1 = "arcctg" (W_u_1/C_z_1) = "arcctg" (Cwᵤ1 / COcᶻ1) = Cβ1 degree; $
 
-// Уменьшение осевой составляющей скорости в одной ступени:
-// $ Delta C_z = (C_z_1 - C_z_2)/i = ( COcᶻ1 - COcᶻ2 )/Ci = CΔcᶻ "м/с"; $
+Уменьшение осевой составляющей скорости в одной ступени:
+$ Delta C_z = (C_z_1 - C_z_2)/i = ( COcᶻ1 - COcᶻ2 )/Ci = CΔcᶻ "м/с"; $
 
-// Осевая составляющая скорости на выходе из рабочего колеса первой ступени:
-// $ C_z_2 = C_z_1 - (Delta C_z)/2 = COcᶻ1 - CΔcᶻ / 2 = CCcᶻ2 "м/с"; $
+Осевая составляющая скорости на выходе из рабочего колеса первой ступени:
+$ C_z_2 = C_z_1 - (Delta C_z)/2 = COcᶻ1 - CΔcᶻ / 2 = CCcᶻ2 "м/с"; $
 
-// #block(breakable: false)[Абсолютная скорость на выходе в рабочее колесо:
-// $ C_2 = sqrt(C^2_z_2 + C^2_u_2) = sqrt( CCcᶻ2^2 + Ccᵤ2^2 ) = Cc2 "м/с"; $]
+#block(breakable: false)[Абсолютная скорость на выходе в рабочее колесо:
+$ C_2 = sqrt(C^2_z_2 + C^2_u_2) = sqrt( CCcᶻ2^2 + Ccᵤ2^2 ) = Cc2 "м/с"; $]
 
-// Угол наклона вектора для построения треугольников скоростей:
-// $ a_2 = "arcctg" (C_u_2/C_z_2) = "arctg" ( Ccᵤ2 / CCcᶻ2 ) = Cα2 degree; $
+Угол наклона вектора для построения треугольников скоростей:
+$ a_2 = "arcctg" (C_u_2/C_z_2) = "arctg" ( Ccᵤ2 / CCcᶻ2 ) = Cα2 degree; $
 
-// Проекция относительной скорости $W$ на окружное направление входной скорости на выходе из рабочего колеса:
-// $ W_u_2 = C_u_2 - u = Ccᵤ2 - Cu = Cwᵤ2 "м/с"; $
+Проекция относительной скорости $W$ на окружное направление входной скорости на выходе из рабочего колеса:
+$ W_u_2 = C_u_2 - u = Ccᵤ2 - Cu = Cwᵤ2 "м/с"; $
 
-// Относительная скорость на выходе из колеса:
-// $ W_2 = sqrt(C^2_z_2 + W^2_u_2) = sqrt(COcᶻ2^2 + (Cwᵤ2)^2) = Cw2 "м/с"; $
+Относительная скорость на выходе из колеса:
+$ W_2 = sqrt(C^2_z_2 + W^2_u_2) = sqrt(COcᶻ2^2 + (Cwᵤ2)^2) = Cw2 "м/с"; $
 
-// Наклон выходной относительной скорости:
-// $ beta_2 = "arctg" (W_u_2/C_z_2) = "arctg" (Cwᵤ2/COcᶻ2) = Cβ2 degree; $
+Наклон выходной относительной скорости:
+$ beta_2 = "arctg" (W_u_2/C_z_2) = "arctg" (Cwᵤ2/COcᶻ2) = Cβ2 degree; $
 
-// Угол поворота в решетке рабочего колеса:
-// $ epsilon = beta_2 - beta_1 = Cβ2 degree - Cβ1 degree = Cϵ degree; $
+Угол поворота в решетке рабочего колеса:
+$ epsilon = beta_2 - beta_1 = Cβ2 degree - Cβ1 degree = Cϵ degree; $
 
-// Коэффициент расхода на внешнем диаметре:
-// $ phi_н = C_z_1 / u_н_1 = COcᶻ1 / Cuₙ1 = CΦₙ; $
+Коэффициент расхода на внешнем диаметре:
+$ phi_н = C_z_1 / u_н_1 = COcᶻ1 / Cuₙ1 = CΦₙ; $
 
-// Проверка числа Маха по средней относительной скорости на внешнем диаметре первой ступени:
-// $ M_W_с = u_н_1 dot sqrt(1+phi_н^2)/sqrt(k_в dot R_в dot T_1^*) = Cuₙ1 dot sqrt(1 + CΦₙ^2) / sqrt(COkₙ dot CORₙ dot CTs1) = CMʷₘ; $
+Проверка числа Маха по средней относительной скорости на внешнем диаметре первой ступени:
+$ M_W_с = u_н_1 dot sqrt(1+phi_н^2)/sqrt(k_в dot R_в dot T_1^*) = Cuₙ1 dot sqrt(1 + CΦₙ^2) / sqrt(COkₙ dot CORₙ dot CTs1) = CMʷₘ; $
 
-// Сверхзвуковое число $M_W_c$ свидетельствует о необходимости профилирования лопаточного аппарата первой ступени турбины по закону $Omega = "const"$ вдоль радиуса.
+Сверхзвуковое число $M_W_c$ свидетельствует о необходимости профилирования лопаточного аппарата первой ступени турбины по закону $Omega = "const"$ вдоль радиуса.
 
-// На @Tri[рисунке] приведён построенный по полученным данным треугольник скоростей:
+На @Tri приведён построенный по полученным данным треугольник скоростей:
 
-// #figure(
-//   text(size: 12pt, cetz.canvas(length:0.05cm, {
-//     import cetz.draw: *
-//     set-style(
-//       mark: (transform-shape: false, fill: black),
-//       stroke: (cap: "round")
-//     )
-//     // Variables
-//     let cz1 = -RawCOcᶻ1
-//     let cz2 = -RawCCcᶻ2
-//     let cu1 = -RawCcᵤ1
-//     let cu2 = -RawCcᵤ2
-//     let cu  =  RawCu
-//     let a1  =  RawCα1 * 1deg
-//     let a2  =  RawCα2 * 1deg
-//     let b1  =  RawCβ1 * 1deg
-//     let b2  =  RawCβ2 * 1deg
-//     let start = calc.max( calc.abs(cu1), calc.abs(cu2) )
+#figure(
+  text(size: 12pt, cetz.canvas(length:0.05cm, {
+    import cetz.draw: *
+    set-style(
+      mark: (transform-shape: false, fill: black),
+      stroke: (cap: "round")
+    )
+    // Variables
+    let cz1 = -RawCOcᶻ1
+    let cz2 = -RawCCcᶻ2
+    let cu1 = -RawCcᵤ1
+    let cu2 = -RawCcᵤ2
+    let cu  =  RawCu
+    let a1  =  RawCα1 * 1deg
+    let a2  =  RawCα2 * 1deg
+    let b1  =  RawCβ1 * 1deg
+    let b2  =  RawCβ2 * 1deg
+    let start = calc.max( calc.abs(cu1), calc.abs(cu2) )
     
-//     // Оси
-//     line((start,0),(-start,0), mark:(end: "stealth"), name: "axisu")
-//     content("axisu.end", $U$, padding: 5, anchor: "north-west" )
-//     line((0,0),(0,cz1), mark:(end: "stealth"), name: "axisz")
-//     content("axisz.end", $z$, padding: 5, anchor: "south-west" )
+    // Оси
+    line((start,0),(-start,0), mark:(end: "stealth"), name: "axisu")
+    content("axisu.end", $U$, padding: 5, anchor: "north-west" )
+    line((0,0),(0,cz1), mark:(end: "stealth"), name: "axisz")
+    content("axisz.end", $z$, padding: 5, anchor: "south-west" )
 
-//     // Треугольник 1
-//     line(name:"C1", (0,0),(cu1  ,cz1), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
-//     line(name:"W1", (0,0),(cu1 + cu, cz1), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
-//     line(name:"U1", "W1.end","C1.end", mark:(end: "stealth", fill:red),stroke:(paint:red, thickness: 2pt))
+    // Треугольник 1
+    line(name:"C1", (0,0),(cu1  ,cz1), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
+    line(name:"W1", (0,0),(cu1 + cu, cz1), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
+    line(name:"U1", "W1.end","C1.end", mark:(end: "stealth", fill:red),stroke:(paint:red, thickness: 2pt))
 
-//     // Треугольник 2
-//     line(name:"C2", (0,0),(cu2, cz2), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
-//     line(name:"W2", (0,0),(cu2 + cu, cz2), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
-//     line(name:"U2","W2.end","C2.end", mark:(end: "stealth", fill:blue),stroke:(paint:blue, thickness: 2pt))
+    // Треугольник 2
+    line(name:"C2", (0,0),(cu2, cz2), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
+    line(name:"W2", (0,0),(cu2 + cu, cz2), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
+    line(name:"U2","W2.end","C2.end", mark:(end: "stealth", fill:blue),stroke:(paint:blue, thickness: 2pt))
 
-//     // линии для U1 и U2
-//     line(name:"U1s","U1.start", (rel:(0,-20)))
-//     line(name:"U1e","U1.end",   (rel:(0,-20)))
-//     line(name:"U_1", "U1s.16", "U1e.16", mark:(symbol: "stealth"))
-//     line(name:"U2s","U2.start", (rel:(0,-40)))
-//     line(name:"U2e","U2.end",   (rel:(0,-40)))
-//     line(name:"U_2", "U2s.36", "U2e.36", mark:(symbol: "stealth"))
+    // линии для U1 и U2
+    line(name:"U1s","U1.start", (rel:(0,-20)))
+    line(name:"U1e","U1.end",   (rel:(0,-20)))
+    line(name:"U_1", "U1s.16", "U1e.16", mark:(symbol: "stealth"))
+    line(name:"U2s","U2.start", (rel:(0,-40)))
+    line(name:"U2e","U2.end",   (rel:(0,-40)))
+    line(name:"U_2", "U2s.36", "U2e.36", mark:(symbol: "stealth"))
 
-//     // Подписи
-//     content("C1.70%", angle:  a1, box(fill:white, inset:3pt, $C_1 = Cc1 "м/с"$))
-//     content("W1.70%", angle: -b1, box(fill:white, inset:3pt, $W_1 = Cw1 "м/с"$))
-//     content("C2.70%", angle:  a2, box(fill:white, inset:3pt, $C_2 = Cc2 "м/с"$))
-//     content("W2.70%", angle: -b2, box(fill:white, inset:3pt, $W_2 = Cw2 "м/с"$))
-//     content("U_1.mid", box(fill:white, inset:3pt, $U_1 = Cu "м/с"$))
-//     content("U_2.mid", box(fill:white, inset:3pt, $U_2 = Cu "м/с"$))
-//     content("axisz.90", angle: 90deg, box(fill:white, inset:3pt, $C_z_1 = COcᶻ1 "м/с"$), anchor: "south")
-//     content("axisz.90", angle:-90deg, box(fill:white, inset:3pt, $C_z_2 = CCcᶻ2 "м/с"$), anchor: "south")
+    // Подписи
+    content("C1.70%", angle:  a1, box(fill:white, inset:3pt, $C_1 = Cc1 "м/с"$))
+    content("W1.70%", angle: -b1, box(fill:white, inset:3pt, $W_1 = Cw1 "м/с"$))
+    content("C2.70%", angle:  a2, box(fill:white, inset:3pt, $C_2 = Cc2 "м/с"$))
+    content("W2.70%", angle: -b2, box(fill:white, inset:3pt, $W_2 = Cw2 "м/с"$))
+    content("U_1.mid", box(fill:white, inset:3pt, $U_1 = Cu "м/с"$))
+    content("U_2.mid", box(fill:white, inset:3pt, $U_2 = Cu "м/с"$))
+    content("axisz.90", angle: 90deg, box(fill:white, inset:3pt, $C_z_1 = COcᶻ1 "м/с"$), anchor: "south")
+    content("axisz.90", angle:-90deg, box(fill:white, inset:3pt, $C_z_2 = CCcᶻ2 "м/с"$), anchor: "south")
 
-//     // Дуги
-//     arc(name:"a2", (0,0), start:180deg, stop: 180deg + a2, radius:80, anchor:"origin", mark:(symbol:"stealth"))
-//     arc(name:"b2", (0,0), start:0deg, stop: -b2, radius:45, anchor:"origin", mark:(symbol:"stealth"))
-//     arc(name:"a1", (0,0), start:-180deg, stop: -180deg + a1, radius:45, anchor:"origin", mark:(symbol:"stealth"))
-//     arc(name:"b1", (0,0), start:0deg, stop: 0deg - b1, radius:80, anchor:"origin", mark:(symbol:"stealth"))
+    // Дуги
+    arc(name:"a2", (0,0), start:180deg, stop: 180deg + a2, radius:80, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"b2", (0,0), start:0deg, stop: -b2, radius:45, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"a1", (0,0), start:-180deg, stop: -180deg + a1, radius:45, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"b1", (0,0), start:0deg, stop: 0deg - b1, radius:80, anchor:"origin", mark:(symbol:"stealth"))
 
-//     // Подписи дуг
-//     content("a1.50%", angle: a1/2, box(fill:white, inset:3pt, $alpha_1 = Cα1 degree$) )
-//     content("b1.33%", angle: -b1/3, box(fill:white, inset:3pt, $beta_1 = Cβ1 degree$) )
-//     content("a2.33%", angle: a2/3, box(fill:white, inset:3pt, $alpha_2 = Cα2 degree$) )
-//     content("b2.50%", angle: -b2/2, box(fill:white, inset:3pt, $beta_2 = Cβ2 degree$) )
-//   })),
-//   caption: text(size:14pt)[Треугольник скоростей на среднем диаметре первой ступени компрессора]
-// ) <Tri>
+    // Подписи дуг
+    content("a1.50%", angle: a1/2, box(fill:white, inset:3pt, $alpha_1 = Cα1 degree$) )
+    content("b1.33%", angle: -b1/3, box(fill:white, inset:3pt, $beta_1 = Cβ1 degree$) )
+    content("a2.33%", angle: a2/3, box(fill:white, inset:3pt, $alpha_2 = Cα2 degree$) )
+    content("b2.50%", angle: -b2/2, box(fill:white, inset:3pt, $beta_2 = Cβ2 degree$) )
+  })),
+  caption: text(size:14pt)[Треугольник скоростей на среднем диаметре первой ступени компрессора]
+) <Tri>
 
-// = Расчет камеры сгорания
+= Расчет камеры сгорания
 
-= Газодинамический расчет турбины по среднему диаметру
+= Газодинамический расчет турбины
+
+Целью предварительного расчёта турбины является определение оптимального расхода воздуха и параметров на выходе из турбины.
+
+Удельная изобарная теплоёмкость газа: 
+$ C_p = R dot (k/(k-1)) = CORᵧ dot ( COkᵧ / (COkᵧ -1) ) = COCpᵧ " " "Дж" / ("кг" dot K); $
+
+Удельная внутренняя мощность турбины:
+$ H_(u T) = N dot alpha_N / G = TAN dot COkₙₜ / AGᵧ = THᵤₜ "Дж/кг"; $
+
+Температурный перепад на турбину по параметрам торможения:
+$ Delta t_T = H_(u T) / C_p = THᵤₜ / COCpᵧ = TΔTsₜ "K;" $
+
+Температура торможения за турбиной:
+$ T^*_(2 T) = T^*_0 - Delta t_T = ATs0 - TΔTsₜ = TTs2ₜ "K;" $
+
+Критическая скорость потока газа за турбиной:
+$ alpha_"кр" = sqrt( (2 k)/(k+1) ) dot R dot T^*_(2 T) = sqrt( (2 COkᵧ) / (COkᵧ + 1) dot CORᵧ dot TTs2ₜ ) = Taᵏʳ2 "м/с"; $
+
+Скорость потока газа за турбиной:
+$ c_(2 T) = alpha_"кр" dot lambda = Taᵏʳ2 dot COY = Tc2ₜ "м/с"; $
+
+#block(breakable: false)[Адиабатный перепад энтальпий на турбину:
+$ H_"ад" = H_(u T) + c_(2 T)^2/2 = THᵤₜ + Tc2ₜ^2/2 = THₐₜ "Дж/кг"; $]
+
+Изоэнтропийный перепад энтальпий на турбину:
+$ H_(0 T) = H_"ад" / eta_"ад" = THₐₜ / COηₐₜ = TH0ₜ "Дж/кг"; $
+
+Температура в потоке за турбиной при изоэнтропийном процессе расширения:
+$ T_(2 t T) = T_0^* - H_(0 T)/C_p = ATs0 - TH0ₜ/COCpᵧ = TTs2ₜₜ "K;" $
+
+Давление в потоке за турбиной:
+$ p_(2 T) = p_0^* (T_(2 t T)/T_0^*)^(k/(k-1)) = TPs0 (TTs2ₜₜ / ATs0)^(COkᵧ / (COkᵧ-1)) = TP2ₜ "Па"; $
+
+Температура в потоке за турбиной:
+$ T_(2 T) = T^*_(2 T) - c_(2 T)^2/2 = TTs2ₜ - Tc2ₜ^2/2 = TT2T "K;" $
+
+Плотность в потоке за турбиной:
+$ rho_(2 T) = p_(2 T) / (T_(2 T) dot R) = TP2ₜ / (TT2T dot CORᵧ) = Tρ2ₜ " кг/м"^3; $
+
+Площадь живого сечения на выходе из рабочего колеса последней ступени:
+$ F_(2 T) = G/(rho_(2 T) dot c_(2 T) dot sin(alpha_(2 T))) = AGᵧ / (TP2ₜ dot Tc2ₜ dot sin COå ) = TF2ₜ " м"^2; $
+
+//$ sigma_p = 0.89 dot 10^(-5) dot n^2 dot F_(2 T) = $
+
+Окружная скорость потока на выходе из турбины по среднему диаметру:
+$ u_2 = pi d_"ср" n/60 = pi dot RawTAγ dot TAn / 60 = Tu2 "м/с"; $
+
+Высота лопаток последней ступени:
+$ l_2 = F_(2 T) / (pi d_"ср") = TF2ₜ / (pi dot Td2ₘ) = Tl2 "м;" $
+
+Коэффициент веерности последней ступени:
+$ C_u = d_"ср"/l_2 = Td2ₘ / Tl2 = Tkₘ ; $
+
+Характерный напорный параметр:
+$ Y = u_2 dot sqrt(m / (2 H_(0 T) ) ) = Tu2 dot sqrt( COm / (2 dot TH0ₜ) ) = COY,  $
+
+#noind что соответствует рекомендованным значениям (0,5...0,6).
+
+#figure(
+  {
+    image("assets/plots/G.svg")
+    text(size:12pt)[Розовой линией показан целевой расход, желтой линией показана целевая мощность]
+  },
+  caption: [Зависимость оптимального расхода воздуха через компрессор от параметров #sym.Phi и #sym.Psi],
+) <Gopt>
+
+= Профилирование меридианных обводов проточной части
+
+Зная полученную длину рабочей лопатки и средний диаметр последней ступени турбины, основываясь на прототипе постоим проточную часть с постоянным корневым диаметром (@Mer[рисунок]). Основываясь на соотношениях между сторонами лопаток и промежутками между ними, а также установив угол раскрытия $gamma = 16 degree$, из чертежа были получены высоты всех лопаток.
+
+#figure(
+  image("assets/plots/geometry.svg"),
+  caption: [Продольный разрез проектируемой проточной части],
+) <Mer>
+
+В @geometry указаны полученные высоты направляющих и сопловых лопаток.
+
+#figure(
+  table(
+    columns: (auto, auto, auto, auto, auto),
+    align: center,
+    [Номер ступени], [1],[2],[3],[4],
+    [Направляющая лопатка, $l_1$, м], $P1l1$, $P2l1$, $P3l1$, $P4l1$,
+    [Сопловая лопатка, $l_2$, м],     $P1l2$, $P2l2$, $P3l2$, $P4l2$,
+  ),
+  caption: [Высоты лопаток],
+  supplement: [Таблица]
+) <geometry>
+
+= Расчет турбины по среднему диаметру
+
+В @S показаны результаты расчета по среднему диаметру.
+
+#figure(
+  table(
+    columns: (auto, auto, auto, auto, auto, auto),
+    align: horizon,
+    [Величина и формула], [Ед.из.], [Сечение 1], [Сечение 2], [Сечение 3], [Сечение 4],
+    $ p_0^* = p^*_(2(i-1)) $, [Па],
+      S1ps0,S2ps0,S3ps0,S4ps0,
+    $ T_0^* = T^*_(2(i-1)) $, [К],
+      S1Ts0,S2Ts0,S3Ts0,S4Ts0,
+    $ H_0 = C_p dot T^*_0 dot (1- (p_2/p_0^*)^((k-1)/k) ) $, [Дж/кг],
+      S1H0,S2H0,S3H0,S4H0,
+    $ T_(2 t t) = T_0^* - H_0 / C_p $, [К],
+      S1T2tt,S2T2tt,S3T2tt,S4T2tt,
+    $ p_2 $, [Па],
+      S1p2,S2p2,S3p2,S4p2,
+    $ c_(1 t) = sqrt(2 (1- rho_(t "ср") ) dot H_0) $, [м/с],
+      S1c1t,S2c1t,S3c1t,S4c1t,
+    $ c_1 = #sym.Phi c_(1 t) $, [м/с],
+      S1c1,S2c1,S3c1,S4c1,
+    $ T_(1 t) = T_0^* - c_(1 t)^2 / (2 C_p) $, [К],
+      S1T1t,S2T1t,S3T1t,S4T1t,
+    $ p_1 = p_0^* dot (T_(1 t)/T_0^*)^(k/(k-1)) $, [Па],
+      S1p1,S2p1,S3p1,S4p1,
+    $ T_1 = T_0^* - c_1^2 / (2 C_p) $, [К],
+      S1T1,S2T1,S3T1,S4T1,
+    $ rho_1 = p_1 / (R dot T_1) $, [кг/$м^3$],
+      S1ρ1,S2ρ1,S3ρ1,S4ρ1,
+    $ F_(1 r) = (G dot R dot T_1) / (p_1 dot c_1) $,$м^2$,
+      S1F1r,S2F1r,S3F1r,S4F1r,
+    $ F_1 = pi dot d_(1 "ср") dot l_1 $,$м^2$,
+      S1F1,S2F1,S3F1,S4F1,
+    $ alpha_1 = arcsin(F_(1 r)/F_1) $, [град],
+      S1α1,S2α1,S3α1,S4α1,
+    $ c_(1 u) = c_1 dot cos(alpha_1) $, [м/с],
+      S1c1u,S2c1u,S3c1u,S4c1u,
+    $ c_(1 z) = c_1 dot sin(alpha_1) $, [м/с],
+      S1c1z,S2c1z,S3c1z,S4c1z,
+    $ u_1 = pi dot d_(1 c) dot n/60 $, [м/с],
+      S1u1,S2u1,S3u1,S4u1,
+    $ u_2 = pi dot d_(2 c) dot n/60 $, [м/с],
+      S1u2,S2u2,S3u2,S4u2,
+    $ w_(1 u) = c_(1 u) - u_1 $, [м/с],
+      S1w1u,S2w1u,S3w1u,S4w1u,
+    $ w_1 =sqrt(c_(1 z)^2 + w_(1 u)^2) $, [м/с],
+      S1w1,S2w1,S3w1,S4w1,
+    $ beta_1 = arctan(c_(1 z)/w_(1 u)) $, [град],
+      S1β1,S2β1,S3β1,S4β1,
+    $ T^*_w_1 = T_1 + w_1^2 / (2 C_p) $, [К],
+      S1Tsw1,S2Tsw1,S3Tsw1,S4Tsw1,
+    $ p^*_w_1 = p_1 dot (T^*_w_1 / T_1)^(k/(k-1)) $, [Па],
+      S1psw1,S2psw1,S3psw1,S4psw1,
+    $ T^*_w_2 = T^*_w_1 - (u_1^2 - u_2^2)/(2 C_p) $, [К],
+      S1Tsw2,S2Tsw2,S3Tsw2,S4Tsw2,
+    $ p^*_(w_2 t) = p^*_w_1 dot (T^*_w_2/T^*_w_1)^(k/(k-1)) $, [Па],
+      S1psw2t,S2psw2t,S3psw2t,S4psw2t,
+    $ H^*_2 = C_p dot T^*_w_2 dot (1 - (p_2 / p^*_(w_2 t))^((k-1)/k) ) $, [Дж/кг],
+      S1Hs2,S2Hs2,S3Hs2,S4Hs2,
+    $ w_(2 t) = sqrt(2 H^*_2) $, [м/с],
+      S1w2t,S2w2t,S3w2t,S4w2t,
+    $ w_2 = Psi w_(2 t) $, [м/с],
+      S1w2,S2w2,S3w2,S4w2,
+    $ T_2 = T^*_w_1 - w_2^2 / (2 C_p) $, [К],
+      S1T2,S2T2,S3T2,S4T2,
+    $ F_(2 r) = (G dot R dot T_2) / (p_2 dot w_2) $,$м^2$,
+      S1F2r,S2F2r,S3F2r,S4F2r,
+    $ F_2 = pi dot d_(2 "ср") dot l_2 $,$м^2$,
+      S1F2,S2F2,S3F2,S4F2,
+    $ beta_2^* = arcsin( F_(2 r)/F_2) $, [град],
+      S1βs2,S2βs2,S3βs2,S4βs2,
+    $ w_(2 u) = w_2 dot cos(beta_2^*) $, [м/с],
+      S1w2u,S2w2u,S3w2u,S4w2u,
+    $ c_(2 z) = w_(2 z) = u_2 dot sin(beta_2^*) $, [м/с],
+      S1c2z,S2c2z,S3c2z,S4c2z,
+    $ c_(2 z) = u_2 dot sin(beta_2^*) $, [м/с],
+      S1c2u,S2c2u,S3c2u,S4c2u,
+    $ alpha_2 = arctan(c_(2 z)/c_(2 u)) $, [град],
+      S1α2,S2α2,S3α2,S4α2,
+    $ c_2 = sqrt(c_(2 z)^2 + c_(2 u)^2) $, [м/с],
+      S1c2,S2c2,S3c2,S4c2,
+    $ T^*_2 = T_2 + c_2^2 / (2 C_p) $, [К],
+      S1Ts2,S2Ts2,S3Ts2,S4Ts2,
+    $ p_2^* = p_2 dot (T_2^* / T_2)^((k-1)/k) $, [Па],
+      S1ps2,S2ps2,S3ps2,S4ps2,
+    $ M_c_1 = c_1 / sqrt(k dot R dot T_1) $, [],
+      S1Mc1,S2Mc1,S3Mc1,S4Mc1,
+    $ M_w_2 = w_2 / sqrt(k dot R dot T_2) $, [],
+      S1Mw2,S2Mw2,S3Mw2,S4Mw2,
+    $ T^*_(2 t t) = T_(2 t t) dot (p_2^* / p_2)^((k-1)/k) $, [К],
+      S1Ts2tt,S2Ts2tt,S3Ts2tt,S4Ts2tt,
+    $ eta_u = (T^*_0 - T^*_2) / (T^*_0 - T_(2 t t)) $, [],
+      S1ηᵤ,S2ηᵤ,S3ηᵤ,S4ηᵤ,
+    $ eta_u^* = (T^*_0 - T^*_2) / (T^*_0 - T^*_(2 t t)) $, [],
+      S1ηsᵤ,S2ηsᵤ,S3ηsᵤ,S4ηsᵤ,
+  ),
+  caption: [Расчет параметров по среднему диаметру],
+  supplement: [Таблица]
+) <S>
+
+= Расчет закрутки потока <Par-rot>
+
+Расчет закрутки потока производится по обратному закону:
+$ r^n dot tan(alpha_1) = "const"; $
+
+Применение этого закона обеспечивает высокую эффективность выходного диффузора, поскольку повышение давления у периферии "отжимает" поток газа от стенок диффузора, противодействуя центробежной силе, что приводит к более равномерному распределению потока в радиальном направлении. Градиент давления, обеспеченный этим законом закрутки, показан на @P[рисунке].
+
+#figure(
+  image("assets/plots/goodies.svg", width: 80%),
+  caption: [Градиент давления на последней ступени в радиальном направлении при обратном законе закрутки],
+) <P>
+
+В рассматриваемом расчете происходит варьирование по четырем параметрам:
++ Угол потока в абсолютном движении на периферии: $ 13 degree < alpha_1 < alpha_(1 "ср");$
++ Угол потока в относительном движении на периферии $15 degree < beta_2^* < 65 degree; $
++ Параметр, определяющий отрицательный градиент осевой составляющей вектора скорости $-0.5 < F < 0 $ ;
++ Кинематическая степень реактивности в корневом сечении $rho_к (r'_2). $
+
+Для поиска желаемых значений этих параметров при ряде выбранных значений $alpha_1$ и $beta_2^*$ было произведено варьирование по параметрам $F$ и $rho_к$, в результате которого было построено поле распределения значений выходного угла в абсолютном движении на периферии $alpha_2$ и разницы суммарной кинематической степени реактивности и суммарной полиномиальной степени реактивности $Delta$ при допустимых значениях параметров. Критерием допустимости является монотонный рост давлений $p_2$ от корня к периферии и значения $Delta < 0.1$. Полученные поля изображены на @var.
+
+В полученном поле выбираются такие значения параметров, при которых $alpha_2$ максимально близок к осевому выходу. Так как это область значений, выбирается точка, для которой градиенты значения $alpha_2$ с соседними точками поля минимален, что позволит минимизировать влияние неточности при моделировании и производстве.
+
+#figure(
+  image("assets/plots/var.svg", width: 100%),
+  caption: [Поле распределения значений $alpha_2$ и $Delta$ при допустимых значениях параметров],
+) <var>
+
+Найдём значения вспомогательных параметров:
+
+$ n_1 
+  = (ln ( tg(alpha_(1 "пер"))/ tg(alpha_(1 "ср")) ) )/ ln(r_(1 "ср") / r_(1 "пер"))
+  = (ln ( tg(R5α1 degree)/tg(R3α1 degree) ))/ ln(R3r/R5r) = SIn1;
+$
+
+$ b_1 = r_(1 "пер")^(n_1) dot tg(alpha_(1 "пер")) = R5r ^ SIn1 dot tg( R5α1 degree ) = SIb1; $
+
+$ n_2 = (ln tg(beta_(2 "пер")^*)/ tg(beta_(2 "ср")^*) )/ ln(r_(2 "пер") / r_(2 "ср")) = (ln ( tg(R5βs2 degree )/ tg(R3βs2 degree) ) )/ ln( R5r/R3r ) = SIn2; $
+
+$ b_2 = r_(2 "ср")^(n_2) dot tg(beta_(2 "ср")^*) = R3r^SIn2 dot tg(S4βs2 degree) = SIb2; $
+
+Коэффициенты для определения осевой составляющей скорости в абсолютном движении на выходе из соплового аппарата:
+
+$ A = (F dot c_(1 z "ср"))/(r_(1 "пер")-r_(1 "ср")) = (SIF dot R3c1z ) / ( 0.5 dot P4l1 ) = SIA; $
+
+$ B &= c_(1 z "ср") - (F dot c_(1 z "ср"))/(r_(1 "пер")-r_(1 "ср")) dot r_(1 "ср") = \ &= R3c1z - (SIF dot R3c1z)/( 0.5 dot P4l1) dot R3r = SIB; $
+
+Окружная составляющая скорости в относительном движении на корневом диаметре на выходе из рабочего колеса:
+
+$ 
+  w'_(2 u) 
+  &= - (u'_1 dot w'_(1 u) + 2 dot u'_1^2 dot rho'_к )/ u'_2 = \ 
+  &= - (R1u1 dot R1w1u + 2 dot R1u1^2 dot R1ρK ) / R1u2
+  = R1w2u;
+$
+
+Для среднего сечения параметры берутся из расчета по среднему диаметру, для остальных сечений для расчёта применяются формулы, представленные в @R[таблице].
+
+Результаты расчета закрутки на последней ступени по обратному закону для пяти сечений представлены в @R[таблице].
+
+#figure(
+  table(
+    columns: (auto, auto, auto, auto, auto, auto, auto),
+    align: horizon,
+    [Величина и формула], [Ед.из.], [Сечение 1], [Сечение 2], [Сечение 3], [Сечение 4], [Сечение 5],
+    $ r $,   [м]   ,
+      R1r  , R2r  , R3r  , R4r  , R5r  ,
+    $ γ $, [град],
+      R1γ  , R2γ  , R3γ  , R4γ  , R5γ  ,
+    $ alpha_1 = arctan(b_1/r^n_1) $, [град],
+      R1α1 , R2α1 , R3α1 , R4α1 , R5α1 ,
+    $ c_(1 z) = r dot A + B $,[м/с],
+      R1c1u, R2c1u, R3c1u, R4c1u, R5c1u,
+    $ c_(1 u) = c_(1 z) / tan(alpha_1) $,[м/с],
+      R1c1z, R2c1z, R3c1z, R4c1z, R5c1z,
+    $ c_(1 r) = c_(1 z) dot tan(gamma_1) $, [м/с],
+      R1c1r, R2c1r, R3c1r, R4c1r, R5c1r,
+    $ c_1 = sqrt(c_(1 z)^2 + c_(1 u)^2 + c_(1 z)^2) $,  [м/с],
+      R1c1 , R2c1 , R3c1 , R4c1 , R5c1 ,
+    $ u_1 = 2 pi r dot n/60 $,[м/с],
+      R1u1 , R2u1 , R3u1 , R4u1 , R5u1 ,
+    $ u_2 = pi n/60 (d_(1 c) - l_1/2 + (№-1)/4 l_1 ) $,[м/с],
+      R1u2 , R2u2 , R3u2 , R4u2 , R5u2 ,
+    $ w_(1 u) = c_(1 u) - u_1 $, [м/с],
+      R1w1u, R2w1u, R3w1u, R4w1u, R5w1u,
+    $ beta_1 = arctan(c_(1 z)/(w_(1 u))) $, [град],
+      R1β1 , R2β1 , R3β1 , R4β1 , R5β1 ,
+    $ w_1 = c_(1 z) / w_(1 u) $, [м/с],
+      R1w1 , R2w1 , R3w1 , R4w1 , R5w1 ,
+    $ w_(2 u) = w_(2 u)^(1) +  $, [м/с],
+      R1w2u, R2w2u, R3w2u, R4w2u, R5w2u,
+    $ c_(2 u) = w_(2 u) + u_2 $, [м/с],
+      R1c2u, R2c2u, R3c2u, R4c2u, R5c2u,
+    $ c_(2 z) = -w_(2 u) dot tan(beta_2^*) $, [м/с],
+      R1c2z, R2c2z, R3c2z, R4c2z, R5c2z,
+    $ c_2 = sqrt(c_(2 z)^2 + c_(2 u)^2 + c_(2 r)^2) $, [м/с],
+      R1c2 , R2c2 , R3c2 , R4c2 , R5c2 ,
+    $ c_(2 r) =  c_(2 z) dot tan(gamma_2 ) $,[м/с],
+      R1c2r, R2c2r, R3c2r, R4c2r, R5c2r,
+    $ alpha_2 = arctan(c_(2 z) / c_(2 u)) $, [град],
+      R1α2 , R2α2 , R3α2 , R4α2 , R5α2 ,
+    $ beta_2^* = arctan(b_2 / r^n_2) $, [град],
+      R1βs2, R2βs2, R3βs2, R4βs2, R5βs2,
+    $ w_2 = c_(2 z) / sin(beta_2^*) $, [м/с],
+      R1w2, R2w2, R3w2, R4w2, R5w2,
+    $ T_1 = T_0^* - c_1^2 / (2 C_p) $,$ degree C$,
+      R1T1, R2T1, R3T1, R4T1, R5T1,
+    $ p_1 = p_0^* &dot chi^1 dot \ &dot (1 - c_1^2 / (k/(k-1) dot 2 R dot T_0^*) )^(k/(k-1)) $, [Па],
+      R1p1, R2p1, R3p1, R4p1, R5p1,
+    $ rho_1 = p_1 / (R dot T_1) $, [кг/$м^3$],
+      R1ρ1, R2ρ1, R3ρ1, R4ρ1, R5ρ1,
+    $ T^*_w_1 = T_1 + w_1^2 / (2 C_p) $,$ degree C$,
+      R1Tsw1, R2Tsw1, R3Tsw1, R4Tsw1, R5Tsw1,
+    $ T_2 = T^*_w_1 - w_2^2 / (2 C_p) $,$degree C$,
+      R1T2, R2T2, R3T2, R4T2, R5T2,
+    $ p_2 = p^*_0 &dot chi^1 dot chi^2 dot \ &dot (1 - (c_1^2 + w_2^2 - w_1^2)/( k/(k-1) dot 2 R dot T^*_0 ) )^(k/(k-1)) $, [Па],
+      R1p2, R2p2, R3p2, R4p2, R5p2,
+    $ rho_2 = p_2 / (T_2 dot R) $, [кг/$м^3$],
+      R1ρ2, R2ρ2, R3ρ2, R4ρ2, R5ρ2,
+    $ rho_T = ( (p_1/p_0^*)^((k-1)/k) - (p_2/p_0^*)^((k-1)/k) ) / (1 - (p_2 / p_0^*)^((k-1)/k)) $, [],
+      R1ρT, R2ρT, R3ρT, R4ρT, R5ρT,
+    $ H_p = (w_2^2 - w_1^2)/2 + (u_1^2 - u_2^2)/2 $, [Дж],
+      R1Hₚ, R2Hₚ, R3Hₚ, R4Hₚ, R5Hₚ,
+    $ H_u = (c_1^2 - c_2^2)/2 + (w_2^2 - w_1^2)/2 + (u_1^2 - u_2^2)/2 $, [Дж],
+      R1Hᵤ, R2Hᵤ, R3Hᵤ, R4Hᵤ, R5Hᵤ,
+    $ rho_K = H_p / H_u $, [],
+      R1ρK, R2ρK, R3ρK, R4ρK, R5ρK,
+    $ ρ_"kп" = a (r-r_1)^2 + b (r-r_1) + c $, [],
+      R1ρKp, R2ρKp, R3ρKp, R4ρKp, R5ρKp,
+    $ Delta ρ_k = ρ_"kп" - rho_K  $, [],
+      R1Δρ, R2Δρ,  R3Δρ, R4Δρ, R5Δρ,
+  ),
+  caption: [Расчет закрутки для последней ступени],
+  supplement: [Таблица]
+) <R>
+
+= Построение моделей рабочей и сопловой лопатки
+
+Основываясь на углах из @R[таблицы], строятся треугольники скоростей и профили для 5 сечений рабочей и сопловой лопатки последней ступени турбины. Построение профилей проводится по средней линии и использует кубический сплайн в форме Эрмита для описания средней линии, спинки и корытца. Такой подход позволяет автоматизировать процесс, что выгодно отличает его от метода окружностей, а также упрощает компьютерную обработку и анализ полученных профилей.
+
+Применение именно этой кривой обусловлено тем, что для её построения необходимы координаты и касательный угол в начальной ($x_1, y_1, alpha_1$) и конечной ($x_2, y_2, alpha_2$) точках --- то есть все данные о геометрии, полученные в ходе расчета в @Par-rot. Построение проводится с помощью введения дополнительного параметра относительной координаты $t(x)$ и описывается следующей системой уравнений:
+$
+  cases(
+    h &= (x_2 - x_1),
+    t(x) &= frac((x - x_1), h, style:"horizontal"),
+    p(t) &= y_1 dot (1 + 2t) (1-t)^2 + y_2 dot t^2 (3-2t) +,
+    &+ h dot [tg(alpha_1) t (1-t)^2 + tg(alpha_2) t^2 (t-1) ]
+  )
+$ <hermite>
+
+Помимо этого, сплайн в форме Эрмита может быть переведён в сплайн в форме Безье и обеспечивает гладкость (непрерывность первой производной) в точках соприкосновения с секторами окружностей передней и задней кромок @SplineBook.
+
+Для демонстрации конфузорности профилей для каждой точки корытца были подобраны ближайшие точки спинки соседнего профиля, по этим данным построено поле распределения расстояния между профилями вдоль канала. Расстояния в этом поле показаны с помощью перцептивно равномерной цветовой шкалы viridis.
+
+#pagebreak()
+
+// #figure(
+//   image("assets/profiles/2/profile1.svg", width: 80%),
+//   caption: [Профиль РЛ в корневом сечении]
+// )
+// #figure(
+//   image("assets/profiles/2/shift1.svg", width: 80%),
+//   caption: [Проверка конфузорности РЛ в корневом сечении]
+// )
+
+// #figure(
+//   image("assets/profiles/2/profile2.svg", width: 80%),
+//   caption: [Профиль РЛ в средне-корневом сечении]
+// )
+// #figure(
+//   image("assets/profiles/2/shift2.svg", width: 80%),
+//   caption: [Проверка конфузорности РЛ в средне-корневом сечении]
+// )
+
+// #figure(
+//   image("assets/profiles/2/profile3.svg", width: 80%),
+//   caption: [Профиль РЛ в среднем сечении]
+// )
+// #figure(
+//   image("assets/profiles/2/shift3.svg", width: 80%),
+//   caption: [Проверка конфузорности РЛ в среднем сечении]
+// )
+
+// #figure(
+//   image("assets/profiles/2/profile4.svg", width: 80%),
+//   caption: [Профиль РЛ в средне-периферийном сечении]
+// )
+// #figure(
+//   image("assets/profiles/2/shift4.svg", width: 80%),
+//   caption: [Проверка конфузорности РЛ в средне-периферийном сечении]
+// )
+
+// #figure(
+//   image("assets/profiles/2/profile5.svg", width: 80%),
+//   caption: [Профиль РЛ в периферийном сечении]
+// )
+// #figure(
+//   image("assets/profiles/2/shift5.svg", width: 80%),
+//   caption: [Проверка конфузорности РЛ в периферийном сечении]
+// )
+
+// Профили сопловых лопаток
+
+// #figure(
+//   image("assets/profiles/1/profile1.svg", width: 80%),
+//   caption: [Профиль СЛ в корневом сечении]
+// )
+// #figure(
+//   image("assets/profiles/1/shift1.svg", width: 80%),
+//   caption: [Проверка конфузорности СЛ в корневом сечении]
+// )
+
+// #figure(
+//   image("assets/profiles/1/profile2.svg", width: 80%),
+//   caption: [Профиль СЛ в средне-корневом сечении]
+// )
+// #figure(
+//   image("assets/profiles/1/shift2.svg", width: 80%),
+//   caption: [Проверка конфузорности СЛ в средне-корневом сечении]
+// )
+
+// #figure(
+//   image("assets/profiles/1/profile3.svg", width: 80%),
+//   caption: [Профиль СЛ в среднем сечении]
+// )
+// #figure(
+//   image("assets/profiles/1/shift3.svg", width: 80%),
+//   caption: [Проверка конфузорности СЛ в среднем сечении]
+// )
+
+// #figure(
+//   image("assets/profiles/1/profile4.svg", width: 80%),
+//   caption: [Профиль СЛ в средне-периферийном сечении]
+// )
+// #figure(
+//   image("assets/profiles/1/shift4.svg", width: 80%),
+//   caption: [Проверка конфузорности СЛ в корневом сечении]
+// )
+
+// #figure(
+//   image("assets/profiles/1/profile5.svg", width: 80%),
+//   caption: [Профиль СЛ в периферийном сечении]
+// )
+// #figure(
+//   image("assets/profiles/1/shift5.svg", width: 80%),
+//   caption: [Проверка конфузорности СЛ в корневом сечении]
+// )
+
+На рисунках @profile-cent-1[] и @profile-cent-2[] изображены соответственно центрированные комбинированные изображения профилей сопловой и рабочей лопаток.
+
+#figure(
+  image("assets/profiles/1/profiles.svg", width: 80%),
+  caption: [Центрированная комбинация всех профилей СЛ]
+) <profile-cent-1>
+#figure(
+  image("assets/profiles/2/profiles.svg", width: 80%),
+  caption: [Центрированная комбинация всех профилей РЛ]
+) <profile-cent-2>
+
+По полученным профилям и геометрии продольного сечения, изображенной на @Mer, строится перо рабочей и сопловой лопатки последней ступени турбины. Для этого используется Waterfall-cad @waterfall-cad --- Haskell-враппер геометрического ядра OpenCASCADE, позволяющий автоматизировать построение рассматриваемых моделей, уменьшив время на их создание и исключив вероятность ошибки. Итогом этого шага являются две корректно спозиционированные относительно начала координат step-модели.
+
+Затем полученные модели загружаются в SolidWorks, в котором для РЛ строится бандажная полка и хвостовик, а для сопловой лопатки --- фрагменты диафрагмы.
+
+Также на этом этапе строится модель диска последней ступени
+
+= Определение прочностных характеристик основных элементов турбины
+
+== Газодинамический расчет последней ступени
+
+=== Подготовка меридионального контура проточной части
+
+=== Подготовка CAD-модели последней ступени турбины к расчету в ANSYS CFX
+
+=== Построение расчетной сетки
+
+== Прочностной расчет рабочей лопатки
+
+=== Расчет рабочей лопатки на статическую прочность в рамках упругой постановки
+
+=== Расчет рабочей лопатки на статическую прочность в рамках упруго-пластической постановки с циклограммой нагружения
+
+=== Расчет рабочей лопатки на длительную прочность
+
+=== Модальный расчет и построение вибрационной диаграммы рабочей лопатки
+
+== Прочностной расчет диска
+
+=== Расчет диска на статическую прочность в рамках упругой постановки
+
+=== Расчет диска на статическую прочность в рамках упруго-пластической постановки с циклограммой нагружения
+
+=== Расчет диска на длительную прочность
+
+=== Модальный расчет и построение вибрационной диаграмы диска
+
+== Модальный расчет ротора
+
+= Конструкция газотурбинной установки
+
+Целью этого раздела является описание основных конструктивных элементов проектируемой ГТУ, их принципа действия, особенностей, характеристик и взаимосвязей. Приводится обоснование принятых конструкторских решений.
+
+== Назначение и общее описание установки
+
+Проектируемая установка предназначена для преобразования тепловой энергии, получаемой врезультатае сжигания топлива в энергию вращения вала, которая используется для привода электрогенератора номинальной мощьностью 65 МВт. Применение установки возможно как в составе ПГУ, так и в качестве независимого агрегата. ГТУ может служить 
+
+== Основные элементы установки и их взаимосвязь
+
+=== Компрессор
+
+=== Камера сгорания
+
+=== Турбина
+
+=== Вал
+
+=== Корпус
+
+=== Подшипники
+
+== Передача моментов по цепочке от источника до потребителя
+
+== Уплотнения
+
+== Тепловые расширения
+
+== Охлаждение проточной части турбины
+
+== Основные этапы пуска и регулирования в процессе работы и останова установки
+
+= Ну эээ... Спецчасть наверное
 
 #centred-heading("Заключение")
 
@@ -622,5 +1142,4 @@
   "ref.bib",
   style: "gost-r-705-2008-numeric",
   title: "Список использованных источников",
-  full: true
 )
