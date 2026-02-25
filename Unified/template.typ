@@ -136,7 +136,7 @@
     counter(math.equation).update(0)
     counter(figure.where(kind: image)).update(0)
     counter(figure.where(kind: table)).update(0)
-    colbreak(weak: true)
+    pagebreak(weak: true)
     upper(it)
   }
 
@@ -171,4 +171,8 @@
 }
 
 #let noind = h(-1.25cm)
-#let centred-heading(title) = align(center)[#heading(numbering:none, title)]
+#let centred-heading(title) = [
+  // #pagebreak(weak:true)
+  
+  #align(center, heading(numbering:none, title))
+]
