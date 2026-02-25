@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.21
+# v0.20.23
 
 using Markdown
 using InteractiveUtils
@@ -378,53 +378,6 @@ begin
 	md"λ Расчет по ступеням"
 end
 
-# ╔═╡ 23866f8f-bdff-45be-afcd-91d3c87a200e
-begin
-	function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
-	    T = @NamedTuple{F::Float64, ρK::Float64, σ::Float64, Δρ::Float64}
-	    tasks = []
-	    
-	    F_list = collect(F_range)
-	    
-	    for chunk_start in 1:6:length(F_list)  # 6 потоков
-	        chunk_end = min(chunk_start + 5, length(F_list))
-	        chunk = F_list[chunk_start:chunk_end]
-	        
-	        task = Threads.@spawn begin
-	            local_valid = T[]
-	            for F in chunk
-	                for ρK in ρK_range
-	                    Params = (; α₁, F, ρK, β⃰₂)
-	                    RR, a, b, c, ɤ = swirl_reverse(P[end], S[end], Params)
-	                    Δρ = sum(r.Δρ for r in RR)
-	                    p̄  = [r.p₂ for r in RR]
-	
-	                    if abs(Δρ) < 0.1 &&
-	                    all(p̄[i] < p̄[i+1] for i in 1:4) &&
-	                    all(RR[i].ρT < RR[i+1].ρT for i in 1:4) &&
-	                    all(RR[i].ρK < RR[i+1].ρK for i in 1:4)
-	                        
-	                        pₘ = (p̄[5] - p̄[1]) / 5
-	                        σ  = (abs(p̄[1]-pₘ) + abs(p̄[2]-pₘ) + abs(p̄[3]-pₘ) +
-								  abs(p̄[4]-pₘ) + abs(p̄[5]-pₘ)) / 5pₘ
-	                        
-	                        result = (; F, ρK, σ, Δρ)
-	                        push!(local_valid, result)
-	                    end
-	                end
-	            end
-	            local_valid
-	        end
-	        push!(tasks, task)
-	    end
-	    
-	    results = fetch.(tasks)
-	    return reduce(vcat, results)
-	end
-	
-	md"Λ Варьирование для закрутки потока"
-end
-
 # ╔═╡ 3e5014a8-e39f-4d3c-bb2f-122dea8482bb
 begin
 	function swirl_reverse(Params, mid, swirl_params)
@@ -658,6 +611,53 @@ begin
 	S, H = calc_stages(Gₒₚₜ, T, P)
 	
 	md"### ∮ Расчет по ступеням"
+end
+
+# ╔═╡ 23866f8f-bdff-45be-afcd-91d3c87a200e
+begin
+	function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
+	    T = @NamedTuple{F::Float64, ρK::Float64, σ::Float64, Δρ::Float64}
+	    tasks = []
+	    
+	    F_list = collect(F_range)
+	    
+	    for chunk_start in 1:6:length(F_list)  # 6 потоков
+	        chunk_end = min(chunk_start + 5, length(F_list))
+	        chunk = F_list[chunk_start:chunk_end]
+	        
+	        task = Threads.@spawn begin
+	            local_valid = T[]
+	            for F in chunk
+	                for ρK in ρK_range
+	                    Params = (; α₁, F, ρK, β⃰₂)
+	                    RR, a, b, c, ɤ = swirl_reverse(P[end], S[end], Params)
+	                    Δρ = sum(r.Δρ for r in RR)
+	                    p̄  = [r.p₂ for r in RR]
+	
+	                    if abs(Δρ) < 0.1 &&
+	                    all(p̄[i] < p̄[i+1] for i in 1:4) &&
+	                    all(RR[i].ρT < RR[i+1].ρT for i in 1:4) &&
+	                    all(RR[i].ρK < RR[i+1].ρK for i in 1:4)
+	                        
+	                        pₘ = (p̄[5] - p̄[1]) / 5
+	                        σ  = (abs(p̄[1]-pₘ) + abs(p̄[2]-pₘ) + abs(p̄[3]-pₘ) +
+								  abs(p̄[4]-pₘ) + abs(p̄[5]-pₘ)) / 5pₘ
+	                        
+	                        result = (; F, ρK, σ, Δρ)
+	                        push!(local_valid, result)
+	                    end
+	                end
+	            end
+	            local_valid
+	        end
+	        push!(tasks, task)
+	    end
+	    
+	    results = fetch.(tasks)
+	    return reduce(vcat, results)
+	end
+	
+	md"Λ Варьирование для закрутки потока"
 end
 
 # ╔═╡ 7e4039e8-ed6c-46eb-a079-9df82d4272d6
@@ -1426,6 +1426,9 @@ end
 
 # ╔═╡ 9c6f53f7-7037-4dce-99b6-687b1473d5d7
 profiles_show(Pr1, Pr2, Pr3, Pr4, Pr5)
+
+# ╔═╡ f19e853e-31dd-47d7-805f-7594e0fd14e0
+profiles_show(Prs1, Prs2, Prs3, Prs4, Prs5)
 
 # ╔═╡ e3eb9ae9-4a31-4ce2-9ca7-607abd52e8f6
 function transformProfile(Pr)
@@ -3305,7 +3308,7 @@ version = "4.1.0+0"
 # ╟─7290e07c-eedc-429f-a2fa-7130dae8da37
 # ╟─c2b940ae-7013-4184-916f-cc2c6c3bb718
 # ╟─23866f8f-bdff-45be-afcd-91d3c87a200e
-# ╟─3e5014a8-e39f-4d3c-bb2f-122dea8482bb
+# ╠═3e5014a8-e39f-4d3c-bb2f-122dea8482bb
 # ╟─e24903de-8706-4d29-aaf0-2005799675e1
 # ╟─1f21d0d2-43a3-489b-9b77-d09d0824f799
 # ╠═4e7e1ddb-8a03-4818-be9e-fa31698faf07
@@ -3321,6 +3324,7 @@ version = "4.1.0+0"
 # ╟─a799d3e9-e95e-4f5a-aa80-96d428751e02
 # ╟─875fe360-eeb8-4a6a-bb39-caf94901ae52
 # ╟─9c6f53f7-7037-4dce-99b6-687b1473d5d7
+# ╟─f19e853e-31dd-47d7-805f-7594e0fd14e0
 # ╟─e12ca256-c439-4eac-83f0-e7ccff7c749b
 # ╟─0fb5895e-2d20-4716-86ba-3ee7a3c55433
 # ╟─fdfad875-453c-4a56-ad68-2b56bdeb2a16
@@ -3334,12 +3338,12 @@ version = "4.1.0+0"
 # ╟─bd295267-109a-4c84-bba3-7cdd0d682b18
 # ╟─ca7636ed-2d30-4086-bc61-ef31ab371969
 # ╟─5d979de0-beb0-41df-a5cd-779eec0e611f
-# ╠═456abb60-9448-4a7b-9331-04c38e6d7cc0
+# ╟─456abb60-9448-4a7b-9331-04c38e6d7cc0
 # ╟─93863518-c9c4-46f4-a33b-a7b32e815ad0
-# ╠═41052bef-706d-4ba9-935f-772889053a94
-# ╠═c4fabc38-a030-4e61-96d5-4d4ecdf0c5e2
+# ╟─41052bef-706d-4ba9-935f-772889053a94
+# ╟─c4fabc38-a030-4e61-96d5-4d4ecdf0c5e2
 # ╟─f3210104-8de0-4394-997c-8cc2858c800a
-# ╠═fcc47753-9b48-4bf2-8b0e-02b8f8417fe7
+# ╟─fcc47753-9b48-4bf2-8b0e-02b8f8417fe7
 # ╟─f2c9597e-84c3-4e0a-8fc0-73131b7254ce
 # ╟─e3eb9ae9-4a31-4ce2-9ca7-607abd52e8f6
 # ╟─c83ce798-1dfb-4ce1-84fe-1b2f2798e8ec
