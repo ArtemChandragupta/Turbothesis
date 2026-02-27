@@ -664,15 +664,15 @@ begin
 end
 
 # ╔═╡ 7e4039e8-ed6c-46eb-a079-9df82d4272d6
-@bind Cα₁ PlutoUI.NumberField(13:40, default=21)
+# @bind Cα₁ PlutoUI.NumberField(13:40, default=21)
 
 # ╔═╡ d1889b73-726a-468b-9bb9-e69cd81a796b
 @bind Cβ⃰₂ PlutoUI.NumberField(15:65, default=26)
 
 # ╔═╡ 6316022b-a071-4d6b-be2a-d786c8edad45
 begin
-	#Cα₁ = 31
-	#Cβ⃰₂ = 39
+	Cα₁ = 20.6
+	# Cβ⃰₂ = 25.9
 	
 	F_range  = range(-0.5, 0  , length=400)
 	ρK_range = range(0.2 , 0.5, length=400)
@@ -3304,19 +3304,19 @@ version = "4.1.0+0"
 # ╟─40561c16-193e-4349-bc16-a7d9ceb55f62
 # ╟─0648057a-709b-40bb-ba4c-6de37981fc82
 # ╟─ec47fa62-62ea-4bf8-a57f-9e6b10b5fa0b
-# ╠═65781f50-667a-44c0-beb2-466dfb293d36
+# ╟─65781f50-667a-44c0-beb2-466dfb293d36
 # ╟─77bbea27-c0fa-4320-ab84-ff91730410e3
 # ╟─7290e07c-eedc-429f-a2fa-7130dae8da37
-# ╠═c2b940ae-7013-4184-916f-cc2c6c3bb718
+# ╟─c2b940ae-7013-4184-916f-cc2c6c3bb718
 # ╟─23866f8f-bdff-45be-afcd-91d3c87a200e
-# ╠═3e5014a8-e39f-4d3c-bb2f-122dea8482bb
+# ╟─3e5014a8-e39f-4d3c-bb2f-122dea8482bb
 # ╟─e24903de-8706-4d29-aaf0-2005799675e1
 # ╟─1f21d0d2-43a3-489b-9b77-d09d0824f799
 # ╟─4e7e1ddb-8a03-4818-be9e-fa31698faf07
 # ╟─4acc88bf-4bbf-49b5-8006-920901d8ddc9
-# ╟─7e4039e8-ed6c-46eb-a079-9df82d4272d6
-# ╟─d1889b73-726a-468b-9bb9-e69cd81a796b
-# ╟─6316022b-a071-4d6b-be2a-d786c8edad45
+# ╠═7e4039e8-ed6c-46eb-a079-9df82d4272d6
+# ╠═d1889b73-726a-468b-9bb9-e69cd81a796b
+# ╠═6316022b-a071-4d6b-be2a-d786c8edad45
 # ╟─d51bd461-3106-4b8d-9d3a-66c7fb6c8ab1
 # ╟─43b474fc-51fa-4aef-86fa-cba0eb59bcf9
 # ╟─9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
@@ -3342,7 +3342,7 @@ version = "4.1.0+0"
 # ╟─456abb60-9448-4a7b-9331-04c38e6d7cc0
 # ╟─93863518-c9c4-46f4-a33b-a7b32e815ad0
 # ╟─41052bef-706d-4ba9-935f-772889053a94
-# ╠═c4fabc38-a030-4e61-96d5-4d4ecdf0c5e2
+# ╟─c4fabc38-a030-4e61-96d5-4d4ecdf0c5e2
 # ╟─f3210104-8de0-4394-997c-8cc2858c800a
 # ╟─fcc47753-9b48-4bf2-8b0e-02b8f8417fe7
 # ╟─f2c9597e-84c3-4e0a-8fc0-73131b7254ce
