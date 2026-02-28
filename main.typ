@@ -798,7 +798,7 @@ $ Y = u_2 dot sqrt(m / (2 H_(0 T) ) ) = Tu2 dot sqrt( COm / (2 dot TH0ₜ) ) = C
     $ c_(2 z) = u_2 dot sin(beta_2^*) $, [м/с],
       S1c2u,S2c2u,S3c2u,S4c2u,
     $ alpha_2 = arctan(c_(2 z)/c_(2 u)) $, [град],
-      S1α2,S2α2,S3α2,S4α2,
+      S1αs2,S2αs2,S3αs2,S4αs2,
     $ c_2 = sqrt(c_(2 z)^2 + c_(2 u)^2) $, [м/с],
       S1c2,S2c2,S3c2,S4c2,
     $ T^*_2 = T_2 + c_2^2 / (2 C_p) $, [К],
@@ -919,7 +919,7 @@ $
     $ c_(2 r) =  c_(2 z) dot tan(gamma_2 ) $,[м/с],
       R1c2r, R2c2r, R3c2r, R4c2r, R5c2r,
     $ alpha_2 = arctan(c_(2 z) / c_(2 u)) $, [град],
-      R1α2 , R2α2 , R3α2 , R4α2 , R5α2 ,
+      R1αs2, R2αs2, R3αs2, R4αs2, R5αs2,
     $ beta_2^* = arctan(b_2 / r^n_2) $, [град],
       R1βs2, R2βs2, R3βs2, R4βs2, R5βs2,
     $ w_2 = c_(2 z) / sin(beta_2^*) $, [м/с],
@@ -984,13 +984,6 @@ $ <hermite>
 //   caption: [Проверка конфузорности РЛ в корневом сечении]
 // )
 
-// #figure(
-//   columns(
-//     [#image("assets/profiles/2/profile1.svg") #colbreak()
-//     #image("assets/profiles/2/shift1.svg")]
-//   )
-// )
-
 #figure(
   text(size: 10pt, cetz.canvas(length:0.016cm, {
     import cetz.draw: *
@@ -1006,165 +999,13 @@ $ <hermite>
     let u1  =  RawR1u1
     let u2  =  RawR1u2
     let a1  =  RawR1α1
-    let a2  = -RawR1α2
+    let a2  =  RawR1αs2
     let b1  =  RawR1β1
     let b2  =  RawR1βs2
-    let c1  = calc.floor( RawR1c1 )
-    let c2  = calc.floor( RawR1c2 )
-    let w1  = calc.floor( RawR1w1 )
-    let w2  = calc.floor( RawR1w2 )
-    
-    // Оси
-    line((c2u+u2, 0), (c1u, 0), mark:(end: "stealth"), name: "axisu")
-    content("axisu.end", $U$, padding: 20, anchor: "north-west" )
-    line((0,0),(0,c2z - 30), mark:(end: "stealth"), name: "axisz")
-    content("axisz.end", $z$, padding: 5, anchor: "south-west" )
-
-    // Треугольник 1
-    line(name:"C1", (0,0),(c1u  ,c1z), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
-    line(name:"W1", (0,0),(c1u + u1, c1z), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
-    line(name:"U1", "W1.end","C1.end", mark:(end: "stealth", fill:red),stroke:(paint:red, thickness: 2pt))
-
-    // Треугольник 2
-    line(name:"C2", (0,0),(c2u, c2z), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
-    line(name:"W2", (0,0),(c2u + u2, c2z), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
-    line(name:"U2","W2.end","C2.end", mark:(end: "stealth", fill:blue),stroke:(paint:blue, thickness: 2pt))
-
-    // линии для U1 и U2
-    line(name:"U1s","U1.start", (rel:(0,-30)))
-    line(name:"U1e","U1.end",   (rel:(0,-30)))
-    line(name:"U_1", "U1s.80%", "U1e.80%", mark:(symbol: "stealth"))
-    line(name:"U2s","U2.start", (rel:(0,-30)))
-    line(name:"U2e","U2.end",   (rel:(0,-30)))
-    line(name:"U_2", "U2s.80%", "U2e.80%", mark:(symbol: "stealth"))
-
-    // Подписи скоростей
-    content("C1.70%", angle:  a1 * 1deg, box(fill:white, inset:3pt, $C_1 = c1 "м/с"$))
-    content("W1.70%", angle:  b1 * 1deg, box(fill:white, inset:3pt, $W_1 = w1 "м/с"$))
-    content("C2.70%", angle: -a2 * 1deg, box(fill:white, inset:3pt, $C_2 = c2 "м/с"$))
-    content("W2.70%", angle: -b2 * 1deg, box(fill:white, inset:3pt, $W_2 = w2 "м/с"$))
-    content("U_1.mid", box(fill:white, inset:3pt, $U_1 = #calc.floor(u1) "м/с"$))
-    content("U_2.mid", box(fill:white, inset:3pt, $U_2 = #calc.floor(u2) "м/с"$))
-
-    // Осевые скорости
-    line(name:"z1", (0,c1z),(c1u + u1,c1z), stroke: (dash: "dashed"))
-    line(name:"z2", (0,c2z),(c2u     ,c2z), stroke: (dash: "dashed"))
-    content("z1", box(fill:white, inset:3pt, $C_z_1 = #calc.floor(-c1z) "м/с"$), anchor: "south")
-    content("z2.0", angle:-90deg, box(inset:3pt, $C_z_2 = #calc.floor(-c2z) "м/с"$), anchor: "south-east")
-
-    // Дуги
-    arc(name:"a2", (0,0), start:0deg, delta: -a2*1deg, radius:c2/2.3, anchor:"origin", mark:(symbol:"stealth"))
-    arc(name:"b2", (0,0), start:0deg, delta: -b2*1deg, radius:w2/2, anchor:"origin", mark:(symbol:"stealth"))
-    arc(name:"a1", (0,0), start:-180deg, delta: a1*1deg, radius:c1/2, anchor:"origin", mark:(symbol:"stealth"))
-    arc(name:"b1", (0,0), start:180deg, delta: b1*1deg, radius:w2/3, anchor:"origin", mark:(symbol:"stealth"))
-
-    // Подписи дуг
-    content("a1.50%", angle: a1/2*1deg, box(fill:white, inset:3pt, $alpha_1 = #calc.floor(a1) degree$) )
-    content("b1.33%", angle: b1/3*1deg, box(fill:white, inset:3pt, $beta_1 = #calc.floor(b1) degree$) )
-    content("a2.33%", angle: -a2/3*1deg, box(fill:white, inset:3pt, $alpha_2^* = #calc.floor(a2) degree$) )
-    content("b2.50%", angle: -b2/2*1deg, box(fill:white, inset:3pt, $beta_2^* = #calc.floor(b2) degree$) )
-  })),
-  caption: [Треугольник скоростей на корневом сечении рабочей лопатки последней ступени турбины]
-) <Tri-1>
-
-#figure(
-  text(size: 10pt, cetz.canvas(length:0.016cm, {
-    import cetz.draw: *
-    set-style(
-      mark: (transform-shape: false, fill: black),
-      stroke: (cap: "round")
-    )
-    // Variables
-    let c1z = -RawR2c1z
-    let c2z = -RawR2c2z
-    let c1u = -RawR2c1u
-    let c2u = -RawR2c2u
-    let u1  =  RawR2u1
-    let u2  =  RawR2u2
-    let a1  =  RawR2α1
-    let a2  = -RawR2α2
-    let b1  =  RawR2β1
-    let b2  =  RawR2βs2
-    let c1  = calc.floor( RawR2c1 )
-    let c2  = calc.floor( RawR2c2 )
-    let w1  = calc.floor( RawR2w1 )
-    let w2  = calc.floor( RawR2w2 )
-    
-    // Оси
-    line((c2u+u2, 0), (c1u, 0), mark:(end: "stealth"), name: "axisu")
-    content("axisu.end", $U$, padding: 20, anchor: "north-west" )
-    line((0,0),(0,c2z - 30), mark:(end: "stealth"), name: "axisz")
-    content("axisz.end", $z$, padding: 5, anchor: "south-west" )
-
-    // Треугольник 1
-    line(name:"C1", (0,0),(c1u  ,c1z), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
-    line(name:"W1", (0,0),(c1u + u1, c1z), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
-    line(name:"U1", "W1.end","C1.end", mark:(end: "stealth", fill:red),stroke:(paint:red, thickness: 2pt))
-
-    // Треугольник 2
-    line(name:"C2", (0,0),(c2u, c2z), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
-    line(name:"W2", (0,0),(c2u + u2, c2z), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
-    line(name:"U2","W2.end","C2.end", mark:(end: "stealth", fill:blue),stroke:(paint:blue, thickness: 2pt))
-
-    // линии для U1 и U2
-    line(name:"U1s","U1.start", (rel:(0,-30)))
-    line(name:"U1e","U1.end",   (rel:(0,-30)))
-    line(name:"U_1", "U1s.80%", "U1e.80%", mark:(symbol: "stealth"))
-    line(name:"U2s","U2.start", (rel:(0,-30)))
-    line(name:"U2e","U2.end",   (rel:(0,-30)))
-    line(name:"U_2", "U2s.80%", "U2e.80%", mark:(symbol: "stealth"))
-
-    // Подписи скоростей
-    content("C1.70%", angle:  a1 * 1deg, box(fill:white, inset:3pt, $C_1 = c1$))
-    content("W1.70%", angle:  b1 * 1deg, box(fill:white, inset:3pt, $W_1 = w1$))
-    content("C2.70%", angle: -a2 * 1deg, box(fill:white, inset:3pt, $C_2 = c2$))
-    content("W2.70%", angle: -b2 * 1deg, box(fill:white, inset:3pt, $W_2 = w2$))
-    content("U_1.mid", box(fill:white, inset:3pt, $U_1 = #calc.floor(u1)$))
-    content("U_2.mid", box(fill:white, inset:3pt, $U_2 = #calc.floor(u2)$))
-
-    // Осевые скорости
-    line(name:"z1", (0,c1z),(c1u + u1,c1z), stroke: (dash: "dashed"))
-    line(name:"z2", (0,c2z),(c2u     ,c2z), stroke: (dash: "dashed"))
-    content("z1", box(inset:3pt, $C_z_1 = #calc.floor(-c1z)$), anchor: "south")
-    content("z2.0", angle:-90deg, box(inset:2pt, $C_z_2 = #calc.floor(-c2z)$), anchor: "south-east")
-
-    // Дуги
-    arc(name:"a2", (0,0), start:0deg, delta: -a2*1deg, radius:c2/2.3, anchor:"origin", mark:(symbol:"stealth"))
-    arc(name:"b2", (0,0), start:0deg, delta: -b2*1deg, radius:w2/2, anchor:"origin", mark:(symbol:"stealth"))
-    arc(name:"a1", (0,0), start:-180deg, delta: a1*1deg, radius:c1/2, anchor:"origin", mark:(symbol:"stealth"))
-    arc(name:"b1", (0,0), start:180deg, delta: b1*1deg, radius:w2/3, anchor:"origin", mark:(symbol:"stealth"))
-
-    // Подписи дуг
-    content("a1.50%", angle: a1/2*1deg, box(fill:white, inset:3pt, $alpha_1 = #calc.floor(a1) degree$) )
-    content("b1.33%", angle: b1/3*1deg, box(fill:white, inset:3pt, $beta_1 = #calc.floor(b1) degree$) )
-    content("a2.33%", angle: -a2/3*1deg, box(fill:white, inset:3pt, $alpha_2^* = #calc.floor(a2) degree$) )
-    content("b2.50%", angle: -b2/2*1deg, box(fill:white, inset:3pt, $beta_2^* = #calc.floor(b2) degree$) )
-  })),
-  caption: [Треугольник скоростей на средне-корневом сечении рабочей лопатки последней ступени турбины]
-) <Tri-2>
-
-#figure(
-  text(size: 10pt, cetz.canvas(length:0.02cm, {
-    import cetz.draw: *
-    set-style(
-      mark: (transform-shape: false, fill: black),
-      stroke: (cap: "round")
-    )
-    // Variables
-    let c1z = -RawR5c1z
-    let c2z = -RawR5c2z
-    let c1u = -RawR5c1u
-    let c2u = -RawR5c2u
-    let u1  =  RawR5u1
-    let u2  =  RawR5u2
-    let a1  =  RawR5α1
-    let a2  = -RawR5α2
-    let b1  =  RawR5β1
-    let b2  =  RawR5βs2
-    let c1  = calc.floor( RawR5c1 )
-    let c2  = calc.floor( RawR5c2 )
-    let w1  = calc.floor( RawR5w1 )
-    let w2  = calc.floor( RawR5w2 )
+    let c1  = calc.round( RawR1c1 )
+    let c2  = calc.round( RawR1c2 )
+    let w1  = calc.round( RawR1w1 )
+    let w2  = calc.round( RawR1w2 )
     
     // Оси
     line((c2u+u2, 0), (c1u, 0), mark:(end: "stealth"), name: "axisu")
@@ -1195,26 +1036,326 @@ $ <hermite>
     content("W1.70%", angle:  b1 * 1deg, box(fill:white, inset:3pt, $W_1 = w1 $))
     content("C2.70%", angle: -a2 * 1deg, box(fill:white, inset:3pt, $C_2 = c2 $))
     content("W2.70%", angle: -b2 * 1deg, box(fill:white, inset:3pt, $W_2 = w2 $))
-    content("U_1.mid", box(fill:white, inset:3pt, $U_1 = #calc.floor(u1) $))
-    content("U_2.mid", box(fill:white, inset:3pt, $U_2 = #calc.floor(u2) $))
+    content("U_1", box(fill:white, inset:3pt, $U_1 = #calc.round(u1) $))
+    content("U_2", box(fill:white, inset:3pt, $U_2 = #calc.round(u2) $))
 
     // Осевые скорости
     line(name:"z1", (0,c1z),(c1u + u1,c1z), stroke: (dash: "dashed"))
     line(name:"z2", (0,c2z),(c2u     ,c2z), stroke: (dash: "dashed"))
-    content("z1", box(fill:white, inset:3pt, $C_z_1 = #calc.floor(-c1z) $), anchor: "south")
-    content("z2.0", angle:-90deg, box(inset:3pt, $C_z_2 = #calc.floor(-c2z) $), anchor: "south-east")
+    content("z1", box(fill:white, inset:3pt, $C_z_1 = #calc.round(-c1z) $), anchor: "south")
+    content("z2.0", angle:-90deg, box(inset:3pt, $C_z_2 = #calc.round(-c2z) $), anchor: "south-east")
 
     // Дуги
     arc(name:"a2", (0,0), start:0deg, delta: -a2*1deg, radius:c2/2.3, anchor:"origin", mark:(symbol:"stealth"))
     arc(name:"b2", (0,0), start:0deg, delta: -b2*1deg, radius:w2/2, anchor:"origin", mark:(symbol:"stealth"))
     arc(name:"a1", (0,0), start:-180deg, delta: a1*1deg, radius:c1/2, anchor:"origin", mark:(symbol:"stealth"))
-    arc(name:"b1", (0,0), start:-180deg, delta:180deg- b1*1deg, radius:w1/3, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"b1", (0,0), start:180deg, delta: b1*1deg, radius:w1/2, anchor:"origin", mark:(symbol:"stealth"))
 
     // Подписи дуг
-    content("a1.50%", angle: a1/2*1deg, box(fill:white, inset:3pt, $alpha_1 = #calc.floor(a1) degree$) )
-    content("b1.33%", angle: b1/3*1deg, box(fill:white, inset:3pt, $beta_1 = #calc.floor(b1) degree$) )
-    content("a2.33%", angle: -a2/3*1deg, box(fill:white, inset:3pt, $alpha_2^* = #calc.floor(a2) degree$) )
-    content("b2.50%", angle: -b2/2*1deg, box(fill:white, inset:3pt, $beta_2^* = #calc.floor(b2) degree$) )
+    content("a1.50%", angle: a1/2*1deg, box(fill:white, inset:3pt, $alpha_1 = #calc.round(a1) degree$) )
+    content("b1.33%", angle: b1/3*1deg, box(fill:white, inset:3pt, $beta_1 = #calc.round(b1) degree$) )
+    content("a2.33%", angle: -a2/3*1deg, box(fill:white, inset:3pt, $alpha_2^* = #calc.round(a2) degree$) )
+    content("b2.50%", angle: -b2/2*1deg, box(fill:white, inset:3pt, $beta_2^* = #calc.round(b2) degree$) )
+  })),
+  caption: [Треугольник скоростей на корневом сечении рабочей лопатки последней ступени турбины]
+) <Tri-1>
+
+#figure(
+  text(size: 10pt, cetz.canvas(length:0.016cm, {
+    import cetz.draw: *
+    set-style(
+      mark: (transform-shape: false, fill: black),
+      stroke: (cap: "round")
+    )
+    // Variables
+    let c1z = -RawR2c1z
+    let c2z = -RawR2c2z
+    let c1u = -RawR2c1u
+    let c2u = -RawR2c2u
+    let u1  =  RawR2u1
+    let u2  =  RawR2u2
+    let a1  =  RawR2α1
+    let a2  =  RawR2αs2
+    let b1  =  RawR2β1
+    let b2  =  RawR2βs2
+    let c1  = calc.round( RawR2c1 )
+    let c2  = calc.round( RawR2c2 )
+    let w1  = calc.round( RawR2w1 )
+    let w2  = calc.round( RawR2w2 )
+    
+    // Оси
+    line((c2u+u2, 0), (c1u, 0), mark:(end: "stealth"), name: "axisu")
+    content("axisu.end", $U$, padding: 20, anchor: "north-west" )
+    line((0,0),(0,c2z - 30), mark:(end: "stealth"), name: "axisz")
+    content("axisz.end", $z$, padding: 5, anchor: "south-west" )
+
+    // Треугольник 1
+    line(name:"C1", (0,0),(c1u  ,c1z), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
+    line(name:"W1", (0,0),(c1u + u1, c1z), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
+    line(name:"U1", "W1.end","C1.end", mark:(end: "stealth", fill:red),stroke:(paint:red, thickness: 2pt))
+
+    // Треугольник 2
+    line(name:"C2", (0,0),(c2u, c2z), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
+    line(name:"W2", (0,0),(c2u + u2, c2z), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
+    line(name:"U2","W2.end","C2.end", mark:(end: "stealth", fill:blue),stroke:(paint:blue, thickness: 2pt))
+
+    // линии для U1 и U2
+    line(name:"U1s","U1.start", (rel:(0,-30)))
+    line(name:"U1e","U1.end",   (rel:(0,-30)))
+    line(name:"U_1", "U1s.80%", "U1e.80%", mark:(symbol: "stealth"))
+    line(name:"U2s","U2.start", (rel:(0,-30)))
+    line(name:"U2e","U2.end",   (rel:(0,-30)))
+    line(name:"U_2", "U2s.80%", "U2e.80%", mark:(symbol: "stealth"))
+
+    // Подписи скоростей
+    content("C1.70%", angle:  a1 * 1deg, box(fill:white, inset:3pt, $C_1 = c1$))
+    content("W1.70%", angle:  b1 * 1deg, box(fill:white, inset:3pt, $W_1 = w1$))
+    content("C2.70%", angle: -a2 * 1deg, box(fill:white, inset:3pt, $C_2 = c2$))
+    content("W2.70%", angle: -b2 * 1deg, box(fill:white, inset:3pt, $W_2 = w2$))
+    content("U_1", box(fill:white, inset:3pt, $U_1 = #calc.round(u1)$))
+    content("U_2", box(fill:white, inset:3pt, $U_2 = #calc.round(u2)$))
+
+    // Осевые скорости
+    line(name:"z1", (0,c1z),(c1u + u1,c1z), stroke: (dash: "dashed"))
+    line(name:"z2", (0,c2z),(c2u     ,c2z), stroke: (dash: "dashed"))
+    content("z1", box(inset:3pt, $C_z_1 = #calc.round(-c1z)$), anchor: "south")
+    content("z2.0", angle:-90deg, box(inset:2pt, $C_z_2 = #calc.round(-c2z)$), anchor: "south-east")
+
+    // Дуги
+    arc(name:"a2", (0,0), start:0deg, delta: -a2*1deg, radius:c2/2.3, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"b2", (0,0), start:0deg, delta: -b2*1deg, radius:w2/2, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"a1", (0,0), start:-180deg, delta: a1*1deg, radius:c1/2, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"b1", (0,0), start:180deg, delta: b1*1deg, radius:w1/2, anchor:"origin", mark:(symbol:"stealth"))
+
+    // Подписи дуг
+    content("a1.50%", angle: a1/2*1deg, box(fill:white, inset:3pt, $alpha_1 = #calc.round(a1) degree$) )
+    content("b1.65%", angle: b1*0.65*1deg, box(fill:white, inset:3pt, $beta_1 = #calc.round(b1) degree$) )
+    content("a2.65%", angle: -a2*0.65*1deg, box(fill:white, inset:3pt, $alpha_2^* = #calc.round(a2) degree$) )
+    content("b2.50%", angle: -b2/2*1deg, box(fill:white, inset:3pt, $beta_2^* = #calc.round(b2) degree$) )
+  })),
+  caption: [Треугольник скоростей на средне-корневом сечении рабочей лопатки последней ступени турбины]
+) <Tri-2>
+
+#figure(
+  text(size: 10pt, cetz.canvas(length:0.017cm, {
+    import cetz.draw: *
+    set-style(
+      mark: (transform-shape: false, fill: black),
+      stroke: (cap: "round")
+    )
+    // Variables
+    let c1z = -RawR3c1z
+    let c2z = -RawR3c2z
+    let c1u = -RawR3c1u
+    let c2u = -RawR3c2u
+    let u1  =  RawR3u1
+    let u2  =  RawR3u2
+    let a1  =  RawR3α1
+    let a2  =  RawR3αs2
+    let b1  =  RawR3β1
+    let b2  =  RawR3βs2
+    let c1  = calc.round( RawR2c1 )
+    let c2  = calc.round( RawR2c2 )
+    let w1  = calc.round( RawR2w1 )
+    let w2  = calc.round( RawR2w2 )
+    
+    // Оси
+    line((c2u+u2, 0), (c1u, 0), mark:(end: "stealth"), name: "axisu")
+    content("axisu.end", $U$, padding: 20, anchor: "north-west" )
+    line((0,0),(0,c2z - 30), mark:(end: "stealth"), name: "axisz")
+    content("axisz.end", $z$, padding: 5, anchor: "south-west" )
+
+    // Треугольник 1
+    line(name:"C1", (0,0),(c1u  ,c1z), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
+    line(name:"W1", (0,0),(c1u + u1, c1z), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
+    line(name:"U1", "W1.end","C1.end", mark:(end: "stealth", fill:red),stroke:(paint:red, thickness: 2pt))
+
+    // Треугольник 2
+    line(name:"C2", (0,0),(c2u, c2z), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
+    line(name:"W2", (0,0),(c2u + u2, c2z), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
+    line(name:"U2","W2.end","C2.end", mark:(end: "stealth", fill:blue),stroke:(paint:blue, thickness: 2pt))
+
+    // линии для U1 и U2
+    line(name:"U1s","U1.start", (rel:(0,-30)))
+    line(name:"U1e","U1.end",   (rel:(0,-30)))
+    line(name:"U_1", "U1s.80%", "U1e.80%", mark:(symbol: "stealth"))
+    line(name:"U2s","U2.start", (rel:(0,-30)))
+    line(name:"U2e","U2.end",   (rel:(0,-30)))
+    line(name:"U_2", "U2s.80%", "U2e.80%", mark:(symbol: "stealth"))
+
+    // Подписи скоростей
+    content("C1.70%", angle:  a1 * 1deg, box(fill:white, inset:3pt, $C_1 = c1$))
+    content("W1.65%", angle:  b1 * 1deg, box(fill:white, inset:3pt, $W_1 = w1$))
+    content("C2.65%", angle: -a2 * 1deg, box(fill:white, inset:3pt, $C_2 = c2$))
+    content("W2.70%", angle: -b2 * 1deg, box(fill:white, inset:3pt, $W_2 = w2$))
+    content("U_1", box(fill:white, inset:3pt, $U_1 = #calc.round(u1)$))
+    content("U_2", box(fill:white, inset:3pt, $U_2 = #calc.round(u2)$))
+
+    // Осевые скорости
+    line(name:"z1", (0,c1z),(c1u + u1,c1z), stroke: (dash: "dashed"))
+    // line(name:"z2", (0,c2z),(c2u     ,c2z), stroke: (dash: "dashed"))
+    content("z1.end", box(inset:3pt, $C_z_1 = #calc.round(-c1z)$), anchor: "south-east")
+    content("U2.end", box(inset:5pt, $C_z_2 = #calc.round(-c2z)$), anchor: "south-west")
+
+    // Дуги
+    arc(name:"a2", (0,0), start:0deg, delta: -a2*1deg, radius:c2/2.8, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"b2", (0,0), start:0deg, delta: -b2*1deg, radius:w2/2, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"a1", (0,0), start:-180deg, delta: a1*1deg, radius:c1/2, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"b1", (0,0), start:180deg, delta: b1*1deg, radius:w1/3.4, anchor:"origin", mark:(symbol:"stealth"))
+
+    // Подписи дуг
+    content("a1.50%", angle: a1/2*1deg, box(fill:white, inset:3pt, $alpha_1 = #calc.round(a1) degree$) )
+    content("b1.65%", angle: b1*0.6*1deg, box(fill:white, inset:3pt, $beta_1 = #calc.round(b1) degree$) )
+    content("a2.65%", angle: -a2*0.65*1deg, box(fill:white, inset:3pt, $alpha_2^* = #calc.round(a2) degree$) )
+    content("b2.50%", angle: -b2/2*1deg, box(fill:white, inset:3pt, $beta_2^* = #calc.round(b2) degree$) )
+  })),
+  caption: [Треугольник скоростей на среднем сечении рабочей лопатки последней ступени турбины]
+) <Tri-3>
+
+#figure(
+  text(size: 10pt, cetz.canvas(length:0.02cm, {
+    import cetz.draw: *
+    set-style(
+      mark: (transform-shape: false, fill: black),
+      stroke: (cap: "round")
+    )
+    // Variables
+    let c1z = -RawR4c1z
+    let c2z = -RawR4c2z
+    let c1u = -RawR4c1u
+    let c2u = -RawR4c2u
+    let u1  =  RawR4u1
+    let u2  =  RawR4u2
+    let a1  =  RawR4α1
+    let a2  =  RawR4αs2
+    let b1  =  RawR4β1
+    let b2  =  RawR4βs2
+    let c1  = calc.round( RawR4c1 )
+    let c2  = calc.round( RawR4c2 )
+    let w1  = calc.round( RawR4w1 )
+    let w2  = calc.round( RawR4w2 )
+    
+    // Оси
+    line((c2u+u2, 0), (c1u, 0), mark:(end: "stealth"), name: "axisu")
+    content("axisu.end", $U$, padding: 20, anchor: "north-west" )
+    line((0,0),(0,c2z - 50), mark:(end: "stealth"), name: "axisz")
+    content("axisz.end", $z$, padding: 5, anchor: "south-west" )
+
+    // Треугольник 1
+    line(name:"C1", (0,0),(c1u  ,c1z), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
+    line(name:"W1", (0,0),(c1u + u1, c1z), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
+    line(name:"U1", "W1.end","C1.end", mark:(end: "stealth", fill:red),stroke:(paint:red, thickness: 2pt))
+
+    // Треугольник 2
+    line(name:"C2", (0,0),(c2u, c2z), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
+    line(name:"W2", (0,0),(c2u + u2, c2z), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
+    line(name:"U2","W2.end","C2.end", mark:(end: "stealth", fill:blue),stroke:(paint:blue, thickness: 2pt))
+
+    // линии для U1 и U2
+    line(name:"U1s","U1.start", (rel:(0,-30)))
+    line(name:"U1e","U1.end",   (rel:(0,-30)))
+    line(name:"U_1", "U1s.80%", "U1e.80%", mark:(symbol: "stealth"))
+    line(name:"U2s","U2.start", (rel:(0,-30)))
+    line(name:"U2e","U2.end",   (rel:(0,-30)))
+    line(name:"U_2", "U2s.80%", "U2e.80%", mark:(symbol: "stealth"))
+
+    // Дуги
+    arc(name:"a2", (0,0), start:0deg, delta: -a2*1deg, radius:c2/2.1, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"b2", (0,0), start:0deg, delta: -b2*1deg, radius:w2/2, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"a1", (0,0), start:-180deg, delta: a1*1deg, radius:c1/2, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"b1", (0,0), start:-180deg, delta: b1*1deg, radius:w1/2.8, anchor:"origin", mark:(symbol:"stealth"))
+
+    // Подписи скоростей
+    content("C1.70%", angle:  a1 * 1deg, box(fill:white, inset:3pt, $C_1 = c1 $))
+    content("W1.64%", angle: 180deg + b1 * 1deg, move(box(fill:white, inset:3pt, $W_1 = w1 $),dy:-2pt))
+    content("C2.70%", angle: 180deg - a2 * 1deg, box(fill:white, inset:3pt, $C_2 = c2 $))
+    content("W2.70%", angle: -b2 * 1deg, box(fill:white, inset:3pt, $W_2 = w2 $))
+    content("U_1", box(fill:white, inset:3pt, $U_1 = #calc.round(u1) $))
+    content("U_2", box(fill:white, inset:3pt, $U_2 = #calc.round(u2) $))
+
+    // Осевые скорости
+    content("U1.0", box(inset:3pt, $C_z_1 = #calc.round(-c1z) $), anchor: "west")
+    content("U2.end", box(inset:3pt, $C_z_2 = #calc.round(-c2z) $), anchor: "east")
+
+    // Подписи дуг
+    content("a1.50%", angle: a1/2*1deg, box(fill:white, inset:3pt, $alpha_1 = #calc.round(a1) degree$) )
+    content("b1.50%", angle: b1/2*1deg, move(box(fill:white, inset:3pt, $beta_1 = #calc.round(b1) degree $), dx:-3pt) )
+    content("a2.50%", angle: -a2/2*1deg, box(fill:white, inset:3pt, $alpha_2^* = #calc.round(a2) degree$) )
+    content("b2.50%", angle: -b2/2*1deg, box(fill:white, inset:3pt, $beta_2^* = #calc.round(b2) degree$) )    
+  })),
+  caption: [Треугольник скоростей на периферийном сечении рабочей лопатки последней ступени турбины]
+) <Tri-4>
+
+#figure(
+  text(size: 10pt, cetz.canvas(length:0.022cm, {
+    import cetz.draw: *
+    set-style(
+      mark: (transform-shape: false, fill: black),
+      stroke: (cap: "round")
+    )
+    // Variables
+    let c1z = -RawR5c1z
+    let c2z = -RawR5c2z
+    let c1u = -RawR5c1u
+    let c2u = -RawR5c2u
+    let u1  =  RawR5u1
+    let u2  =  RawR5u2
+    let a1  =  RawR5α1
+    let a2  =  RawR5αs2
+    let b1  =  RawR5β1
+    let b2  =  RawR5βs2
+    let c1  = calc.round( RawR5c1 )
+    let c2  = calc.round( RawR5c2 )
+    let w1  = calc.round( RawR5w1 )
+    let w2  = calc.round( RawR5w2 )
+    
+    // Оси
+    line((c2u+u2, 0), (c1u, 0), mark:(end: "stealth"), name: "axisu")
+    content("axisu.end", $U$, padding: 20, anchor: "north-west" )
+    line((0,0),(0,c2z - 50), mark:(end: "stealth"), name: "axisz")
+    content("axisz.end", $z$, padding: 5, anchor: "south-west" )
+
+    // Треугольник 1
+    line(name:"C1", (0,0),(c1u  ,c1z), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
+    line(name:"W1", (0,0),(c1u + u1, c1z), mark:(end:"stealth", fill:red), stroke:(paint:red, thickness: 2pt))
+    line(name:"U1", "W1.end","C1.end", mark:(end: "stealth", fill:red),stroke:(paint:red, thickness: 2pt))
+
+    // Треугольник 2
+    line(name:"C2", (0,0),(c2u, c2z), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
+    line(name:"W2", (0,0),(c2u + u2, c2z), mark:(end:"stealth", fill:blue), stroke:(paint:blue, thickness: 2pt))
+    line(name:"U2","W2.end","C2.end", mark:(end: "stealth", fill:blue),stroke:(paint:blue, thickness: 2pt))
+
+    // линии для U1 и U2
+    line(name:"U1s","U1.start", (rel:(0,-30)))
+    line(name:"U1e","U1.end",   (rel:(0,-30)))
+    line(name:"U_1", "U1s.80%", "U1e.80%", mark:(symbol: "stealth"))
+    line(name:"U2s","U2.start", (rel:(0,-30)))
+    line(name:"U2e","U2.end",   (rel:(0,-30)))
+    line(name:"U_2", "U2s.80%", "U2e.80%", mark:(symbol: "stealth"))
+
+    // Дуги
+    arc(name:"a2", (0,0), start:0deg, delta: -a2*1deg, radius:c2/2.1, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"b2", (0,0), start:0deg, delta: -b2*1deg, radius:w2/2, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"a1", (0,0), start:-180deg, delta: a1*1deg, radius:c1/2, anchor:"origin", mark:(symbol:"stealth"))
+    arc(name:"b1", (0,0), start:-180deg, delta: b1*1deg, radius:w1/2.6, anchor:"origin", mark:(symbol:"stealth"))
+
+    // Подписи скоростей
+    content("C1.70%", angle:  a1 * 1deg, box(fill:white, inset:3pt, $C_1 = c1 $))
+    content("W1.65%", angle: 180deg + b1 * 1deg, box(fill:white, inset:3pt, $W_1 = w1 $))
+    content("C2.70%", angle: 180deg - a2 * 1deg, box(fill:white, inset:3pt, $C_2 = c2 $))
+    content("W2.70%", angle: -b2 * 1deg, box(fill:white, inset:3pt, $W_2 = w2 $))
+    content("U_1.80%", box(fill:white, inset:3pt, $U_1 = #calc.round(u1) $))
+    content("U_2.mid", box(fill:white, inset:3pt, $U_2 = #calc.round(u2) $))
+
+    // Осевые скорости
+    content("U1.0", box(inset:3pt, $C_z_1 = #calc.round(-c1z) $), anchor: "west")
+    content("U2.end", box(inset:3pt, $C_z_2 = #calc.round(-c2z) $), anchor: "east")
+    
+    // Подписи дуг
+    content("a1.50%", angle: a1/2*1deg, box(fill:white, inset:3pt, $alpha_1 = #calc.round(a1) degree$) )
+    content("b1.30%", angle: b1*0.3*1deg, move(box(fill:white, inset:3pt, $beta_1 = #calc.round(b1) degree $), dx:-1pt ) )
+    content("a2.14%", angle: -a2*0.14*1deg, box(fill:white, inset:3pt, $alpha_2^* = #calc.round(a2) degree$) )
+    content("b2.50%", angle: -b2/2*1deg, box(fill:white, inset:3pt, $beta_2^* = #calc.round(b2) degree$) )    
   })),
   caption: [Треугольник скоростей на периферийном сечении рабочей лопатки последней ступени турбины]
 ) <Tri-5>
