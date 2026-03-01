@@ -1061,6 +1061,11 @@ $ <hermite>
 ) <Tri-1>
 
 #figure(
+  image("assets/profiles/2/profile_combined1.svg"),
+  caption: [Профиль РЛ в корневом сечении и демонстрация его конфузорности]
+)
+
+#figure(
   text(size: 10pt, cetz.canvas(length:0.016cm, {
     import cetz.draw: *
     set-style(
@@ -1135,6 +1140,11 @@ $ <hermite>
   })),
   caption: [Треугольник скоростей на средне-корневом сечении рабочей лопатки последней ступени турбины]
 ) <Tri-2>
+
+#figure(
+  image("assets/profiles/2/profile_combined2.svg"),
+  caption: [Профиль РЛ в средне-корневом сечении и демонстрация его конфузорности]
+)
 
 #figure(
   text(size: 10pt, cetz.canvas(length:0.017cm, {
@@ -1213,6 +1223,11 @@ $ <hermite>
 ) <Tri-3>
 
 #figure(
+  image("assets/profiles/2/profile_combined3.svg"),
+  caption: [Профиль РЛ в среднем сечении и демонстрация его конфузорности]
+)
+
+#figure(
   text(size: 10pt, cetz.canvas(length:0.02cm, {
     import cetz.draw: *
     set-style(
@@ -1285,6 +1300,11 @@ $ <hermite>
   })),
   caption: [Треугольник скоростей на периферийном сечении рабочей лопатки последней ступени турбины]
 ) <Tri-4>
+
+#figure(
+  image("assets/profiles/2/profile_combined4.svg"),
+  caption: [Профиль РЛ в средне-периферийном сечении и демонстрация его конфузорности]
+)
 
 #figure(
   text(size: 10pt, cetz.canvas(length:0.022cm, {
@@ -1360,88 +1380,37 @@ $ <hermite>
   caption: [Треугольник скоростей на периферийном сечении рабочей лопатки последней ступени турбины]
 ) <Tri-5>
 
-// #figure(
-//   image("assets/profiles/2/profile2.svg", width: 80%),
-//   caption: [Профиль РЛ в средне-корневом сечении]
-// )
-// #figure(
-//   image("assets/profiles/2/shift2.svg", width: 80%),
-//   caption: [Проверка конфузорности РЛ в средне-корневом сечении]
-// )
+#figure(
+  image("assets/profiles/2/profile_combined5.svg"),
+  caption: [Профиль РЛ в периферийном сечении и демонстрация его конфузорности]
+)
 
-// #figure(
-//   image("assets/profiles/2/profile3.svg", width: 80%),
-//   caption: [Профиль РЛ в среднем сечении]
-// )
-// #figure(
-//   image("assets/profiles/2/shift3.svg", width: 80%),
-//   caption: [Проверка конфузорности РЛ в среднем сечении]
-// )
+Профили сопловых лопаток
 
-// #figure(
-//   image("assets/profiles/2/profile4.svg", width: 80%),
-//   caption: [Профиль РЛ в средне-периферийном сечении]
-// )
-// #figure(
-//   image("assets/profiles/2/shift4.svg", width: 80%),
-//   caption: [Проверка конфузорности РЛ в средне-периферийном сечении]
-// )
+#figure(
+  image("assets/profiles/1/profile_combined1.svg", width: 80%),
+  caption: [Профиль СЛ в корневом сечении]
+)
 
-// #figure(
-//   image("assets/profiles/2/profile5.svg", width: 80%),
-//   caption: [Профиль РЛ в периферийном сечении]
-// )
-// #figure(
-//   image("assets/profiles/2/shift5.svg", width: 80%),
-//   caption: [Проверка конфузорности РЛ в периферийном сечении]
-// )
+#figure(
+  image("assets/profiles/1/profile_combined2.svg", width: 80%),
+  caption: [Профиль СЛ в средне-корневом сечении]
+)
 
-// Профили сопловых лопаток
+#figure(
+  image("assets/profiles/1/profile_combined3.svg", width: 80%),
+  caption: [Профиль СЛ в среднем сечении]
+)
 
-// #figure(
-//   image("assets/profiles/1/profile1.svg", width: 80%),
-//   caption: [Профиль СЛ в корневом сечении]
-// )
-// #figure(
-//   image("assets/profiles/1/shift1.svg", width: 80%),
-//   caption: [Проверка конфузорности СЛ в корневом сечении]
-// )
+#figure(
+  image("assets/profiles/1/profile_combined4.svg", width: 80%),
+  caption: [Профиль СЛ в средне-периферийном сечении]
+)
 
-// #figure(
-//   image("assets/profiles/1/profile2.svg", width: 80%),
-//   caption: [Профиль СЛ в средне-корневом сечении]
-// )
-// #figure(
-//   image("assets/profiles/1/shift2.svg", width: 80%),
-//   caption: [Проверка конфузорности СЛ в средне-корневом сечении]
-// )
-
-// #figure(
-//   image("assets/profiles/1/profile3.svg", width: 80%),
-//   caption: [Профиль СЛ в среднем сечении]
-// )
-// #figure(
-//   image("assets/profiles/1/shift3.svg", width: 80%),
-//   caption: [Проверка конфузорности СЛ в среднем сечении]
-// )
-
-// #figure(
-//   image("assets/profiles/1/profile4.svg", width: 80%),
-//   caption: [Профиль СЛ в средне-периферийном сечении]
-// )
-// #figure(
-//   image("assets/profiles/1/shift4.svg", width: 80%),
-//   caption: [Проверка конфузорности СЛ в корневом сечении]
-// )
-
-// #figure(
-//   image("assets/profiles/1/profile5.svg", width: 80%),
-//   caption: [Профиль СЛ в периферийном сечении]
-// )
-// #figure(
-//   image("assets/profiles/1/shift5.svg", width: 80%),
-//   caption: [Проверка конфузорности СЛ в корневом сечении]
-// )
+#figure(
+  image("assets/profiles/1/profile_combined5.svg", width: 80%),
+  caption: [Профиль СЛ в периферийном сечении]
+)
 
 // На рисунках @profile-cent-1[] и @profile-cent-2[] изображены соответственно центрированные комбинированные изображения профилей сопловой и рабочей лопаток.
 
