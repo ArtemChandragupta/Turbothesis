@@ -506,7 +506,7 @@ begin
 		Hᵤ   = (c₁^2 - c₂^2)/2 + (w₂^2 - w₁^2)/2 + (u₁^2 - u₂^2)/2
 		ρK   = № == 1 ? ɤ.ρK : Hₚ / Hᵤ
 
-		(; r, b, γ, c₁, α₁, c₁u, c₁z, c₁r, u₁, u₂, β₁, w₁, w₁u, w₂u, c₂u, c₂z, c₂, c₂r, α⃰₂, β⃰₂, w₂, T₁, p₁, ρ₁, T⃰w₁, T₂, p₂, ρ₂, πρc₁, πρc₂, ρT, Hₚ, Hᵤ, ρK)
+		(; r₁, r, b, γ, c₁, α₁, c₁u, c₁z, c₁r, u₁, u₂, β₁, w₁, w₁u, w₂u, c₂u, c₂z, c₂, c₂r, α⃰₂, β⃰₂, w₂, T₁, p₁, ρ₁, T⃰w₁, T₂, p₂, ρ₂, πρc₁, πρc₂, ρT, Hₚ, Hᵤ, ρK)
 	end
 	md"λ Расчет обратной закрутки"
 end
@@ -1182,6 +1182,12 @@ begin
 	md"### ∮ Построение профилей рабочих и сопловых лопаток"
 end
 
+# ╔═╡ db8f33e5-7c40-406e-ae8f-5f0e2b025653
+Pr3.Z
+
+# ╔═╡ b50559b2-3128-4711-b8de-fd5bfa5409d2
+Prs3.Z
+
 # ╔═╡ f3210104-8de0-4394-997c-8cc2858c800a
 begin
 	function profile_show(Pr)
@@ -1378,7 +1384,7 @@ begin
 
 		with_theme(theme_latexfonts()) do
 			fig = Figure(
-				figure_padding = 0
+				figure_padding = 1
 			)
     		ax = Axis(fig[1, 1], aspect = DataAspect())
 			hidespines!(ax); hidedecorations!(ax)
@@ -1525,7 +1531,7 @@ begin
 end
 
 # ╔═╡ a79a9761-eb35-4000-9e86-a6d109feed8d
-profile_combined(Pr1)
+profile_combined(Prs5)
 
 # ╔═╡ f2c9597e-84c3-4e0a-8fc0-73131b7254ce
 begin
@@ -3483,8 +3489,8 @@ version = "4.1.0+0"
 # ╟─ec47fa62-62ea-4bf8-a57f-9e6b10b5fa0b
 # ╟─65781f50-667a-44c0-beb2-466dfb293d36
 # ╟─77bbea27-c0fa-4320-ab84-ff91730410e3
-# ╟─7290e07c-eedc-429f-a2fa-7130dae8da37
-# ╟─c2b940ae-7013-4184-916f-cc2c6c3bb718
+# ╠═7290e07c-eedc-429f-a2fa-7130dae8da37
+# ╠═c2b940ae-7013-4184-916f-cc2c6c3bb718
 # ╟─23866f8f-bdff-45be-afcd-91d3c87a200e
 # ╟─3e5014a8-e39f-4d3c-bb2f-122dea8482bb
 # ╟─e24903de-8706-4d29-aaf0-2005799675e1
@@ -3498,8 +3504,10 @@ version = "4.1.0+0"
 # ╟─43b474fc-51fa-4aef-86fa-cba0eb59bcf9
 # ╟─9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
 # ╟─7c80bb36-5cef-4e21-bd84-53f347f6dfe0
-# ╟─20f45d03-754e-4d6a-b1ad-431745281c4e
-# ╟─a79a9761-eb35-4000-9e86-a6d109feed8d
+# ╠═20f45d03-754e-4d6a-b1ad-431745281c4e
+# ╟─db8f33e5-7c40-406e-ae8f-5f0e2b025653
+# ╟─b50559b2-3128-4711-b8de-fd5bfa5409d2
+# ╠═a79a9761-eb35-4000-9e86-a6d109feed8d
 # ╟─d98408fe-9751-4f1d-8131-8e4ff6e5eb51
 # ╟─e12ca256-c439-4eac-83f0-e7ccff7c749b
 # ╟─0fb5895e-2d20-4716-86ba-3ee7a3c55433
@@ -3520,7 +3528,7 @@ version = "4.1.0+0"
 # ╟─c4fabc38-a030-4e61-96d5-4d4ecdf0c5e2
 # ╟─f3210104-8de0-4394-997c-8cc2858c800a
 # ╟─8fe1c00d-4ebb-420d-8349-165b663f0d6a
-# ╠═fcc47753-9b48-4bf2-8b0e-02b8f8417fe7
+# ╟─fcc47753-9b48-4bf2-8b0e-02b8f8417fe7
 # ╟─f2c9597e-84c3-4e0a-8fc0-73131b7254ce
 # ╟─e3eb9ae9-4a31-4ce2-9ca7-607abd52e8f6
 # ╟─c83ce798-1dfb-4ce1-84fe-1b2f2798e8ec
