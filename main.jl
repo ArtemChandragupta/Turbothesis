@@ -1296,6 +1296,76 @@ begin
 	md"👁 Отображение одного профиля"
 end
 
+# ╔═╡ 8fe1c00d-4ebb-420d-8349-165b663f0d6a
+begin
+	function profile_shift(Pr)
+
+		Δ = Pr.type == 2 ? Pr.Z.t : -Pr.Z.t
+
+		with_theme(theme_latexfonts()) do
+			fig = Figure(figure_padding = 0)
+    		ax = Axis(fig[1, 1], aspect = DataAspect())
+			hidespines!(ax); hidedecorations!(ax)
+
+			# Расстояния между профилями
+			ds = Pr.type == 2 ? distance(Pr.xt, Pr.yt, Pr.xb, Pr.yb, Δ) : distance(Pr.xb, Pr.yb, Pr.xt, Pr.yt, Δ)
+
+			distances = [1000d.dᵢ for d in ds]
+
+			min_dist, max_dist = extrema(distances)
+    		norm_distances = (distances .- min_dist) ./ (max_dist - min_dist)
+
+			colors = [cgrad(:viridis, [0, 1])[d] for d in norm_distances]
+
+			if Pr.type == 2
+				for i in 1:length(Pr.xt)
+					lines!(ax, color = colors[i], linewidth=4,
+						   [Pr.xt[i], Pr.xb[ds[i].j]    ],
+						   [Pr.yt[i], Pr.yb[ds[i].j] + Δ]
+					  	)
+				end
+			elseif Pr.type == 1
+				for i in 1:length(Pr.xt)
+					lines!(ax, color = colors[i], linewidth=4,
+						   [Pr.xb[i], Pr.xt[ds[i].j]    ],
+						   [Pr.yb[i], Pr.yt[ds[i].j] + Δ]
+					  	)
+				end
+			end
+
+			# Дуги скругления
+			arc!(ax, color = :black, linewidth = 2, (0   , 0   ),
+				 Pr.R₁, deg2rad(90 + Pr.ϕ₁ᵗ), deg2rad(360 - 90 + Pr.ϕ₁ᵇ)
+				)
+			arc!(ax, color = :black, linewidth = 2, (Pr.l, Pr.ξ),
+				 Pr.R₂, deg2rad(90 + Pr.ϕ₂ᵗ), deg2rad(     -90 + Pr.ϕ₂ᵇ)
+				)
+
+		    # Профиль лопатки
+    		lines!(ax, Pr.xt, Pr.yt, color = :black, linewidth = 2)
+	    	lines!(ax, Pr.xb, Pr.yb, color = :black, linewidth = 2)
+
+			# Дуги скругления
+			arc!(ax, (0   ,        Δ), Pr.R₁, deg2rad(90 + Pr.ϕ₁ᵗ), deg2rad(360 - 90 + Pr.ϕ₁ᵇ), color = :black, linewidth = 2)
+			arc!(ax, (Pr.l, Pr.ξ + Δ), Pr.R₂, deg2rad(90 + Pr.ϕ₂ᵗ), deg2rad(     -90 + Pr.ϕ₂ᵇ), color = :black, linewidth = 2)
+
+		    # Профиль лопатки
+    		lines!(ax, Pr.xt, Pr.yt .+ Δ, color = :black, linewidth = 2)
+    		lines!(ax, Pr.xb, Pr.yb .+ Δ, color = :black, linewidth = 2)
+
+			Colorbar(fig[1, 2], limits=(min_dist,max_dist), minorticksvisible=true,
+					 label = L"t, \ м м"
+					)
+
+			save("assets/profiles/$(Pr.type)/shift$(Pr.n).svg", fig)
+    
+	    	fig
+		end
+	end
+
+	md"👁 Отображение конфузорности"
+end
+
 # ╔═╡ fcc47753-9b48-4bf2-8b0e-02b8f8417fe7
 begin
 	function profile_combined(Pr)
@@ -1412,6 +1482,9 @@ begin
 
 			arc!(ax, (0   , 0   ), Pr.R₁, 0, 2π, color = :gray, linewidth = 1)
 			arc!(ax, (Pr.l, Pr.ξ), Pr.R₂, 0, 2π, color = :gray, linewidth = 1)
+
+			arc!(ax, (0   , 0+Δ   ), Pr.R₁, 0, 2π, color = :gray, linewidth = 1)
+			arc!(ax, (Pr.l, Pr.ξ+Δ), Pr.R₂, 0, 2π, color = :gray, linewidth = 1)
 
 			# Дуги скругления
 			arc!(ax, color = :black, linewidth = 2, (0   , 0   ),
@@ -1536,76 +1609,6 @@ begin
 	profiles_show(Prs1, Prs2, Prs3, Prs4, Prs5)
 
 	md"Запись всех профилей"
-end
-
-# ╔═╡ 8fe1c00d-4ebb-420d-8349-165b663f0d6a
-begin
-	function profile_shift(Pr)
-
-		Δ = Pr.type == 2 ? Pr.Z.t : -Pr.Z.t
-
-		with_theme(theme_latexfonts()) do
-			fig = Figure(figure_padding = 0)
-    		ax = Axis(fig[1, 1], aspect = DataAspect())
-			hidespines!(ax); hidedecorations!(ax)
-
-			# Расстояния между профилями
-			ds = Pr.type == 2 ? distance(Pr.xt, Pr.yt, Pr.xb, Pr.yb, Δ) : distance(Pr.xb, Pr.yb, Pr.xt, Pr.yt, Δ)
-
-			distances = [1000d.dᵢ for d in ds]
-
-			min_dist, max_dist = extrema(distances)
-    		norm_distances = (distances .- min_dist) ./ (max_dist - min_dist)
-
-			colors = [cgrad(:viridis, [0, 1])[d] for d in norm_distances]
-
-			if Pr.type == 2
-				for i in 1:length(Pr.xt)
-					lines!(ax, color = colors[i], linewidth=4,
-						   [Pr.xt[i], Pr.xb[ds[i].j]    ],
-						   [Pr.yt[i], Pr.yb[ds[i].j] + Δ]
-					  	)
-				end
-			elseif Pr.type == 1
-				for i in 1:length(Pr.xt)
-					lines!(ax, color = colors[i], linewidth=4,
-						   [Pr.xb[i], Pr.xt[ds[i].j]    ],
-						   [Pr.yb[i], Pr.yt[ds[i].j] + Δ]
-					  	)
-				end
-			end
-
-			# Дуги скругления
-			arc!(ax, color = :black, linewidth = 2, (0   , 0   ),
-				 Pr.R₁, deg2rad(90 + Pr.ϕ₁ᵗ), deg2rad(360 - 90 + Pr.ϕ₁ᵇ)
-				)
-			arc!(ax, color = :black, linewidth = 2, (Pr.l, Pr.ξ),
-				 Pr.R₂, deg2rad(90 + Pr.ϕ₂ᵗ), deg2rad(     -90 + Pr.ϕ₂ᵇ)
-				)
-
-		    # Профиль лопатки
-    		lines!(ax, Pr.xt, Pr.yt, color = :black, linewidth = 2)
-	    	lines!(ax, Pr.xb, Pr.yb, color = :black, linewidth = 2)
-
-			# Дуги скругления
-			arc!(ax, (0   ,        Δ), Pr.R₁, deg2rad(90 + Pr.ϕ₁ᵗ), deg2rad(360 - 90 + Pr.ϕ₁ᵇ), color = :black, linewidth = 2)
-			arc!(ax, (Pr.l, Pr.ξ + Δ), Pr.R₂, deg2rad(90 + Pr.ϕ₂ᵗ), deg2rad(     -90 + Pr.ϕ₂ᵇ), color = :black, linewidth = 2)
-
-		    # Профиль лопатки
-    		lines!(ax, Pr.xt, Pr.yt .+ Δ, color = :black, linewidth = 2)
-    		lines!(ax, Pr.xb, Pr.yb .+ Δ, color = :black, linewidth = 2)
-
-			Colorbar(fig[1, 2], limits=(min_dist,max_dist), minorticksvisible=true,
-					 label = L"t, \ м м"
-					)
-
-			save("assets/profiles/$(Pr.type)/shift$(Pr.n).svg", fig)
-    
-	    	fig
-		end
-	end
-
-	md"👁 Отображение конфузорности"
 end
 
 # ╔═╡ e3eb9ae9-4a31-4ce2-9ca7-607abd52e8f6
@@ -3497,7 +3500,7 @@ version = "4.1.0+0"
 # ╟─7c80bb36-5cef-4e21-bd84-53f347f6dfe0
 # ╟─20f45d03-754e-4d6a-b1ad-431745281c4e
 # ╟─a79a9761-eb35-4000-9e86-a6d109feed8d
-# ╠═d98408fe-9751-4f1d-8131-8e4ff6e5eb51
+# ╟─d98408fe-9751-4f1d-8131-8e4ff6e5eb51
 # ╟─e12ca256-c439-4eac-83f0-e7ccff7c749b
 # ╟─0fb5895e-2d20-4716-86ba-3ee7a3c55433
 # ╟─fdfad875-453c-4a56-ad68-2b56bdeb2a16
@@ -3517,7 +3520,7 @@ version = "4.1.0+0"
 # ╟─c4fabc38-a030-4e61-96d5-4d4ecdf0c5e2
 # ╟─f3210104-8de0-4394-997c-8cc2858c800a
 # ╟─8fe1c00d-4ebb-420d-8349-165b663f0d6a
-# ╟─fcc47753-9b48-4bf2-8b0e-02b8f8417fe7
+# ╠═fcc47753-9b48-4bf2-8b0e-02b8f8417fe7
 # ╟─f2c9597e-84c3-4e0a-8fc0-73131b7254ce
 # ╟─e3eb9ae9-4a31-4ce2-9ca7-607abd52e8f6
 # ╟─c83ce798-1dfb-4ce1-84fe-1b2f2798e8ec
