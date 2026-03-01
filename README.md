@@ -6,4 +6,4 @@
 
 Расчет обтекания и прочности проводился в [Ansys-2022](https://www.ansys.com/) с помощью модулей CFX и mechanical.
 
-![image](./assets/profiles/2/shift2.svg)
+![image](./assets/profiles/2/profile_combined2.svg)
