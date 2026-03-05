@@ -380,6 +380,53 @@ begin
 	md"λ Расчет по ступеням"
 end
 
+# ╔═╡ 23866f8f-bdff-45be-afcd-91d3c87a200e
+begin
+	function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
+	    T = @NamedTuple{F::Float64, ρK::Float64, σ::Float64, Δρ::Float64}
+	    tasks = []
+	    
+	    F_list = collect(F_range)
+	    
+	    for chunk_start in 1:6:length(F_list)  # 6 потоков
+	        chunk_end = min(chunk_start + 5, length(F_list))
+	        chunk = F_list[chunk_start:chunk_end]
+	        
+	        task = Threads.@spawn begin
+	            local_valid = T[]
+	            for F in chunk
+	                for ρK in ρK_range
+	                    Params = (; α₁, F, ρK, β⃰₂)
+	                    RR, a, b, c, ɤ = swirl_reverse(P[end], S[end], Params)
+	                    Δρ = sum(r.Δρ for r in RR)
+	                    p̄  = [r.p₂ for r in RR]
+	
+	                    if abs(Δρ) < 0.1 &&
+	                    all(p̄[i] < p̄[i+1] for i in 1:4) &&
+	                    all(RR[i].ρT < RR[i+1].ρT for i in 1:4) &&
+	                    all(RR[i].ρK < RR[i+1].ρK for i in 1:4)
+	                        
+	                        pₘ = (p̄[5] - p̄[1]) / 5
+	                        σ  = (abs(p̄[1]-pₘ) + abs(p̄[2]-pₘ) + abs(p̄[3]-pₘ) +
+								  abs(p̄[4]-pₘ) + abs(p̄[5]-pₘ)) / 5pₘ
+	                        
+	                        result = (; F, ρK, σ, Δρ)
+	                        push!(local_valid, result)
+	                    end
+	                end
+	            end
+	            local_valid
+	        end
+	        push!(tasks, task)
+	    end
+	    
+	    results = fetch.(tasks)
+	    return reduce(vcat, results)
+	end
+	
+	md"Λ Варьирование для закрутки потока"
+end
+
 # ╔═╡ 3e5014a8-e39f-4d3c-bb2f-122dea8482bb
 begin
 	function swirl_reverse(Params, mid, swirl_params)
@@ -614,53 +661,6 @@ begin
 	S, H = calc_stages(Gₒₚₜ, T, P)
 	
 	md"### ∮ Расчет по ступеням"
-end
-
-# ╔═╡ 23866f8f-bdff-45be-afcd-91d3c87a200e
-begin
-	function find_FρK_threaded(α₁, β⃰₂, F_range, ρK_range)
-	    T = @NamedTuple{F::Float64, ρK::Float64, σ::Float64, Δρ::Float64}
-	    tasks = []
-	    
-	    F_list = collect(F_range)
-	    
-	    for chunk_start in 1:6:length(F_list)  # 6 потоков
-	        chunk_end = min(chunk_start + 5, length(F_list))
-	        chunk = F_list[chunk_start:chunk_end]
-	        
-	        task = Threads.@spawn begin
-	            local_valid = T[]
-	            for F in chunk
-	                for ρK in ρK_range
-	                    Params = (; α₁, F, ρK, β⃰₂)
-	                    RR, a, b, c, ɤ = swirl_reverse(P[end], S[end], Params)
-	                    Δρ = sum(r.Δρ for r in RR)
-	                    p̄  = [r.p₂ for r in RR]
-	
-	                    if abs(Δρ) < 0.1 &&
-	                    all(p̄[i] < p̄[i+1] for i in 1:4) &&
-	                    all(RR[i].ρT < RR[i+1].ρT for i in 1:4) &&
-	                    all(RR[i].ρK < RR[i+1].ρK for i in 1:4)
-	                        
-	                        pₘ = (p̄[5] - p̄[1]) / 5
-	                        σ  = (abs(p̄[1]-pₘ) + abs(p̄[2]-pₘ) + abs(p̄[3]-pₘ) +
-								  abs(p̄[4]-pₘ) + abs(p̄[5]-pₘ)) / 5pₘ
-	                        
-	                        result = (; F, ρK, σ, Δρ)
-	                        push!(local_valid, result)
-	                    end
-	                end
-	            end
-	            local_valid
-	        end
-	        push!(tasks, task)
-	    end
-	    
-	    results = fetch.(tasks)
-	    return reduce(vcat, results)
-	end
-	
-	md"Λ Варьирование для закрутки потока"
 end
 
 # ╔═╡ 7e4039e8-ed6c-46eb-a079-9df82d4272d6
