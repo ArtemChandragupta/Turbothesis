@@ -938,8 +938,6 @@ begin
 					  )
 			scatterlines!(ax2, 1:length(R), [r.p₂ for r in R], label = "p₂")
 	
-			save("assets/plots/goodies.svg", fig)
-	
 			fig
 		end
 	end
@@ -3480,8 +3478,8 @@ version = "4.1.0+0"
 # ╟─56a5a75a-20ff-443e-992a-c8a5957b7a90
 # ╟─40561c16-193e-4349-bc16-a7d9ceb55f62
 # ╟─0648057a-709b-40bb-ba4c-6de37981fc82
-# ╟─ec47fa62-62ea-4bf8-a57f-9e6b10b5fa0b
-# ╟─65781f50-667a-44c0-beb2-466dfb293d36
+# ╠═ec47fa62-62ea-4bf8-a57f-9e6b10b5fa0b
+# ╠═65781f50-667a-44c0-beb2-466dfb293d36
 # ╟─77bbea27-c0fa-4320-ab84-ff91730410e3
 # ╟─7290e07c-eedc-429f-a2fa-7130dae8da37
 # ╟─c2b940ae-7013-4184-916f-cc2c6c3bb718
@@ -3496,7 +3494,7 @@ version = "4.1.0+0"
 # ╟─6316022b-a071-4d6b-be2a-d786c8edad45
 # ╟─d51bd461-3106-4b8d-9d3a-66c7fb6c8ab1
 # ╟─43b474fc-51fa-4aef-86fa-cba0eb59bcf9
-# ╟─9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
+# ╠═9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
 # ╟─7c80bb36-5cef-4e21-bd84-53f347f6dfe0
 # ╟─20f45d03-754e-4d6a-b1ad-431745281c4e
 # ╟─a79a9761-eb35-4000-9e86-a6d109feed8d
