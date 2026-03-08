@@ -171,8 +171,5 @@
 }
 
 #let noind = h(-1.25cm)
-#let centred-heading(title) = [
-  // #pagebreak(weak:true)
-  
-  #align(center, heading(numbering:none, title))
-]
+
+#let centred-heading(title) = align(center, heading(numbering:none, title))
