@@ -1,5 +1,5 @@
 #import "@preview/cetz:0.4.2"
-#import "@preview/lilaq:0.5.0" as lq
+#import "@preview/lilaq:0.6.0" as lq
 #import "@preview/zero:0.6.1": *
 #import "@preview/fletcher:0.5.8" as fletcher: diagram, node, edge
 #import fletcher.shapes: trapezium

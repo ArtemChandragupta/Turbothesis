@@ -43,7 +43,7 @@ NIX_ENFORCE_NO_NATIVE='1'
 export NIX_ENFORCE_NO_NATIVE
 NIX_HARDENING_ENABLE='bindnow format fortify fortify3 pic relro stackclashprotection stackprotector strictoverflow zerocallusedregs'
 export NIX_HARDENING_ENABLE
-NIX_LDFLAGS='-rpath /home/artem/Dev/Turbothesis/Unified/waterfall/outputs/out/lib  -L/nix/store/s58723hvjaaq0qs3h61mn64mwp7044wj-ncurses-6.5/lib -L/nix/store/cyw33ds8cfwj1c6740llq1mzk4iinspp-libffi-3.5.2/lib -L/nix/store/9yyfg7f6d9v53cw7rn090d6dfsg3vld0-elfutils-0.193/lib -L/nix/store/sd9c9h940yv36386mvyq2vqmyv80qnsc-gmp-with-cxx-6.3.0/lib -L/nix/store/krmgqvd5cgl3hvlq39blhhwp174gbp97-numactl-2.0.18/lib -L/nix/store/s58723hvjaaq0qs3h61mn64mwp7044wj-ncurses-6.5/lib -L/nix/store/cyw33ds8cfwj1c6740llq1mzk4iinspp-libffi-3.5.2/lib -L/nix/store/9yyfg7f6d9v53cw7rn090d6dfsg3vld0-elfutils-0.193/lib -L/nix/store/sd9c9h940yv36386mvyq2vqmyv80qnsc-gmp-with-cxx-6.3.0/lib -L/nix/store/krmgqvd5cgl3hvlq39blhhwp174gbp97-numactl-2.0.18/lib'
+NIX_LDFLAGS='-rpath /home/artem/Dev/Turbothesis/waterfall/outputs/out/lib  -L/nix/store/s58723hvjaaq0qs3h61mn64mwp7044wj-ncurses-6.5/lib -L/nix/store/cyw33ds8cfwj1c6740llq1mzk4iinspp-libffi-3.5.2/lib -L/nix/store/9yyfg7f6d9v53cw7rn090d6dfsg3vld0-elfutils-0.193/lib -L/nix/store/sd9c9h940yv36386mvyq2vqmyv80qnsc-gmp-with-cxx-6.3.0/lib -L/nix/store/krmgqvd5cgl3hvlq39blhhwp174gbp97-numactl-2.0.18/lib -L/nix/store/s58723hvjaaq0qs3h61mn64mwp7044wj-ncurses-6.5/lib -L/nix/store/cyw33ds8cfwj1c6740llq1mzk4iinspp-libffi-3.5.2/lib -L/nix/store/9yyfg7f6d9v53cw7rn090d6dfsg3vld0-elfutils-0.193/lib -L/nix/store/sd9c9h940yv36386mvyq2vqmyv80qnsc-gmp-with-cxx-6.3.0/lib -L/nix/store/krmgqvd5cgl3hvlq39blhhwp174gbp97-numactl-2.0.18/lib'
 export NIX_LDFLAGS
 NIX_NO_SELF_RPATH='1'
 NIX_STORE='/nix/store'
@@ -136,7 +136,7 @@ name='nix-shell-env'
 export name
 nativeBuildInputs=''
 export nativeBuildInputs
-out='/home/artem/Dev/Turbothesis/Unified/waterfall/outputs/out'
+out='/home/artem/Dev/Turbothesis/waterfall/outputs/out'
 export out
 outputBin='out'
 outputDev='out'
@@ -167,7 +167,7 @@ preConfigurePhases=' updateAutotoolsGnuConfigScriptsPhase'
 declare -a preFixupHooks=('_moveToShare' '_multioutDocs' '_multioutDevs' )
 preferLocalBuild='1'
 export preferLocalBuild
-prefix='/home/artem/Dev/Turbothesis/Unified/waterfall/outputs/out'
+prefix='/home/artem/Dev/Turbothesis/waterfall/outputs/out'
 declare -a propagatedBuildDepFiles=('propagated-build-build-deps' 'propagated-native-build-inputs' 'propagated-build-target-deps' )
 propagatedBuildInputs=''
 export propagatedBuildInputs
