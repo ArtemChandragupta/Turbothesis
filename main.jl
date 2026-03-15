@@ -277,7 +277,7 @@ begin
 
 		H₀ = T.H₀ₜ / 𝒞.m
 
-		d₁ₘ = @. T.d₂ₘ - T.l₂ + l₂₁
+		d₁ₘ = @. T.d₂ₘ - T.l₂ + l₁
 		d₂ₘ = @. T.d₂ₘ - T.l₂ + l₂
 
 		n = 0.6
@@ -340,7 +340,7 @@ begin
 		T₁   = T⃰₀ - c₁^2 / 2𝒞.Cpᵧ
 		ρ₁   = p₁ / (𝒞.Rᵧ * T₁)
 		F₁r  = G * 𝒞.Rᵧ * T₁ / (p₁ * c₁)
-		F₁   = π * 𝒫.d₁ₘ * 𝒫.l₂₁
+		F₁   = π * 𝒫.d₁ₘ * 𝒫.l₁
 		α₁   = asind(F₁r / F₁)
 		c₁u  = c₁ * cosd(α₁)
 		c₁z  = c₁ * sind(α₁)
@@ -363,8 +363,9 @@ begin
 		w₂u  = w₂ * cosd(β⃰₂)
 		c₂z  = w₂ * sind(β⃰₂)
 		c₂u  = u₂ - w₂u
+		c₂r  = c₂z * tand(𝒯.γ/2)
 		α⃰₂   = c₂u < 0 ? - atand(c₂z / c₂u) : 180 - atand(c₂z / c₂u)
-		c₂   = √(c₂z^2 + c₂u^2)
+		c₂   = √(c₂z^2 + c₂u^2)# + c₂r^2)
 		T⃰₂   = T₂ + c₂^2 / 2𝒞.Cpᵧ
 		p⃰₂   = p₂ * (T⃰₂ / T₂)^𝒞.k_1k
 		Mc₁  = c₁ / √(𝒞.kᵧ * 𝒞.Rᵧ * T₁)
@@ -373,7 +374,7 @@ begin
 		ηᵤ   = (T⃰₀ - T⃰₂) / (T⃰₀ - T₂tt)
 		η⃰ᵤ   = (T⃰₀ - T⃰₂) / (T⃰₀ - T⃰₂tt)
 		Hᵤ   = (T⃰₀ - T⃰₂) * 𝒞.Cpᵧ
-	
+
 		(; p⃰₀, T⃰₀, p₂, H₀, T₂tt, c₁t, c₁, T₁t, p₁, T₁, ρ₁, F₁r, F₁, α₁, c₁u, c₁z, u₁, u₂, w₁u, w₁, β₁, T⃰w₁, p⃰w₁, T⃰w₂, p⃰w₂t, H⃰₂, w₂t, w₂, T₂, F₂r, F₂, β⃰₂, w₂u, c₂z, c₂u, α⃰₂, c₂, T⃰₂, p⃰₂, Mc₁, Mw₂, T⃰₂tt, ηᵤ, η⃰ᵤ, Hᵤ)
 	end
 
@@ -418,11 +419,11 @@ begin
 		F  = swirl_params.F
 		ρK = swirl_params.ρK
 		
-		n₁ = log(tand(α₁)/tand(𝓜.α₁)) / log(𝒫.d₁ₘ / (𝒫.d₁ₘ + 𝒫.l₂₁))
+		n₁ = log(tand(α₁)/tand(𝓜.α₁)) / log(𝒫.d₁ₘ / (𝒫.d₁ₘ + 𝒫.l₁))
 		n₂ = log(tand(𝓜.β⃰₂)/tand(β⃰₂)) / log((𝒫.d₂ₘ + 𝒫.l₂) / 𝒫.d₂ₘ)
-		b₁ = (𝒫.rₘ₁ + 𝒫.l₂₁/2)^n₁ * tand(α₁)
+		b₁ = (𝒫.rₘ₁ + 𝒫.l₁/2)^n₁ * tand(α₁)
 		b₂ = 𝒫.rₘ^n₂ * tand(𝓜.β⃰₂)
-		A  = (F * 𝓜.c₁z)/(𝒫.l₂₁/2)
+		A  = (F * 𝓜.c₁z)/(𝒫.l₁/2)
 		B  = 𝓜.c₁z - A * 𝒫.rₘ₁
 		χ¹ = 𝓜.p₁ * (𝓜.T⃰₀  / 𝓜.T₁)^𝒞.kk_1 / 𝓜.p⃰₀
 		χ² = 𝓜.p₂ * (𝓜.T⃰w₂ / 𝓜.T₂)^𝒞.kk_1 / 𝓜.p⃰w₂t
@@ -470,8 +471,8 @@ begin
 	end
 
 	function calc_swirl(№, 𝒫, w₂u_R1, 𝓜, ɤ, 𝒞 = CONST, 𝒯 = TASK)
-		r    = 𝒫.rk + 𝒫.l₂  * (№-1)/4
-		r₁   = 𝒫.rk + 𝒫.l₂₁ * (№-1)/4
+		r    = 𝒫.rk + 𝒫.l₂ * (№-1)/4
+		r₁   = 𝒫.rk + 𝒫.l₁ * (№-1)/4
 		b    = 𝒫.b₂
 		γ    = ɤ.γ * (№-1)/4
 		α₁   = atand(ɤ.b₁ / (r₁^ɤ.n₁))
@@ -665,14 +666,14 @@ begin
 end
 
 # ╔═╡ 7e4039e8-ed6c-46eb-a079-9df82d4272d6
-@bind Cα₁ PlutoUI.NumberField(13:40, default=21)
+# @bind Cα₁ PlutoUI.NumberField(13:40, default=21)
 
 # ╔═╡ d1889b73-726a-468b-9bb9-e69cd81a796b
 @bind Cβ⃰₂ PlutoUI.NumberField(15:65, default=26)
 
 # ╔═╡ 6316022b-a071-4d6b-be2a-d786c8edad45
 begin
-	# Cα₁ = 20.6
+	Cα₁ = 20.6
 	# Cβ⃰₂ = 25.9
 	
 	F_range  = range(-0.5, 0  , length=400)
@@ -733,43 +734,6 @@ begin
 	end
 
 	md"ʧ Парсер для typst"
-end
-
-# ╔═╡ fdfad875-453c-4a56-ad68-2b56bdeb2a16
-begin
-	open("vars.typ", "w") do file
-    	write(file,
-			  "#import \"@preview/zero:0.6.1\": * \n \n",
-			  
-			  typst_vars(TASK; prefix ="TA"), "\n \n",
-			  typst_vars(CONST; prefix ="CO"), "\n \n",
-			  typst_vars(Å; prefix ="A"), "\n \n",
-			  typst_vars(C; prefix ="C"), "\n \n",
-			  typst_vars(T; prefix ="T"), "\n \n",
-			  # typst_vars(l̄; prefix ="L"), "\n \n",
-
-			  typst_vars(ɤ; prefix ="SI"),    "\n",
-			  typst_vars(P[1]; prefix ="P1"), "\n",
-			  typst_vars(P[2]; prefix ="P2"), "\n",
-			  typst_vars(P[3]; prefix ="P3"), "\n",
-			  typst_vars(P[4]; prefix ="P4"), "\n \n",
-			  
-			  typst_vars(S[1]; prefix ="S1"), "\n",
-			  typst_vars(S[2]; prefix ="S2"), "\n",
-			  typst_vars(S[3]; prefix ="S3"), "\n",
-			  typst_vars(S[4]; prefix ="S4"), "\n \n",
-			  
-			  typst_vars(R[1]; prefix ="R1"), "\n",
-			  typst_vars(R[2]; prefix ="R2"), "\n",
-			  typst_vars(R[3]; prefix ="R3"), "\n",
-			  typst_vars(R[4]; prefix ="R4"), "\n",
-			  typst_vars(R[5]; prefix ="R5"), "\n \n",
-			  
-			 )
-	end
-
-	md"Запись в файл"
-
 end
 
 # ╔═╡ 48f45b5a-03af-4b1c-bdb9-16964246e85c
@@ -882,7 +846,7 @@ begin
 	        ax1 = Axis(fig[1, 1];
 	            ylabel = L"F",
 	            xlabel = L"\rho_K",
-	            title  = L"\sigma ($\alpha_1 = %$(Cα₁)$, $\beta^*_2 = %$(Cβ⃰₂)$)",
+	            title  = L"\sigma ($\alpha_1 '' = %$(Cα₁)$, $\beta^*_2 ' = %$(Cβ⃰₂)$)",
 	            axis_settings...
 	        )
 	        hm1 = heatmap!(ax1, ρK_range, F_range, σ_matrix, rasterize = true)
@@ -891,12 +855,13 @@ begin
 	
 	        # График для разницы полиномиальной и нормальной степени реактивности
 	        ax2 = Axis(fig[1, 3];
+				ylabel = L"F",
 	            xlabel = L"\rho_K",
-	            title  = L"$\Delta \rho$ ($\alpha_1 = %$(Cα₁)$, $\beta^*_2 = %$(Cβ⃰₂)$)",
+	            title  = L"$\Delta \rho$ ($\alpha_1 '' = %$(Cα₁)$, $\beta^*_2 ' = %$(Cβ⃰₂)$)",
 	            axis_settings...
 	        )
 	        hm2 = heatmap!(ax2, ρK_range, F_range, abs.(Δρ_matrix), rasterize=true)
-	        Colorbar(fig[1, 4], hm2, label=L"\Delta", width=15)
+	        Colorbar(fig[1, 4], hm2, label=L"\Delta \rho", width=15)
 	        scatter!(ax2, filtered_FρK[2], filtered_FρK[1], color=:red, markersize=8)
 	
 	        colgap!(fig.layout, 1, 10)
@@ -1169,13 +1134,53 @@ begin
 	Pr4 = profile_build(S, R, 2, 4, 0.00175, 0.0006, 11, 6, l̄, Pr1)
 	Pr5 = profile_build(S, R, 2, 5, 0.00125, 0.0005, 11, 6, l̄, Pr1)
 
-	Prs5 = profile_build(S, R, 1, 5, 0.005, 0.001, 15, 4, l̄, 0    )
-	Prs1 = profile_build(S, R, 1, 1, 0.005, 0.001, 15, 4, l̄, Prs5 )
-	Prs2 = profile_build(S, R, 1, 2, 0.005, 0.001, 15, 4, l̄, Prs5 )
-	Prs3 = profile_build(S, R, 1, 3, 0.005, 0.001, 15, 4, l̄, Prs5 )
-	Prs4 = profile_build(S, R, 1, 4, 0.005, 0.001, 15, 4, l̄, Prs5 )
+	Prs5 = profile_build(S, R, 1, 5, 0.0075, 0.0015, 15, 4, l̄, 0    )
+	Prs1 = profile_build(S, R, 1, 1, 0.005 , 0.0011, 15, 4, l̄, Prs5 )
+	Prs2 = profile_build(S, R, 1, 2, 0.0056, 0.0012, 15, 4, l̄, Prs5 )
+	Prs3 = profile_build(S, R, 1, 3, 0.0062, 0.0013, 15, 4, l̄, Prs5 )
+	Prs4 = profile_build(S, R, 1, 4, 0.0068, 0.0014, 15, 4, l̄, Prs5 )
 	
 	md"### ∮ Построение профилей рабочих и сопловых лопаток"
+end
+
+# ╔═╡ fdfad875-453c-4a56-ad68-2b56bdeb2a16
+begin
+	open("vars.typ", "w") do file
+    	write(file,
+			  "#import \"@preview/zero:0.6.1\": * \n \n",
+			  
+			  typst_vars(TASK; prefix ="TA"), "\n \n",
+			  typst_vars(CONST; prefix ="CO"), "\n \n",
+			  typst_vars(Å; prefix ="A"), "\n \n",
+			  typst_vars(C; prefix ="C"), "\n \n",
+			  typst_vars(T; prefix ="T"), "\n \n",
+			  # typst_vars(l̄; prefix ="L"), "\n \n",
+
+			  typst_vars(ɤ; prefix ="SI"),    "\n",
+			  typst_vars(P[1]; prefix ="P1"), "\n",
+			  typst_vars(P[2]; prefix ="P2"), "\n",
+			  typst_vars(P[3]; prefix ="P3"), "\n",
+			  typst_vars(P[4]; prefix ="P4"), "\n \n",
+			  
+			  typst_vars(S[1]; prefix ="S1"), "\n",
+			  typst_vars(S[2]; prefix ="S2"), "\n",
+			  typst_vars(S[3]; prefix ="S3"), "\n",
+			  typst_vars(S[4]; prefix ="S4"), "\n \n",
+			  
+			  typst_vars(R[1]; prefix ="R1"), "\n",
+			  typst_vars(R[2]; prefix ="R2"), "\n",
+			  typst_vars(R[3]; prefix ="R3"), "\n",
+			  typst_vars(R[4]; prefix ="R4"), "\n",
+			  typst_vars(R[5]; prefix ="R5"), "\n \n",
+
+			  typst_vars(Pr3.Z;  prefix ="Pr"), "\n \n",
+			  typst_vars(Pr3.Z; prefix ="Prs"), "\n \n",
+			  
+			 )
+	end
+
+	md"Запись в файл"
+
 end
 
 # ╔═╡ f3210104-8de0-4394-997c-8cc2858c800a
@@ -3483,9 +3488,9 @@ version = "4.1.0+0"
 # ╟─65781f50-667a-44c0-beb2-466dfb293d36
 # ╟─77bbea27-c0fa-4320-ab84-ff91730410e3
 # ╟─7290e07c-eedc-429f-a2fa-7130dae8da37
-# ╠═c2b940ae-7013-4184-916f-cc2c6c3bb718
+# ╟─c2b940ae-7013-4184-916f-cc2c6c3bb718
 # ╟─23866f8f-bdff-45be-afcd-91d3c87a200e
-# ╠═3e5014a8-e39f-4d3c-bb2f-122dea8482bb
+# ╟─3e5014a8-e39f-4d3c-bb2f-122dea8482bb
 # ╟─e24903de-8706-4d29-aaf0-2005799675e1
 # ╟─1f21d0d2-43a3-489b-9b77-d09d0824f799
 # ╟─4e7e1ddb-8a03-4818-be9e-fa31698faf07
@@ -3497,8 +3502,8 @@ version = "4.1.0+0"
 # ╟─43b474fc-51fa-4aef-86fa-cba0eb59bcf9
 # ╟─9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
 # ╟─2a16d189-115d-42f4-aecf-2c2aaf7a6768
-# ╟─20f45d03-754e-4d6a-b1ad-431745281c4e
-# ╠═a79a9761-eb35-4000-9e86-a6d109feed8d
+# ╠═20f45d03-754e-4d6a-b1ad-431745281c4e
+# ╟─a79a9761-eb35-4000-9e86-a6d109feed8d
 # ╟─d98408fe-9751-4f1d-8131-8e4ff6e5eb51
 # ╟─e12ca256-c439-4eac-83f0-e7ccff7c749b
 # ╟─0fb5895e-2d20-4716-86ba-3ee7a3c55433
