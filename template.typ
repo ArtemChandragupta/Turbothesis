@@ -87,7 +87,7 @@
       Работа допущена к защите \
       Директор ВШЭМ \
       #text("__________") А. С. Алешина \
-      "#text("__")"#text("_____________") 2024 г.
+      "#text("__")"#text("_____________") 2026 г.
     ])
 
     #place(horizon+center)[ \ \
@@ -129,7 +129,9 @@
   // Заголовки
   set heading(numbering: "1.1")
   show heading: it => {
-    set text(hyphenate: false, size: 14pt, weight: "regular")
+    set text(hyphenate: false, size: 14pt,
+    // weight: "regular"
+    )
     set block(above: 1.4em, below: 2em)
     pad(x: 1.25cm, it)
   }
@@ -137,7 +139,7 @@
     counter(math.equation).update(0)
     counter(figure.where(kind: image)).update(0)
     counter(figure.where(kind: table)).update(0)
-    // pagebreak(weak: true)
+    pagebreak(weak: true)
     upper(it)
   }
 
