@@ -152,13 +152,6 @@
   set math.equation(
     numbering: (..num) => numbering("(1.1)", counter(heading).get().first(), num.pos().first())
   )
-  show math.equation.where(block: true): it => {
-    if it.supplement != [table-eq] {
-      linebreak()
-      it
-      linebreak()
-  } else {it}
-}
 
   // set-num(
   //   // exponent: "eng",
@@ -176,6 +169,13 @@
 #let noind = h(-1.25cm)
 
 #let centred-heading(title) = align(center, heading(numbering:none, title))
+
+#let appendix(body) = {
+  set heading(numbering: none, supplement: [Приложение])
+  counter(heading).update(0)
+  set text(hyphenate: false, size: 14pt, weight: "regular")
+  body
+}
 
 #let table-multi-page(continue-header-label: [], ..table-args) = context {
   let columns = table-args.named().at("columns", default: 1)
