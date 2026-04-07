@@ -62,7 +62,7 @@
     set figure.caption(position: top)
     show figure.caption: it => align(left, it)
     set block(breakable: true)
-    set text(size: 10pt)
+    // set text(size: 10pt)
     show figure.caption: set text(size:14pt)
     set math.equation(numbering: none, supplement: [table-eq])
     it
@@ -178,6 +178,7 @@
 }
 
 #let table-multi-page(continue-header-label: [], ..table-args) = context {
+  set text(size: 10pt)
   let columns = table-args.named().at("columns", default: 1)
   let column-amount = if type(columns) == int {
     columns
