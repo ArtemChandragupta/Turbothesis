@@ -156,6 +156,14 @@
   set math.equation(
     numbering: (..num) => numbering("(1.1)", counter(heading).get().first(), num.pos().first())
   )
+  show math.equation: it => {
+    if it.block and not it.has("label") and it.numbering != none [
+      #counter(math.equation).update(v => v - 1)
+      #math.equation(it.body, block: true, numbering: none)
+    ] else {
+      it
+    }
+  }
 
   // set-num(
   //   // exponent: "eng",
