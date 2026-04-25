@@ -133,3 +133,28 @@ egorshin2021:
       location: СПб.
    date: 2021
    language: russian
+
+# Специальная часть
+
+SpecEng:
+   type: article
+   title: CORRELATION BETWEEN PRESSURE RECOVERY OF HIGHLY LOADED ANNULAR DIFFUSERS AND INTEGRAL STAGE DESIGN PARAMETERS
+   author:
+      - Mimic, Dajan
+      - Drechsel, Bastian
+      - Herbst, Florian
+   publisher:
+      name: Leibniz Universitat Hannover
+      location: Hannover
+   date: 2017
+
+SpecRus:
+   type: article
+   title: ОПТИМАЛЬНЫЙ РАДИАЛЬНЫЙ ЗАЗОР РАБОЧЕГО КОЛЕСА В БЛОКЕ С ВЫХОДНЫМ ДИФФУЗОРОМ
+   author:
+      - Гуленков, Михаил Борисович
+      - Черников, Виктор Александрович
+      - Семакина, Елена Юрьевна
+   city: Санкт-Петербург
+   publisher: СПбПУ
+   date: 2024
