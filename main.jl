@@ -685,6 +685,9 @@ begin
 	md"### ∮ Поиск _хороших_ значений ρk и F"
 end
 
+# ╔═╡ bb7b3104-ec46-4a40-a7d4-908f547bd2c3
+valid_FρK
+
 # ╔═╡ 43b474fc-51fa-4aef-86fa-cba0eb59bcf9
 begin
 	(α₁, β⃰₂, F, ρK) = (Cα₁, Cβ⃰₂, filtered_FρK[1], filtered_FρK[2])
@@ -795,7 +798,7 @@ begin
 			fig = Figure()
 			ax = Axis(fig[1, 1], xlabel = "Φ", ylabel = "Ψ")
 			hm = heatmap!(ax, Φ➞, Ψ➞, G_matrix, interpolate = true)
-			Colorbar(fig[1, 2], hm, label = L"G_{opt}", minorticksvisible=true)
+			Colorbar(fig[1, 2], hm, label = L"G_{opt}, \ кг/с", minorticksvisible=true)
 	
 			contour!(ax, Φ➞,Ψ➞,G_matrix, levels = [T.Gᵧ], color = "#e75480" )
 			contour!(ax, Φ➞,Ψ➞,H_matrix, levels = [T.Nₜ], color = "#b8860b" )
@@ -897,7 +900,7 @@ begin
 			# График давлений
 			ax2 = Axis(fig[1, 2],
 					   title = L"p_2 \ при \ обратной \ закрутке",
-					   ylabel = "p₂"
+					   ylabel = L"p_2, \ Па"
 					  )
 			scatterlines!(ax2, 1:length(R), [r.p₂ for r in R], label = "p₂")
 	
@@ -1182,6 +1185,410 @@ begin
 	md"Запись в файл"
 
 end
+
+# ╔═╡ 3a476e75-5619-4905-bcc3-e3942d3b83e0
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+    # --- Вспомогательные функции ---
+    
+    function fill_matrix(field)
+        matrix = fill(NaN, (length(ρK_range), length(F_range)))
+        for param in valid_FρK
+            i = findfirst(==(param.F), F_range)
+            j = findfirst(==(param.ρK), ρK_range)
+            if i !== nothing && j !== nothing
+                matrix[j, i] = getfield(param, field)
+            end
+        end
+        return matrix
+    end
+
+	function distance_fin(Pr, Δ)
+		d̄ = []
+
+		if Pr.type == 2
+			x1 = Pr.xt; x2 = Pr.xb
+			y1 = Pr.yt; y2 = Pr.yb
+		elseif Pr.type == 1
+			x1 = Pr.xb; x2 = Pr.xt
+			y1 = Pr.yb; y2 = Pr.yt
+		end
+	
+		for i in 1:length(x1)
+			j  = argmin( √( (x1[i]-x2[j])^2 + (y1[i]-y2[j]+Δ)^2 ) for j in 1:length(x2))
+			dᵢ = minimum(√( (x1[i]-x2[j])^2 + (y1[i]-y2[j]+Δ)^2 ) for j in 1:length(x2))
+		
+			push!(d̄, (; j, dᵢ))
+		end
+
+		d̄
+	end
+
+	function get_min_distances(x1, y1, x2, y2, shift_y)
+        # Ищем для каждой точки верхнего профиля (x1, y1) 
+        # ближайшую точку на нижнем профиле, смещенном на Δ (x2, y2 + shift_y)
+        res = []
+        for i in 1:length(x1)
+            p1 = [x1[i], y1[i]]
+            min_d = Inf
+            min_j = 1
+            for j in 1:length(x2)
+                p2 = [x2[j], y2[j] + shift_y]
+                d = sqrt((p1[1]-p2[1])^2 + (p1[2]-p2[2])^2)
+                if d < min_d
+                    min_d = d
+                    min_j = j
+                end
+            end
+            push!(res, (dᵢ = min_d, j = min_j))
+        end
+        return res
+    end
+
+	function draw_2d_shift!(ax, Pr)
+        Δ = Pr.type == 2 ? Pr.Z.t : -Pr.Z.t
+        # Используем нашу локальную функцию get_min_distances
+        ds = Pr.type == 2 ? get_min_distances(Pr.xt, Pr.yt, Pr.xb, Pr.yb, Δ) : 
+                            get_min_distances(Pr.xb, Pr.yb, Pr.xt, Pr.yt, Δ)
+
+        distances = [1000d.dᵢ for d in ds]
+        min_d, max_d = extrema(distances)
+        colors = [cgrad(:viridis)[(d - min_d)/(max_d - min_d + 1e-9)] for d in distances]
+
+        # Отрисовка линий канала
+        for i in 1:length(Pr.xt)
+            p1 = Pr.type == 2 ? [Pr.xt[i], Pr.yt[i]] : [Pr.xb[i], Pr.yb[i]]
+            p2 = Pr.type == 2 ? [Pr.xb[ds[i].j], Pr.yb[ds[i].j] + Δ] : [Pr.xt[ds[i].j], Pr.yt[ds[i].j] + Δ]
+            lines!(ax, [p1[1], p2[1]], [p1[2], p2[2]], color=colors[i], linewidth=3)
+        end
+
+		mod = Pr.type == 2 ? 1 : -1
+        dir = Pr.type == 2 ? :up : :down
+        pnt = Pr.type == 2 ? 2 : 1
+
+        scatter!(ax, Pr.cntr, color=:gray, markersize=10)
+        arc!(ax, color = :gray, linewidth = 1, Pr.cₘₐₓ.pₘ, Pr.cₘₐₓ.cₘ, 0, 2π)
+
+        α  = atan(Pr.ξ / Pr.l) + pi/2
+        dl = Pr.type == 2 ? 0.4Pr.l * cos(α) : 0.3Pr.l * cos(α)
+        diam_points = [
+            (Pr.cₘₐₓ.pₘ[1]+Pr.cₘₐₓ.cₘ*cos(α), Pr.cₘₐₓ.pₘ[2]+Pr.cₘₐₓ.cₘ*sin(α)),
+            (Pr.cₘₐₓ.pₘ[1]-Pr.cₘₐₓ.cₘ*cos(α), Pr.cₘₐₓ.pₘ[2]-Pr.cₘₐₓ.cₘ*sin(α)),
+            (
+                Pr.cₘₐₓ.pₘ[1]+mod*(-Pr.cₘₐₓ.cₘ*cos(α) - dl),
+                Pr.cₘₐₓ.pₘ[2]+mod*(-Pr.cₘₐₓ.cₘ*sin(α) - dl * tan(α))
+            )
+        ]
+
+        lines!(ax, color = :gray, linewidth = 1, linestyle = :dash, 
+               [diam_points[2], diam_points[3]])
+        
+        bracket!(ax, color=:gray, linewidth = 0, width = 0,
+                 diam_points[pnt], diam_points[3],
+                 text  = "c = $(round(Int, Pr.cₘₐₓ.cₘ * 2000)) mm")
+        
+        arrows2d!(ax, color = :gray, argmode = :endpoint,
+                  shaftwidth = 1, tipwidth = 8, tiplength = 6,
+                  tailwidth = 8, taillength = 6,
+                  tail = Point2f[(0, 0), (1, -0.5), (1, 0.5)],
+                  diam_points[1], diam_points[2])
+
+        # Контуры окружностей
+        diam_points_1 = [
+            (0 + Pr.R₁ * cos(α), 0 + Pr.R₁ * sin(α)+Δ),
+            (0 - Pr.R₁ * cos(α), 0 - Pr.R₁ * sin(α)+Δ),
+            (0 + Pr.R₁ * cos(α) + dl, 0 +Δ + Pr.R₁ * sin(α) + dl * tan(α))
+        ]
+        lines!(ax, color = :gray, linewidth = 1, [diam_points_1[2], diam_points_1[3]])
+        
+        bracket!(ax, color = :gray, linewidth = 0, width = 0,
+                 diam_points_1[3], diam_points_1[1],
+                 text = "⌀ $(round(Int, 2000Pr.R₁)) mm")
+
+        diam_points_2 = [
+            (Pr.l + Pr.R₂ * cos(α)     , Pr.ξ + Pr.R₂ * sin(α)+Δ),
+            (Pr.l - Pr.R₂ * cos(α)     , Pr.ξ - Pr.R₂ * sin(α)+Δ),
+            (Pr.l - mod * (Pr.R₂ * cos(α) + dl), Pr.ξ +Δ - mod * (Pr.R₂ * sin(α) + dl * tan(α)))
+        ]
+        
+        if Pr.type == 2
+            lines!(ax, color = :gray, linewidth = 1, [diam_points_2[1], diam_points_2[3]])
+            bracket!(ax, color = :gray, linewidth = 0, width = 0,
+                     diam_points_2[3], diam_points_2[2],
+                     text = "⌀ $(round(Int, 2000Pr.R₂)) mm")
+        elseif Pr.type == 1
+            lines!(ax, color = :gray, linewidth = 1, [diam_points_2[2], diam_points_2[3]])
+            bracket!(ax, color = :gray, linewidth = 0, width = 0,
+                     diam_points_2[3], diam_points_2[1],
+                     text = "⌀ $(round(Int, 2000Pr.R₂)) mm")
+        end
+
+        # Хорда
+        lines!(ax, color = :gray, linewidth = 1, linestyle = :dash, [0, Pr.l], [0+Δ, Pr.ξ+Δ])
+        bracket!(ax, color = :gray, linewidth = 1, 0, 0+Δ, Pr.l, Pr.ξ+Δ, orientation = dir,
+                 text = "b = $(round(Int, Pr.b * 10^3)) mm")
+
+        arc!(ax, (0, 0+Δ), Pr.R₁, 0, 2π, color = :gray, linewidth = 1)
+        arc!(ax, (Pr.l, Pr.ξ+Δ), Pr.R₂, 0, 2π, color = :gray, linewidth = 1)
+		arc!(ax, (0, 0), Pr.R₁, 0, 2π, color = :gray, linewidth = 1)
+        arc!(ax, (Pr.l, Pr.ξ), Pr.R₂, 0, 2π, color = :gray, linewidth = 1)
+
+		bracket!(ax, color = :gray, linewidth = 1, 0, 0, 0, Δ, orientation = Pr.type == 1 ? :down : :up, text = "Δ = $(round(Int, 1000Pr.Z.t)) mm" )
+		lines!(ax, color = :gray, linewidth = 1, linestyle = :dash, [0, 0], [0, Δ])
+
+        # Два профиля
+        for d_y in [0, Δ]
+            arc!(ax, (0, d_y), Pr.R₁, deg2rad(90+Pr.ϕ₁ᵗ), deg2rad(360-90+Pr.ϕ₁ᵇ), color=:black, linewidth=2)
+            arc!(ax, (Pr.l, Pr.ξ+d_y), Pr.R₂, deg2rad(90+Pr.ϕ₂ᵗ), deg2rad(-90+Pr.ϕ₂ᵇ), color=:black, linewidth=2)
+
+			lines!(ax, Pr.xc, Pr.yc .+ d_y, color= :gray, linewidth=1)
+            lines!(ax, Pr.xt, Pr.yt .+ d_y, color=:black, linewidth=2)
+            lines!(ax, Pr.xb, Pr.yb .+ d_y, color=:black, linewidth=2)
+        end
+        return min_d, max_d
+    end
+
+    # Функция отрисовки одного 2D-профиля на указанной оси
+    # function draw_profile!(ax, Pr)
+    #     mod = Pr.type == 2 ? 1 : -1
+    #     dir = Pr.type == 2 ? :up : :down
+    #     pnt = Pr.type == 2 ? 2 : 1
+
+    #     scatter!(ax, Pr.cntr, color=:gray, markersize=10)
+    #     arc!(ax, color = :gray, linewidth = 1, Pr.cₘₐₓ.pₘ, Pr.cₘₐₓ.cₘ, 0, 2π)
+
+    #     α  = atan(Pr.ξ / Pr.l) + pi/2
+    #     dl = Pr.type == 2 ? 0.2Pr.l * cos(α) : 0.3Pr.l * cos(α)
+    #     diam_points = [
+    #         (Pr.cₘₐₓ.pₘ[1]+Pr.cₘₐₓ.cₘ*cos(α), Pr.cₘₐₓ.pₘ[2]+Pr.cₘₐₓ.cₘ*sin(α)),
+    #         (Pr.cₘₐₓ.pₘ[1]-Pr.cₘₐₓ.cₘ*cos(α), Pr.cₘₐₓ.pₘ[2]-Pr.cₘₐₓ.cₘ*sin(α)),
+    #         (
+    #             Pr.cₘₐₓ.pₘ[1]+mod*(-Pr.cₘₐₓ.cₘ*cos(α) - dl),
+    #             Pr.cₘₐₓ.pₘ[2]+mod*(-Pr.cₘₐₓ.cₘ*sin(α) - dl * tan(α))
+    #         )
+    #     ]
+
+    #     lines!(ax, color = :gray, linewidth = 1, linestyle = :dash, 
+    #            [diam_points[2], diam_points[3]])
+        
+    #     bracket!(ax, color=:gray, linewidth = 0, width = 0,
+    #              diam_points[pnt], diam_points[3],
+    #              text  = "c = $(round(Int, Pr.cₘₐₓ.cₘ * 2000)) mm")
+        
+    #     arrows2d!(ax, color = :gray, argmode = :endpoint,
+    #               shaftwidth = 1, tipwidth = 8, tiplength = 6,
+    #               tailwidth = 8, taillength = 6,
+    #               tail = Point2f[(0, 0), (1, -0.5), (1, 0.5)],
+    #               diam_points[1], diam_points[2])
+
+    #     # Контуры окружностей
+    #     diam_points_1 = [
+    #         (0 + Pr.R₁ * cos(α), 0 + Pr.R₁ * sin(α)),
+    #         (0 - Pr.R₁ * cos(α), 0 - Pr.R₁ * sin(α)),
+    #         (0 + Pr.R₁ * cos(α) + dl, 0 + Pr.R₁ * sin(α) + dl * tan(α))
+    #     ]
+    #     lines!(ax, color = :gray, linewidth = 1, [diam_points_1[2], diam_points_1[3]])
+        
+    #     bracket!(ax, color = :gray, linewidth = 0, width = 0,
+    #              diam_points_1[3], diam_points_1[1],
+    #              text = "⌀ $(round(Int, 2000Pr.R₁)) mm")
+
+    #     diam_points_2 = [
+    #         (Pr.l + Pr.R₂ * cos(α)     , Pr.ξ + Pr.R₂ * sin(α)),
+    #         (Pr.l - Pr.R₂ * cos(α)     , Pr.ξ - Pr.R₂ * sin(α)),
+    #         (Pr.l - mod * (Pr.R₂ * cos(α) + dl), Pr.ξ - mod * (Pr.R₂ * sin(α) + dl * tan(α)))
+    #     ]
+        
+    #     if Pr.type == 2
+    #         lines!(ax, color = :gray, linewidth = 1, [diam_points_2[1], diam_points_2[3]])
+    #         bracket!(ax, color = :gray, linewidth = 0, width = 0,
+    #                  diam_points_2[3], diam_points_2[2],
+    #                  text = "⌀ $(round(Int, 2000Pr.R₂)) mm")
+    #     elseif Pr.type == 1
+    #         lines!(ax, color = :gray, linewidth = 1, [diam_points_2[2], diam_points_2[3]])
+    #         bracket!(ax, color = :gray, linewidth = 0, width = 0,
+    #                  diam_points_2[3], diam_points_2[1],
+    #                  text = "⌀ $(round(Int, 2000Pr.R₂)) mm")
+    #     end
+
+    #     # Хорда
+    #     lines!(ax, color = :gray, linewidth = 1, linestyle = :dash, [0, Pr.l], [0, Pr.ξ])
+    #     bracket!(ax, color = :gray, linewidth = 1, 0, 0, Pr.l, Pr.ξ, orientation = dir,
+    #              text = "b = $(round(Int, Pr.b * 10^3)) mm")
+
+    #     arc!(ax, (0, 0), Pr.R₁, 0, 2π, color = :gray, linewidth = 1)
+    #     arc!(ax, (Pr.l, Pr.ξ), Pr.R₂, 0, 2π, color = :gray, linewidth = 1)
+
+    #     # Дуги скругления (входная и выходная кромки)
+    #     arc!(ax, color = :black, linewidth = 2, (0, 0), Pr.R₁,
+    #          deg2rad(90 + Pr.ϕ₁ᵗ), deg2rad(360 - 90 + Pr.ϕ₁ᵇ))
+    #     arc!(ax, color = :black, linewidth = 2, (Pr.l, Pr.ξ), Pr.R₂,
+    #          deg2rad(90 + Pr.ϕ₂ᵗ), deg2rad(-90 + Pr.ϕ₂ᵇ))
+
+    #     # Профиль лопатки
+    #     lines!(ax, Pr.xc, Pr.yc, color = :gray , linewidth = 1)
+    #     lines!(ax, Pr.xt, Pr.yt, color = :black, linewidth = 2)
+    #     lines!(ax, Pr.xb, Pr.yb, color = :black, linewidth = 2)
+    # end
+
+    # В calculate_blade_geometry мы возвращаем X, Y, Z и Pr[1]
+    function calculate_blade_geometry(F, ρK, Cα₁, Cβ⃰₂, P, S, l̄)
+        n_sections = 5
+        n_arc = 50 
+
+        swirl_params = (; α₁=Cα₁, F=F, ρK=ρK, β⃰₂=Cβ⃰₂)
+        R, a, b, c, ɤ = swirl_reverse(P[end], S[end], swirl_params)
+        
+        Pr1 = profile_build(S, R, 2, 1, 0.003  , 0.001 , 11, 6, l̄, 0  )
+        Pr2 = profile_build(S, R, 2, 2, 0.00285, 0.0008, 11, 6, l̄, Pr1)
+        Pr3 = profile_build(S, R, 2, 3, 0.00235, 0.0007, 11, 6, l̄, Pr1)
+        Pr4 = profile_build(S, R, 2, 4, 0.00175, 0.0006, 11, 6, l̄, Pr1)
+        Pr5 = profile_build(S, R, 2, 5, 0.00125, 0.0005, 11, 6, l̄, Pr1)
+        Pr = [Pr1, Pr2, Pr3, Pr4, Pr5]
+
+        n_total = length(Pr[1].xt) + n_arc + length(Pr[1].xb) + n_arc + 1
+        X = zeros(Float64, n_total, n_sections)
+        Y = zeros(Float64, n_total, n_sections)
+        Z = zeros(Float64, n_total, n_sections)
+
+        for i in 1:n_sections
+            cx, cy = Pr[i].cntr
+            z_val = Pr[i].r - Pr[1].r
+
+            xt_c = Pr[i].xt .- cx
+            yt_c = Pr[i].yt .- cy
+
+            arc_center2 = (Pr[i].l - cx, Pr[i].ξ - cy)
+            angles2 = range(deg2rad(90 + Pr[i].ϕ₂ᵗ), deg2rad(-90 + Pr[i].ϕ₂ᵇ), length=n_arc)
+            arc2_x = [arc_center2[1] + Pr[i].R₂ * cos(θ) for θ in angles2]
+            arc2_y = [arc_center2[2] + Pr[i].R₂ * sin(θ) for θ in angles2]
+
+            xb_c = reverse(Pr[i].xb .- cx)
+            yb_c = reverse(Pr[i].yb .- cy)
+
+            arc_center1 = (0 - cx, 0 - cy)
+            angles1 = range(deg2rad(90 + Pr[i].ϕ₁ᵗ), deg2rad(360 - 90 + Pr[i].ϕ₁ᵇ), length=n_arc)
+            arc1_x = [arc_center1[1] + Pr[i].R₁ * cos(θ) for θ in angles1]
+            arc1_y = [arc_center1[2] + Pr[i].R₁ * sin(θ) for θ in angles1]
+
+            full_x = vcat(xt_c, arc2_x, xb_c, reverse(arc1_x), [xt_c[1]])
+            full_y = vcat(yt_c, arc2_y, yb_c, reverse(arc1_y), [yt_c[1]])
+
+            X[:, i] .= full_x
+            Y[:, i] .= full_y
+            Z[:, i] .= z_val
+        end
+
+        return X, Y, Z, Pr[1]
+    end
+
+    # --- Подготовка данных и отрисовка ---
+    σ_matrix  = fill_matrix(:σ)
+    Δρ_matrix = fill_matrix(:Δρ)
+
+    with_theme(theme_latexfonts()) do
+        update_theme!(fontsize = 22)
+        fig = Figure(size=(1600, 800)) 
+        
+        # --- 1. Настройка осей ---
+        axis_settings = (
+            xminorticksvisible = true, xminorgridvisible = true,
+            xminorticks = IntervalsBetween(10),
+            yminorticksvisible = true, yminorgridvisible = true,
+            yminorticks = IntervalsBetween(10),
+        )
+
+        # Первая колонка: Графики σ и Δρ
+        ax_hm1 = Axis(fig[1, 1][1, 1]; ylabel = L"F", xlabel = L"\rho_K", 
+                      title = L"\sigma ($\alpha_1 '' = %$(Cα₁)$, $\beta^*_2 ' = %$(Cβ⃰₂)$)", axis_settings...)
+        ax_hm2 = Axis(fig[2, 1][1, 1]; ylabel = L"F", xlabel = L"\rho_K", 
+                      title = L"$\Delta \rho$ ($\alpha_1 '' = %$(Cα₁)$, $\beta^*_2 ' = %$(Cβ⃰₂)$)", axis_settings...)
+
+        # Вторая колонка: 2D Профиль
+		ax_shift = Axis(fig[1:2, 2][1, 1], aspect=DataAspect())
+		hidespines!(ax_shift); hidedecorations!(ax_shift)
+
+        # Третья колонка: 3D Лопатка
+        ax3d = Axis3(fig[1:2, 3], aspect = :data, azimuth = -pi, elevation = pi/8)
+        hidespines!(ax3d); hidedecorations!(ax3d)
+
+        # --- 2. Статичные графики ---
+        hm1 = heatmap!(ax_hm1, ρK_range, F_range, σ_matrix, rasterize = true)
+        Colorbar(fig[1, 1][1, 2], hm1, label="σ", width=15)
+        
+        hm2 = heatmap!(ax_hm2, ρK_range, F_range, abs.(Δρ_matrix), rasterize=true)
+        Colorbar(fig[2, 1][1, 2], hm2, label=L"\Delta \rho", width=15)
+
+		# Colorbar для канала (динамический)
+        cb_limits = Observable((0.0, 1.0))
+        Colorbar(fig[1:2, 2][1, 2], limits=cb_limits, label="t, mm", width=15, height = Relative(0.5), ticklabelspace = 40)
+
+		colsize!(fig.layout, 1, Relative(0.4))  # 40% ширины
+		colsize!(fig.layout, 2, Relative(0.4))  # 40% ширины
+		colsize!(fig.layout, 3, Relative(0.2))  # 20% ширины
+
+        # --- 3. Инициализация Observables ---
+        start_param = valid_FρK[1]
+        X_init, Y_init, Z_init, Pr1_init = calculate_blade_geometry(start_param.F, start_param.ρK, Cα₁, Cβ⃰₂, P, S, l̄)
+
+        X_obs = Observable(X_init)
+        Y_obs = Observable(Y_init)
+        Z_obs = Observable(Z_init)
+        point_obs = Observable(Point2f(start_param.ρK, start_param.F))
+
+        # --- 4. Связывание с Observables ---
+        
+        # 4.1. 3D Лопатка
+        surface!(ax3d, X_obs, Y_obs, Z_obs)
+        for i in [1, 5]
+            pts_2d = lift(X_obs, Y_obs) do x, y
+                [Point2f(x[j, i], y[j, i]) for j in 1:size(x, 1)]
+            end
+            p_fill = poly!(ax3d, pts_2d, color=cgrad(:viridis)[i==1 ? 0.0 : 1.0])
+            on(Z_obs) do z
+                translate!(p_fill, 0, 0, z[1, i])
+            end
+            translate!(p_fill, 0, 0, Z_init[1, i])
+        end
+        for i in 1:5
+            pts_3d = lift(X_obs, Y_obs, Z_obs) do x, y, z
+                [Point3f(x[j, i], y[j, i], z[j, i]) for j in 1:size(x, 1)]
+            end
+            lines!(ax3d, pts_3d, color = :black, linewidth = 1.5)
+        end
+
+        # 4.2. Тепловые карты
+        scatter!(ax_hm1, point_obs, color=:red, markersize=8)
+        scatter!(ax_hm2, point_obs, color=:red, markersize=8)
+
+
+        # --- 5. Запись анимации ---
+        points_to_animate = valid_FρK[1:100:end]
+        filepath = "assets/plots/optimization_anim.mp4"
+        
+        record(fig, filepath, points_to_animate; framerate = 5) do param
+            # Считаем новую геометрию и профиль
+            X_new, Y_new, Z_new, Pr1_new = calculate_blade_geometry(param.F, param.ρK, Cα₁, Cβ⃰₂, P, S, l̄)
+            
+            # Обновляем 3D и точки
+            X_obs[] = X_new
+            Y_obs[] = Y_new
+            Z_obs[] = Z_new
+            point_obs[] = Point2f(param.ρK, param.F)
+
+            # Обновление 2D Канала
+            empty!(ax_shift)
+            min_d, max_d = draw_2d_shift!(ax_shift, Pr1_new)
+            cb_limits[] = (min_d, max_d)
+            hidespines!(ax_shift); hidedecorations!(ax_shift)
+            autolimits!(ax_shift)
+        end
+        
+        PlutoUI.LocalResource(filepath)
+    end
+end
+  ╠═╡ =#
 
 # ╔═╡ f3210104-8de0-4394-997c-8cc2858c800a
 begin
@@ -1526,7 +1933,7 @@ begin
 end
 
 # ╔═╡ a79a9761-eb35-4000-9e86-a6d109feed8d
-profile_combined(Prs5)
+profile_combined(Pr1)
 
 # ╔═╡ f2c9597e-84c3-4e0a-8fc0-73131b7254ce
 begin
@@ -1611,6 +2018,89 @@ begin
 
 	md"Запись всех профилей"
 end
+
+# ╔═╡ 9759fc89-22be-4927-9353-24161255a800
+begin
+    function profiles_surface_3d(Pr1, Pr2, Pr3, Pr4, Pr5)
+        Pr = [Pr1, Pr2, Pr3, Pr4, Pr5]
+        n_sections = 5
+        n_arc = 50 # Количество точек на каждой дуге кромки
+        
+        # Считаем общее количество точек в одном замкнутом контуре
+        # +1 в конце нужен, чтобы соединить последнюю точку с первой и "зашить" шов
+        n_total = length(Pr[1].xt) + n_arc + length(Pr[1].xb) + n_arc + 1
+
+        # Заранее выделяем память под матрицы
+        X = zeros(Float64, n_total, n_sections)
+        Y = zeros(Float64, n_total, n_sections)
+        Z = zeros(Float64, n_total, n_sections)
+
+        with_theme(theme_latexfonts()) do
+            fig = Figure(size = (900, 800))
+            ax = Axis3(fig[1, 1], aspect = :data, azimuth = -pi, elevation = pi/8)
+            
+            hidespines!(ax); hidedecorations!(ax)
+
+            # Формируем замкнутые контуры для каждого сечения
+            for i in 1:n_sections
+                cx, cy = Pr[i].cntr
+                z_val = Pr[i].r - Pr[1].r
+
+                # 1. Спинка (Top)
+                xt_c = Pr[i].xt .- cx
+                yt_c = Pr[i].yt .- cy
+
+                # 2. Выходная кромка (Arc 2 - Trailing Edge)
+                arc_center2 = (Pr[i].l - cx, Pr[i].ξ - cy)
+                angles2 = range(deg2rad(90 + Pr[i].ϕ₂ᵗ), deg2rad(-90 + Pr[i].ϕ₂ᵇ), length=n_arc)
+                arc2_x = [arc_center2[1] + Pr[i].R₂ * cos(θ) for θ in angles2]
+                arc2_y = [arc_center2[2] + Pr[i].R₂ * sin(θ) for θ in angles2]
+
+                # 3. Корыто (Bottom)
+                xb_c = reverse(Pr[i].xb .- cx)
+                yb_c = reverse(Pr[i].yb .- cy)
+
+                # 4. Входная кромка (Arc 1 - Leading Edge)
+                arc_center1 = (0 - cx, 0 - cy)
+                angles1 = range(deg2rad(90 + Pr[i].ϕ₁ᵗ), deg2rad(360 - 90 + Pr[i].ϕ₁ᵇ), length=n_arc)
+                arc1_x = [arc_center1[1] + Pr[i].R₁ * cos(θ) for θ in angles1]
+                arc1_y = [arc_center1[2] + Pr[i].R₁ * sin(θ) for θ in angles1]
+
+                # Собираем все части в единый массив + добавляем первую точку в конец
+                full_x = vcat(xt_c, arc2_x, xb_c, reverse(arc1_x), [xt_c[1]])
+                full_y = vcat(yt_c, arc2_y, yb_c, reverse(arc1_y), [yt_c[1]])
+
+                # Записываем в i-й столбец матрицы
+                X[:, i] .= full_x
+                Y[:, i] .= full_y
+                Z[:, i] .= z_val
+            end
+
+            # ОДНА поверхность для всей лопатки
+            surface!(ax, X, Y, Z)
+
+            # Торцевые крышки, чтобы лопатка не казалась полой
+            for i in [1, 5]
+                pts_2d = [Point2f(X[j, i], Y[j, i]) for j in 1:n_total]
+                p_fill = poly!(ax, pts_2d, color=cgrad(:viridis)[i==1 ? 0.0 : 1.0])
+                translate!(p_fill, 0, 0, Z[1, i])
+            end
+
+			# Профили
+			for i in 1:n_sections
+                lines!(ax, X[:,i], Y[:,i], Z[:,i], color = :black, linewidth = 1.5)
+            end
+
+            save("assets/profiles/$(Pr1.type)/blade_full_surface.png", fig)
+            fig
+        end
+    end
+
+	md"👁 3-d лопатка"
+end
+
+# ╔═╡ a50cd219-7dc9-46d4-9e9e-9fec5fdbbe52
+profiles_surface_3d(Pr1, Pr2, Pr3, Pr4, Pr5)
 
 # ╔═╡ e3eb9ae9-4a31-4ce2-9ca7-607abd52e8f6
 function transformProfile(Pr)
@@ -1724,9 +2214,6 @@ function table_swirl_short()
 	| $w_2, \text{м/с}$       |$(r̂1.w₂)  |$(r̂2.w₂)  |$(r̂3.w₂)  |$(r̂4.w₂)  |$(r̂5.w₂)  |
 	"""
 end
-
-# ╔═╡ 2a16d189-115d-42f4-aecf-2c2aaf7a6768
-table_swirl_short()
 
 # ╔═╡ ef9bc959-20a8-44aa-9093-725c4734dd8d
 function table_swirl()
@@ -1933,7 +2420,7 @@ PlutoUI = "~0.7.62"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.12.5"
+julia_version = "1.12.6"
 manifest_format = "2.0"
 project_hash = "832f7853c2ec3552ca1b52be9bbe64aacf5ef079"
 
@@ -1961,9 +2448,9 @@ version = "0.4.5"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra", "Requires"]
-git-tree-sha1 = "7e35fca2bdfba44d797c53dfe63a51fabf39bfc0"
+git-tree-sha1 = "0761717147821d696c9470a7a86364b2fbd22fd8"
 uuid = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
-version = "4.4.0"
+version = "4.5.2"
 weakdeps = ["SparseArrays", "StaticArrays"]
 
     [deps.Adapt.extensions]
@@ -2062,26 +2549,32 @@ uuid = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 version = "0.15.6"
 
 [[deps.Cairo_jll]]
-deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "fde3bf89aead2e723284a8ff9cdf5b551ed700e8"
+deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "Libdl", "Pixman_jll", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
+git-tree-sha1 = "d0efe2c6fdcdaa1c161d206aa8b933788397ec71"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
-version = "1.18.5+0"
+version = "1.18.6+0"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra"]
-git-tree-sha1 = "e4c6a16e77171a5f5e25e9646617ab1c276c5607"
+git-tree-sha1 = "12177ad6b3cad7fd50c8b3825ce24a99ad61c18f"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-version = "1.26.0"
+version = "1.26.1"
 weakdeps = ["SparseArrays"]
 
     [deps.ChainRulesCore.extensions]
     ChainRulesCoreSparseArraysExt = "SparseArrays"
 
+[[deps.CodecZstd]]
+deps = ["TranscodingStreams", "Zstd_jll"]
+git-tree-sha1 = "da54a6cd93c54950c15adf1d336cfd7d71f51a56"
+uuid = "6b39b394-51ab-5f42-8807-6242bab2b4c2"
+version = "0.8.7"
+
 [[deps.ColorBrewer]]
 deps = ["Colors", "JSON"]
-git-tree-sha1 = "e771a63cc8b539eca78c85b0cabd9233d6c8f06f"
+git-tree-sha1 = "07da79661b919001e6863b81fc572497daa58349"
 uuid = "a2cac450-b92f-5266-8821-25eda20663c8"
-version = "0.4.1"
+version = "0.4.2"
 
 [[deps.ColorSchemes]]
 deps = ["ColorTypes", "ColorVectorSpace", "Colors", "FixedPointNumbers", "PrecompileTools", "Random"]
@@ -2128,9 +2621,9 @@ version = "1.3.0+1"
 
 [[deps.ComputePipeline]]
 deps = ["Observables", "Preferences"]
-git-tree-sha1 = "cb1299fee09da21e65ec88c1ff3a259f8d0b5802"
+git-tree-sha1 = "3b4be73db165146d8a88e47924f464e55ab053cd"
 uuid = "95dc2771-c249-4cd0-9c9f-1f3b4330693c"
-version = "0.1.4"
+version = "0.1.7"
 
 [[deps.ConstructionBase]]
 git-tree-sha1 = "b4b092499347b18a015186eae3042f72267106cb"
@@ -2148,16 +2641,28 @@ git-tree-sha1 = "439e35b0b36e2e5881738abc8857bd92ad6ff9a8"
 uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
 version = "0.6.3"
 
+[[deps.CoreMath]]
+deps = ["CoreMath_jll"]
+git-tree-sha1 = "8c0480f92b1b1796239156a1b9b1bfb1b39499b4"
+uuid = "b7a15901-be09-4a0e-87d2-2e66b0e09b5a"
+version = "0.1.0"
+
+[[deps.CoreMath_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "a692a4c1dc59a4b8bc0b6403876eb3250fde2bc3"
+uuid = "a38c48d9-6df1-5ac9-9223-b6ada3b5572b"
+version = "0.1.0+0"
+
 [[deps.DataAPI]]
 git-tree-sha1 = "abe83f3a2f1b857aac70ef8b269080af17764bbe"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.16.0"
 
 [[deps.DataStructures]]
-deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "4e1fe97fdaed23e9dc21d4d664bea76b65fc50a0"
+deps = ["OrderedCollections"]
+git-tree-sha1 = "e86f4a2805f7f19bec5129bc9150c38208e5dc23"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.18.22"
+version = "0.19.4"
 
 [[deps.DataValueInterfaces]]
 git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
@@ -2171,9 +2676,9 @@ version = "1.11.0"
 
 [[deps.DelaunayTriangulation]]
 deps = ["AdaptivePredicates", "EnumX", "ExactPredicates", "Random"]
-git-tree-sha1 = "5620ff4ee0084a6ab7097a27ba0c19290200b037"
+git-tree-sha1 = "c55f5a9fd67bdbc8e089b5a3111fe4292986a8e8"
 uuid = "927a84f5-c5f4-47a5-9785-b46e178433df"
-version = "1.6.4"
+version = "1.6.6"
 
 [[deps.Distributed]]
 deps = ["Random", "Serialization", "Sockets"]
@@ -2182,9 +2687,9 @@ version = "1.11.0"
 
 [[deps.Distributions]]
 deps = ["AliasTables", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns"]
-git-tree-sha1 = "3bc002af51045ca3b47d2e1787d6ce02e68b943a"
+git-tree-sha1 = "e421c1938fafab0165b04dc1a9dbe2a26272952c"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.122"
+version = "0.25.125"
 
     [deps.Distributions.extensions]
     DistributionsChainRulesCoreExt = "ChainRulesCore"
@@ -2213,9 +2718,9 @@ uuid = "5ae413db-bbd1-5e63-b57d-d24a61df00f5"
 version = "2.2.4+0"
 
 [[deps.EnumX]]
-git-tree-sha1 = "bddad79635af6aec424f53ed8aad5d7555dc6f00"
+git-tree-sha1 = "c49898e8438c828577f04b92fc9368c388ac783c"
 uuid = "4e289a0a-7415-4d19-859d-a7e5c4648b56"
-version = "1.0.5"
+version = "1.0.7"
 
 [[deps.ExactPredicates]]
 deps = ["IntervalArithmetic", "Random", "StaticArrays"]
@@ -2225,9 +2730,9 @@ version = "2.2.9"
 
 [[deps.Expat_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "7bb1361afdb33c7f2b085aa49ea8fe1b0fb14e58"
+git-tree-sha1 = "9cb7fe11da6adb8683cbacf8aa9b5237941e3a75"
 uuid = "2e619515-83b5-522b-bb60-26c02a35a201"
-version = "2.7.1+0"
+version = "2.7.5+0"
 
 [[deps.Extents]]
 git-tree-sha1 = "b309b36a9e02fe7be71270dd8c0fd873625332b4"
@@ -2240,23 +2745,17 @@ git-tree-sha1 = "eaa040768ea663ca695d442be1bc97edfe6824f2"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
 version = "6.1.3+0"
 
-[[deps.FFTW]]
-deps = ["AbstractFFTs", "FFTW_jll", "Libdl", "LinearAlgebra", "MKL_jll", "Preferences", "Reexport"]
-git-tree-sha1 = "97f08406df914023af55ade2f843c39e99c5d969"
-uuid = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
-version = "1.10.0"
-
-[[deps.FFTW_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "6d6219a004b8cf1e0b4dbe27a2860b8e04eba0be"
-uuid = "f5851436-0d7a-5f13-b9de-f02708fd171a"
-version = "3.3.11+0"
+[[deps.FFTA]]
+deps = ["AbstractFFTs", "DocStringExtensions", "LinearAlgebra", "MuladdMacro", "Primes", "Random", "Reexport"]
+git-tree-sha1 = "65e55303b72f4a567a51b174dd2c47496efeb95a"
+uuid = "b86e33f2-c0db-4aa1-a6e0-ab43e668529e"
+version = "0.3.1"
 
 [[deps.FileIO]]
 deps = ["Pkg", "Requires", "UUIDs"]
-git-tree-sha1 = "d60eb76f37d7e5a40cc2e7c36974d864b82dc802"
+git-tree-sha1 = "6522cfb3b8fe97bec632252263057996cbd3de20"
 uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
-version = "1.17.1"
+version = "1.18.0"
 
     [deps.FileIO.extensions]
     HTTPExt = "HTTP"
@@ -2287,14 +2786,15 @@ version = "1.11.0"
 
 [[deps.FillArrays]]
 deps = ["LinearAlgebra"]
-git-tree-sha1 = "173e4d8f14230a7523ae11b9a3fa9edb3e0efd78"
+git-tree-sha1 = "2f979084d1e13948a3352cf64a25df6bd3b4dca3"
 uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
-version = "1.14.0"
-weakdeps = ["PDMats", "SparseArrays", "Statistics"]
+version = "1.16.0"
+weakdeps = ["PDMats", "SparseArrays", "StaticArrays", "Statistics"]
 
     [deps.FillArrays.extensions]
     FillArraysPDMatsExt = "PDMats"
     FillArraysSparseArraysExt = "SparseArrays"
+    FillArraysStaticArraysExt = "StaticArrays"
     FillArraysStatisticsExt = "Statistics"
 
 [[deps.FixedPointNumbers]]
@@ -2322,9 +2822,9 @@ version = "4.1.1"
 
 [[deps.FreeType2_jll]]
 deps = ["Artifacts", "Bzip2_jll", "JLLWrappers", "Libdl", "Zlib_jll"]
-git-tree-sha1 = "2c5512e11c791d1baed2049c5652441b28fc6a31"
+git-tree-sha1 = "70329abc09b886fd2c5d94ad2d9527639c421e3e"
 uuid = "d7e528f0-a631-5988-bf34-fe36492bcfd7"
-version = "2.13.4+0"
+version = "2.14.3+1"
 
 [[deps.FreeTypeAbstraction]]
 deps = ["BaseDirs", "ColorVectorSpace", "Colors", "FreeType", "GeometryBasics", "Mmap"]
@@ -2364,9 +2864,9 @@ version = "5.2.3+0"
 
 [[deps.Glib_jll]]
 deps = ["Artifacts", "GettextRuntime_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Libiconv_jll", "Libmount_jll", "PCRE2_jll", "Zlib_jll"]
-git-tree-sha1 = "50c11ffab2a3d50192a228c313f05b5b5dc5acb2"
+git-tree-sha1 = "24f6def62397474a297bfcec22384101609142ed"
 uuid = "7746bdde-850d-59dc-9ae8-88ece973131d"
-version = "2.86.0+0"
+version = "2.86.3+0"
 
 [[deps.Graphics]]
 deps = ["Colors", "LinearAlgebra", "NaNMath"]
@@ -2453,9 +2953,9 @@ version = "0.9.10"
 
 [[deps.Imath_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "0936ba688c6d201805a83da835b55c61a180db52"
+git-tree-sha1 = "dcc8d0cd653e55213df9b75ebc6fe4a8d3254c65"
 uuid = "905a6f67-0a94-5f89-b386-d35d92009cd1"
-version = "3.1.11+0"
+version = "3.2.2+0"
 
 [[deps.IndirectArrays]]
 git-tree-sha1 = "012e604e1c7458645cb8b436f8fba789a51b257f"
@@ -2467,11 +2967,10 @@ git-tree-sha1 = "d1b1b796e47d94588b3757fe84fbf65a5ec4a80d"
 uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
 version = "0.1.5"
 
-[[deps.IntelOpenMP_jll]]
-deps = ["Artifacts", "JLLWrappers", "LazyArtifacts", "Libdl"]
-git-tree-sha1 = "ec1debd61c300961f98064cfb21287613ad7f303"
-uuid = "1d5cc7b8-4909-519e-a0f8-d0f5ad9712d0"
-version = "2025.2.0+0"
+[[deps.IntegerMathUtils]]
+git-tree-sha1 = "4c1acff2dc6b6967e7e750633c50bc3b8d83e617"
+uuid = "18e54dd8-cb9d-406c-a71d-865a43cbb235"
+version = "0.1.3"
 
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
@@ -2493,16 +2992,17 @@ version = "0.16.2"
     Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [[deps.IntervalArithmetic]]
-deps = ["CRlibm", "MacroTools", "OpenBLASConsistentFPCSR_jll", "Random", "RoundingEmulator"]
-git-tree-sha1 = "79342df41c3c24664e5bf29395cfdf2f2a599412"
+deps = ["CRlibm", "CoreMath", "MacroTools", "OpenBLASConsistentFPCSR_jll", "Printf", "Random", "RoundingEmulator"]
+git-tree-sha1 = "f1c42fcaca2d8034fe392f3e86c2e0809f75b2a1"
 uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-version = "0.22.36"
+version = "1.0.6"
 
     [deps.IntervalArithmetic.extensions]
     IntervalArithmeticArblibExt = "Arblib"
     IntervalArithmeticDiffRulesExt = "DiffRules"
     IntervalArithmeticForwardDiffExt = "ForwardDiff"
     IntervalArithmeticIntervalSetsExt = "IntervalSets"
+    IntervalArithmeticIrrationalConstantsExt = "IrrationalConstants"
     IntervalArithmeticLinearAlgebraExt = "LinearAlgebra"
     IntervalArithmeticRecipesBaseExt = "RecipesBase"
     IntervalArithmeticSparseArraysExt = "SparseArrays"
@@ -2512,14 +3012,15 @@ version = "0.22.36"
     DiffRules = "b552c78f-8df3-52c6-915a-8e097449b14b"
     ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
     IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
+    IrrationalConstants = "92d709cd-6900-40b7-9082-c6be49f344b6"
     LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
     RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
     SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [[deps.IntervalSets]]
-git-tree-sha1 = "5fbb102dcb8b1a858111ae81d56682376130517d"
+git-tree-sha1 = "79d6bd28c8d9bccc2229784f1bd637689b256377"
 uuid = "8197267c-284f-5f27-9208-e0e47529a953"
-version = "0.7.11"
+version = "0.7.14"
 
     [deps.IntervalSets.extensions]
     IntervalSetsRandomExt = "Random"
@@ -2542,9 +3043,9 @@ weakdeps = ["Dates", "Test"]
     InverseFunctionsTestExt = "Test"
 
 [[deps.IrrationalConstants]]
-git-tree-sha1 = "e2222959fbc6c19554dc15174c81bf7bf3aa691c"
+git-tree-sha1 = "b2d91fe939cae05960e760110b328288867b5758"
 uuid = "92d709cd-6900-40b7-9082-c6be49f344b6"
-version = "0.2.4"
+version = "0.2.6"
 
 [[deps.Isoband]]
 deps = ["isoband_jll"]
@@ -2582,9 +3083,9 @@ version = "0.1.6"
 
 [[deps.JpegTurbo_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "4255f0032eafd6451d707a51d5f0248b8a165e4d"
+git-tree-sha1 = "c0c9b76f3520863909825cbecdef58cd63de705a"
 uuid = "aacddb02-875f-59d6-b918-886e6ef4fbf8"
-version = "3.1.3+0"
+version = "3.1.5+0"
 
 [[deps.JuliaSyntaxHighlighting]]
 deps = ["StyledStrings"]
@@ -2592,10 +3093,10 @@ uuid = "ac6e5ff7-fb65-4e79-a425-ec3bc9c03011"
 version = "1.12.0"
 
 [[deps.KernelDensity]]
-deps = ["Distributions", "DocStringExtensions", "FFTW", "Interpolations", "StatsBase"]
-git-tree-sha1 = "ba51324b894edaf1df3ab16e2cc6bc3280a2f1a7"
+deps = ["Distributions", "DocStringExtensions", "FFTA", "Interpolations", "StatsBase"]
+git-tree-sha1 = "4260cfc991b8885bf747801fb60dd4503250e478"
 uuid = "5ab0869b-81aa-558d-bb23-cbf5423bbe9b"
-version = "0.6.10"
+version = "0.6.11"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -2605,9 +3106,9 @@ version = "3.100.3+0"
 
 [[deps.LERC_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "aaafe88dccbd957a8d82f7d05be9b69172e0cee3"
+git-tree-sha1 = "17b94ecafcfa45e8360a4fc9ca6b583b049e4e37"
 uuid = "88015f11-f218-50d7-93a8-a6af411a945d"
-version = "4.0.1+0"
+version = "4.1.0+0"
 
 [[deps.LLVMOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -2615,21 +3116,10 @@ git-tree-sha1 = "eb62a3deb62fc6d8822c0c4bef73e4412419c5d8"
 uuid = "1d63c593-3942-5779-bab2-d838dc0a180e"
 version = "18.1.8+0"
 
-[[deps.LZO_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "1c602b1127f4751facb671441ca72715cc95938a"
-uuid = "dd4b983a-f0e5-5f8d-a1b7-129d4a5fb1ac"
-version = "2.10.3+0"
-
 [[deps.LaTeXStrings]]
 git-tree-sha1 = "dda21b8cbd6a6c40d9d02a73230f9d70fed6918c"
 uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 version = "1.4.0"
-
-[[deps.LazyArtifacts]]
-deps = ["Artifacts", "Pkg"]
-uuid = "4af54fe1-eca0-43a8-85a7-787d91b784e3"
-version = "1.11.0"
 
 [[deps.LazyModules]]
 git-tree-sha1 = "a560dd966b386ac9ae60bdd3a3d3a326062d3c3e"
@@ -2685,9 +3175,9 @@ version = "1.18.0+0"
 
 [[deps.Libmount_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "3acf07f130a76f87c041cfb2ff7d7284ca67b072"
+git-tree-sha1 = "cc3ad4faf30015a3e8094c9b5b7f19e85bdf2386"
 uuid = "4b2f31a3-9ecc-558c-b454-b3730dcb73e9"
-version = "2.41.2+0"
+version = "2.42.0+0"
 
 [[deps.Libtiff_jll]]
 deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "LERC_jll", "Libdl", "XZ_jll", "Zlib_jll", "Zstd_jll"]
@@ -2697,9 +3187,9 @@ version = "4.7.2+0"
 
 [[deps.Libuuid_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "2a7a12fc0a4e7fb773450d17975322aa77142106"
+git-tree-sha1 = "d620582b1f0cbe2c72dd1d5bd195a9ce73370ab1"
 uuid = "38a345b3-de98-5d2b-a5d3-14cd9215e700"
-version = "2.41.2+0"
+version = "2.42.0+0"
 
 [[deps.LinearAlgebra]]
 deps = ["Libdl", "OpenBLAS_jll", "libblastrampoline_jll"]
@@ -2731,12 +3221,6 @@ git-tree-sha1 = "c64d943587f7187e751162b3b84445bbbd79f691"
 uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
 version = "1.1.0"
 
-[[deps.MKL_jll]]
-deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "oneTBB_jll"]
-git-tree-sha1 = "282cadc186e7b2ae0eeadbd7a4dffed4196ae2aa"
-uuid = "856f044c-d86e-5d09-b602-aeab76dc8ba7"
-version = "2025.2.0+0"
-
 [[deps.MacroTools]]
 git-tree-sha1 = "1e0228a030642014fe5cfe68c2c0a818f9e3f522"
 uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
@@ -2749,9 +3233,9 @@ uuid = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 version = "0.24.6"
 
 [[deps.MappedArrays]]
-git-tree-sha1 = "2dab0221fe2b0f2cb6754eaa743cc266339f527e"
+git-tree-sha1 = "0ee4497a4e80dbd29c058fcee6493f5219556f40"
 uuid = "dbb5928d-eab1-5f90-85c2-b9b0edb7c900"
-version = "0.4.2"
+version = "0.4.3"
 
 [[deps.Markdown]]
 deps = ["Base64", "JuliaSyntaxHighlighting", "StyledStrings"]
@@ -2760,9 +3244,9 @@ version = "1.11.0"
 
 [[deps.MathTeXEngine]]
 deps = ["AbstractTrees", "Automa", "DataStructures", "FreeTypeAbstraction", "GeometryBasics", "LaTeXStrings", "REPL", "RelocatableFolders", "UnicodeFun"]
-git-tree-sha1 = "a370fef694c109e1950836176ed0d5eabbb65479"
+git-tree-sha1 = "7eb8cdaa6f0e8081616367c10b31b9d9b34bb02a"
 uuid = "0a4f8689-d25c-4efe-a92b-7142dfc1aa53"
-version = "0.6.6"
+version = "0.6.7"
 
 [[deps.Missings]]
 deps = ["DataAPI"]
@@ -2783,6 +3267,11 @@ version = "0.3.4"
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
 version = "2025.11.4"
+
+[[deps.MuladdMacro]]
+git-tree-sha1 = "cac9cc5499c25554cba55cd3c30543cff5ca4fab"
+uuid = "46d2c3a1-f734-5fdb-9937-b9b9aeba4221"
+version = "0.2.4"
 
 [[deps.NaNMath]]
 deps = ["OpenLibm_jll"]
@@ -2822,9 +3311,9 @@ version = "1.3.6+0"
 
 [[deps.OpenBLASConsistentFPCSR_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "567515ca155d0020a45b05175449b499c63e7015"
+git-tree-sha1 = "f2b3b9e52a5eb6a3434c8cca67ad2dde011194f4"
 uuid = "6cdc7f73-28fd-5e50-80fb-958a8875b1af"
-version = "0.3.29+0"
+version = "0.3.30+0"
 
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
@@ -2839,9 +3328,9 @@ version = "0.3.3"
 
 [[deps.OpenEXR_jll]]
 deps = ["Artifacts", "Imath_jll", "JLLWrappers", "Libdl", "Zlib_jll"]
-git-tree-sha1 = "8292dd5c8a38257111ada2174000a33745b06d4e"
+git-tree-sha1 = "9ac7c730c53b3b5d9a73fb900ac4b4fc263774db"
 uuid = "18a262bb-aa17-5467-a713-aee519bc75cb"
-version = "3.2.4+0"
+version = "3.4.9+0"
 
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -2861,9 +3350,9 @@ version = "0.5.6+0"
 
 [[deps.Opus_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "c392fc5dd032381919e3b22dd32d6443760ce7ea"
+git-tree-sha1 = "e2bb57a313a74b8104064b7efd01406c0a50d2ff"
 uuid = "91d4177d-7536-5919-b921-800302f37372"
-version = "1.5.2+0"
+version = "1.6.1+0"
 
 [[deps.OrderedCollections]]
 git-tree-sha1 = "05868e21324cede2207c6f0f466b4bfef6d5e7ee"
@@ -2877,9 +3366,13 @@ version = "10.44.0+1"
 
 [[deps.PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "f07c06228a1c670ae4c87d1276b92c7c597fdda0"
+git-tree-sha1 = "e4cff168707d441cd6bf3ff7e4832bdf34278e4a"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
-version = "0.11.35"
+version = "0.11.37"
+weakdeps = ["StatsBase"]
+
+    [deps.PDMats.extensions]
+    StatsBaseExt = "StatsBase"
 
 [[deps.PNGFiles]]
 deps = ["Base64", "CEnum", "ImageCore", "IndirectArrays", "OffsetArrays", "libpng_jll"]
@@ -2901,9 +3394,9 @@ version = "0.5.12"
 
 [[deps.Pango_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "FriBidi_jll", "Glib_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "1f7f9bbd5f7a2e5a9f7d96e51c9754454ea7f60b"
+git-tree-sha1 = "58e5ed5e386e156bd93e86b305ebd21ac63d2d04"
 uuid = "36c8627f-9965-5494-a995-c6b170f724f3"
-version = "1.56.4+0"
+version = "1.57.1+0"
 
 [[deps.Parsers]]
 deps = ["Dates", "PrecompileTools", "UUIDs"]
@@ -2934,9 +3427,9 @@ version = "0.3.3"
 
 [[deps.PlotUtils]]
 deps = ["ColorSchemes", "Colors", "Dates", "PrecompileTools", "Printf", "Random", "Reexport", "StableRNGs", "Statistics"]
-git-tree-sha1 = "3ca9a356cd2e113c420f2c13bea19f8d3fb1cb18"
+git-tree-sha1 = "26ca162858917496748aad52bb5d3be4d26a228a"
 uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
-version = "1.4.3"
+version = "1.4.4"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
@@ -2951,15 +3444,21 @@ version = "0.1.2"
 
 [[deps.PrecompileTools]]
 deps = ["Preferences"]
-git-tree-sha1 = "5aa36f7049a63a1528fe8f7c3f2113413ffd4e1f"
+git-tree-sha1 = "07a921781cab75691315adc645096ed5e370cb77"
 uuid = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
-version = "1.2.1"
+version = "1.3.3"
 
 [[deps.Preferences]]
 deps = ["TOML"]
-git-tree-sha1 = "0f27480397253da18fe2c12a4ba4eb9eb208bf3d"
+git-tree-sha1 = "8b770b60760d4451834fe79dd483e318eee709c4"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
-version = "1.5.0"
+version = "1.5.2"
+
+[[deps.Primes]]
+deps = ["IntegerMathUtils"]
+git-tree-sha1 = "25cdd1d20cd005b52fc12cb6be3f75faaf59bb9b"
+uuid = "27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae"
+version = "0.5.7"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -2973,21 +3472,21 @@ uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
 version = "1.11.0"
 
 [[deps.PtrArrays]]
-git-tree-sha1 = "1d36ef11a9aaf1e8b74dacc6a731dd1de8fd493d"
+git-tree-sha1 = "4fbbafbc6251b883f4d2705356f3641f3652a7fe"
 uuid = "43287f4e-b6f4-7ad1-bb20-aadabca52c3d"
-version = "1.3.0"
+version = "1.4.0"
 
 [[deps.QOI]]
 deps = ["ColorTypes", "FileIO", "FixedPointNumbers"]
-git-tree-sha1 = "8b3fc30bc0390abdce15f8822c889f669baed73d"
+git-tree-sha1 = "472daaa816895cb7aee81658d4e7aec901fa1106"
 uuid = "4b34888f-f399-49d4-9bb3-47ed5cae4e65"
-version = "1.0.1"
+version = "1.0.2"
 
 [[deps.QuadGK]]
 deps = ["DataStructures", "LinearAlgebra"]
-git-tree-sha1 = "9da16da70037ba9d701192e27befedefb91ec284"
+git-tree-sha1 = "5e8e8b0ab68215d7a2b14b9921a946fee794749e"
 uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
-version = "2.11.2"
+version = "2.11.3"
 
     [deps.QuadGK.extensions]
     QuadGKEnzymeExt = "Enzyme"
@@ -3039,9 +3538,9 @@ version = "1.3.1"
 
 [[deps.Rmath]]
 deps = ["Random", "Rmath_jll"]
-git-tree-sha1 = "852bd0f55565a9e973fcfee83a84413270224dc4"
+git-tree-sha1 = "5b3d50eb374cea306873b371d3f8d3915a018f0b"
 uuid = "79098fc4-a85e-5d69-aa6a-4863f24498fa"
-version = "0.8.0"
+version = "0.9.0"
 
 [[deps.Rmath_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -3092,10 +3591,10 @@ uuid = "992d4aef-0814-514b-bc4d-f2e9a6c4116f"
 version = "1.0.3"
 
 [[deps.SignedDistanceFields]]
-deps = ["Random", "Statistics", "Test"]
-git-tree-sha1 = "d263a08ec505853a5ff1c1ebde2070419e3f28e9"
+deps = ["Statistics"]
+git-tree-sha1 = "3949ad92e1c9d2ff0cd4a1317d5ecbba682f4b92"
 uuid = "73760f76-fbc4-59ce-8f25-708e95d2df96"
-version = "0.4.0"
+version = "0.4.1"
 
 [[deps.SimpleTraits]]
 deps = ["InteractiveUtils", "MacroTools"]
@@ -3126,9 +3625,9 @@ version = "1.12.0"
 
 [[deps.SpecialFunctions]]
 deps = ["IrrationalConstants", "LogExpFunctions", "OpenLibm_jll", "OpenSpecFun_jll"]
-git-tree-sha1 = "f2685b435df2613e25fc10ad8c26dddb8640f547"
+git-tree-sha1 = "2700b235561b0335d5bef7097a111dc513b8655e"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
-version = "2.6.1"
+version = "2.7.2"
 weakdeps = ["ChainRulesCore"]
 
     [deps.SpecialFunctions.extensions]
@@ -3136,9 +3635,9 @@ weakdeps = ["ChainRulesCore"]
 
 [[deps.StableRNGs]]
 deps = ["Random"]
-git-tree-sha1 = "95af145932c2ed859b63329952ce8d633719f091"
+git-tree-sha1 = "4f96c596b8c8258cc7d3b19797854d368f243ddc"
 uuid = "860ef19b-820b-49d6-a774-d7a799459cd3"
-version = "1.0.3"
+version = "1.0.4"
 
 [[deps.StackViews]]
 deps = ["OffsetArrays"]
@@ -3148,9 +3647,9 @@ version = "0.1.2"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "PrecompileTools", "Random", "StaticArraysCore"]
-git-tree-sha1 = "b8693004b385c842357406e3af647701fe783f98"
+git-tree-sha1 = "246a8bb2e6667f832eea063c3a56aef96429a3db"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.9.15"
+version = "1.9.18"
 weakdeps = ["ChainRulesCore", "Statistics"]
 
     [deps.StaticArrays.extensions]
@@ -3158,9 +3657,9 @@ weakdeps = ["ChainRulesCore", "Statistics"]
     StaticArraysStatisticsExt = "Statistics"
 
 [[deps.StaticArraysCore]]
-git-tree-sha1 = "192954ef1208c7019899fbf8049e717f92959682"
+git-tree-sha1 = "6ab403037779dae8c514bad259f32a447262455a"
 uuid = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
-version = "1.4.3"
+version = "1.4.4"
 
 [[deps.Statistics]]
 deps = ["LinearAlgebra"]
@@ -3174,21 +3673,21 @@ weakdeps = ["SparseArrays"]
 
 [[deps.StatsAPI]]
 deps = ["LinearAlgebra"]
-git-tree-sha1 = "9d72a13a3f4dd3795a195ac5a44d7d6ff5f552ff"
+git-tree-sha1 = "178ed29fd5b2a2cfc3bd31c13375ae925623ff36"
 uuid = "82ae8749-77ed-4fe6-ae5f-f523153014b0"
-version = "1.7.1"
+version = "1.8.0"
 
 [[deps.StatsBase]]
-deps = ["AliasTables", "DataAPI", "DataStructures", "LinearAlgebra", "LogExpFunctions", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "StatsAPI"]
-git-tree-sha1 = "2c962245732371acd51700dbb268af311bddd719"
+deps = ["AliasTables", "DataAPI", "DataStructures", "IrrationalConstants", "LinearAlgebra", "LogExpFunctions", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "StatsAPI"]
+git-tree-sha1 = "aceda6f4e598d331548e04cc6b2124a6148138e3"
 uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
-version = "0.34.6"
+version = "0.34.10"
 
 [[deps.StatsFuns]]
 deps = ["HypergeometricFunctions", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
-git-tree-sha1 = "8e45cecc66f3b42633b8ce14d431e8e57a3e242e"
+git-tree-sha1 = "91f091a8716a6bb38417a6e6f274602a19aaa685"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
-version = "1.5.0"
+version = "1.5.2"
 weakdeps = ["ChainRulesCore", "InverseFunctions"]
 
     [deps.StatsFuns.extensions]
@@ -3197,9 +3696,9 @@ weakdeps = ["ChainRulesCore", "InverseFunctions"]
 
 [[deps.StructArrays]]
 deps = ["ConstructionBase", "DataAPI", "Tables"]
-git-tree-sha1 = "8ad2e38cbb812e29348719cc63580ec1dfeb9de4"
+git-tree-sha1 = "ad8002667372439f2e3611cfd14097e03fa4bccd"
 uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
-version = "0.7.1"
+version = "0.7.3"
 
     [deps.StructArrays.extensions]
     StructArraysAdaptExt = "Adapt"
@@ -3263,10 +3762,10 @@ uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 version = "1.11.0"
 
 [[deps.TiffImages]]
-deps = ["ColorTypes", "DataStructures", "DocStringExtensions", "FileIO", "FixedPointNumbers", "IndirectArrays", "Inflate", "Mmap", "OffsetArrays", "PkgVersion", "PrecompileTools", "ProgressMeter", "SIMD", "UUIDs"]
-git-tree-sha1 = "98b9352a24cb6a2066f9ababcc6802de9aed8ad8"
+deps = ["CodecZstd", "ColorTypes", "DataStructures", "DocStringExtensions", "FileIO", "FixedPointNumbers", "IndirectArrays", "Inflate", "Mmap", "OffsetArrays", "PkgVersion", "PrecompileTools", "ProgressMeter", "SIMD", "UUIDs"]
+git-tree-sha1 = "9ca5f1f2d42f80df4b8c9f6ab5a64f438bbd9976"
 uuid = "731e570b-9d59-4bfa-96dc-6df516fadf69"
-version = "0.11.6"
+version = "0.11.9"
 
 [[deps.TranscodingStreams]]
 git-tree-sha1 = "0c45878dcfdcfa8480052b6ab162cdd138781742"
@@ -3274,9 +3773,9 @@ uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.11.3"
 
 [[deps.Tricks]]
-git-tree-sha1 = "372b90fe551c019541fafc6ff034199dc19c8436"
+git-tree-sha1 = "311349fd1c93a31f783f977a71e8b062a57d4101"
 uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
-version = "0.1.12"
+version = "0.1.13"
 
 [[deps.TriplotBase]]
 git-tree-sha1 = "4d4ed7f294cda19382ff7de4c137d24d16adc89b"
@@ -3305,15 +3804,16 @@ version = "0.4.1"
 
 [[deps.Unitful]]
 deps = ["Dates", "LinearAlgebra", "Random"]
-git-tree-sha1 = "cec2df8cf14e0844a8c4d770d12347fda5931d72"
+git-tree-sha1 = "57e1b2c9de4bd6f40ecb9de4ac1797b81970d008"
 uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
-version = "1.25.0"
+version = "1.28.0"
 
     [deps.Unitful.extensions]
     ConstructionBaseUnitfulExt = "ConstructionBase"
     ForwardDiffExt = "ForwardDiff"
     InverseFunctionsUnitfulExt = "InverseFunctions"
     LatexifyExt = ["Latexify", "LaTeXStrings"]
+    NaNMathExt = "NaNMath"
     PrintfExt = "Printf"
 
     [deps.Unitful.weakdeps]
@@ -3322,6 +3822,7 @@ version = "1.25.0"
     InverseFunctions = "3587e190-3f89-42d0-90ee-14403ec27112"
     LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
     Latexify = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
+    NaNMath = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
     Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [[deps.WebP]]
@@ -3332,21 +3833,21 @@ version = "0.1.3"
 
 [[deps.WoodburyMatrices]]
 deps = ["LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "c1a7aa6219628fcd757dede0ca95e245c5cd9511"
+git-tree-sha1 = "248a7031b3da79a127f14e5dc5f417e26f9f6db7"
 uuid = "efce3f68-66dc-5838-9240-27a6d6f5f9b6"
-version = "1.0.0"
+version = "1.1.0"
 
 [[deps.XZ_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "fee71455b0aaa3440dfdd54a9a36ccef829be7d4"
+git-tree-sha1 = "b29c22e245d092b8b4e8d3c09ad7baa586d9f573"
 uuid = "ffd25f8a-64ca-5728-b0f7-c24cf3aae800"
-version = "5.8.1+0"
+version = "5.8.3+0"
 
 [[deps.Xorg_libX11_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Xorg_libxcb_jll", "Xorg_xtrans_jll"]
-git-tree-sha1 = "b5899b25d17bf1889d25906fb9deed5da0c15b3b"
+git-tree-sha1 = "808090ede1d41644447dd5cbafced4731c56bd2f"
 uuid = "4f6342f7-b3d2-589e-9d20-edeb45f2b2bc"
-version = "1.8.12+0"
+version = "1.8.13+0"
 
 [[deps.Xorg_libXau_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -3362,9 +3863,9 @@ version = "1.1.6+0"
 
 [[deps.Xorg_libXext_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Xorg_libX11_jll"]
-git-tree-sha1 = "a4c0ee07ad36bf8bbce1c3bb52d21fb1e0b987fb"
+git-tree-sha1 = "1a4a26870bf1e5d26cd585e38038d399d7e65706"
 uuid = "1082639a-0dae-5f34-9b06-72781eeb8cb3"
-version = "1.3.7+0"
+version = "1.3.8+0"
 
 [[deps.Xorg_libXrender_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Xorg_libX11_jll"]
@@ -3403,9 +3904,9 @@ version = "0.2.3+0"
 
 [[deps.libaom_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "371cc681c00a3ccc3fbc5c0fb91f58ba9bec1ecf"
+git-tree-sha1 = "850b06095ee71f0135d644ffd8a52850699581ed"
 uuid = "a4ae2306-e953-59d6-aa16-d00cac43593b"
-version = "3.13.1+0"
+version = "3.13.3+0"
 
 [[deps.libass_jll]]
 deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl", "Zlib_jll"]
@@ -3426,9 +3927,9 @@ version = "2.0.4+0"
 
 [[deps.libpng_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Zlib_jll"]
-git-tree-sha1 = "07b6a107d926093898e82b3b1db657ebe33134ec"
+git-tree-sha1 = "e51150d5ab85cee6fc36726850f0e627ad2e4aba"
 uuid = "b53b4c65-9356-5827-b1ea-8c7a1a84506f"
-version = "1.6.50+0"
+version = "1.6.58+0"
 
 [[deps.libsixel_jll]]
 deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "Libdl", "libpng_jll"]
@@ -3452,12 +3953,6 @@ version = "1.6.0+0"
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
 version = "1.64.0+1"
-
-[[deps.oneTBB_jll]]
-deps = ["Artifacts", "JLLWrappers", "LazyArtifacts", "Libdl"]
-git-tree-sha1 = "d5a767a3bb77135a99e433afe0eb14cd7f6914c3"
-uuid = "1317d2d5-d96f-522e-a858-c73665f53c3e"
-version = "2022.0.0+0"
 
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
@@ -3498,16 +3993,18 @@ version = "4.1.0+0"
 # ╟─7e4039e8-ed6c-46eb-a079-9df82d4272d6
 # ╟─d1889b73-726a-468b-9bb9-e69cd81a796b
 # ╟─6316022b-a071-4d6b-be2a-d786c8edad45
+# ╠═bb7b3104-ec46-4a40-a7d4-908f547bd2c3
 # ╟─d51bd461-3106-4b8d-9d3a-66c7fb6c8ab1
-# ╟─43b474fc-51fa-4aef-86fa-cba0eb59bcf9
+# ╠═43b474fc-51fa-4aef-86fa-cba0eb59bcf9
 # ╟─9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
-# ╟─2a16d189-115d-42f4-aecf-2c2aaf7a6768
-# ╠═20f45d03-754e-4d6a-b1ad-431745281c4e
+# ╟─20f45d03-754e-4d6a-b1ad-431745281c4e
 # ╟─a79a9761-eb35-4000-9e86-a6d109feed8d
+# ╟─a50cd219-7dc9-46d4-9e9e-9fec5fdbbe52
 # ╟─d98408fe-9751-4f1d-8131-8e4ff6e5eb51
 # ╟─e12ca256-c439-4eac-83f0-e7ccff7c749b
 # ╟─0fb5895e-2d20-4716-86ba-3ee7a3c55433
 # ╟─fdfad875-453c-4a56-ad68-2b56bdeb2a16
+# ╟─3a476e75-5619-4905-bcc3-e3942d3b83e0
 # ╟─b0aa65a1-3433-4b48-9196-d47e6e35379e
 # ╟─7e82ca6c-5c36-4c0d-ba07-914ff604f107
 # ╟─48f45b5a-03af-4b1c-bdb9-16964246e85c
@@ -3526,6 +4023,7 @@ version = "4.1.0+0"
 # ╟─8fe1c00d-4ebb-420d-8349-165b663f0d6a
 # ╟─fcc47753-9b48-4bf2-8b0e-02b8f8417fe7
 # ╟─f2c9597e-84c3-4e0a-8fc0-73131b7254ce
+# ╟─9759fc89-22be-4927-9353-24161255a800
 # ╟─e3eb9ae9-4a31-4ce2-9ca7-607abd52e8f6
 # ╟─c83ce798-1dfb-4ce1-84fe-1b2f2798e8ec
 # ╟─8678ac5d-fea0-4697-b2e6-799e72afda5a
