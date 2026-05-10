@@ -698,6 +698,410 @@ begin
 	md"### ∮ Обратная закрутка"
 end
 
+# ╔═╡ 3a476e75-5619-4905-bcc3-e3942d3b83e0
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+    # --- Вспомогательные функции ---
+    
+    function fill_matrix(field)
+        matrix = fill(NaN, (length(ρK_range), length(F_range)))
+        for param in valid_FρK
+            i = findfirst(==(param.F), F_range)
+            j = findfirst(==(param.ρK), ρK_range)
+            if i !== nothing && j !== nothing
+                matrix[j, i] = getfield(param, field)
+            end
+        end
+        return matrix
+    end
+
+	function distance_fin(Pr, Δ)
+		d̄ = []
+
+		if Pr.type == 2
+			x1 = Pr.xt; x2 = Pr.xb
+			y1 = Pr.yt; y2 = Pr.yb
+		elseif Pr.type == 1
+			x1 = Pr.xb; x2 = Pr.xt
+			y1 = Pr.yb; y2 = Pr.yt
+		end
+	
+		for i in 1:length(x1)
+			j  = argmin( √( (x1[i]-x2[j])^2 + (y1[i]-y2[j]+Δ)^2 ) for j in 1:length(x2))
+			dᵢ = minimum(√( (x1[i]-x2[j])^2 + (y1[i]-y2[j]+Δ)^2 ) for j in 1:length(x2))
+		
+			push!(d̄, (; j, dᵢ))
+		end
+
+		d̄
+	end
+
+	function get_min_distances(x1, y1, x2, y2, shift_y)
+        # Ищем для каждой точки верхнего профиля (x1, y1) 
+        # ближайшую точку на нижнем профиле, смещенном на Δ (x2, y2 + shift_y)
+        res = []
+        for i in 1:length(x1)
+            p1 = [x1[i], y1[i]]
+            min_d = Inf
+            min_j = 1
+            for j in 1:length(x2)
+                p2 = [x2[j], y2[j] + shift_y]
+                d = sqrt((p1[1]-p2[1])^2 + (p1[2]-p2[2])^2)
+                if d < min_d
+                    min_d = d
+                    min_j = j
+                end
+            end
+            push!(res, (dᵢ = min_d, j = min_j))
+        end
+        return res
+    end
+
+	function draw_2d_shift!(ax, Pr)
+        Δ = Pr.type == 2 ? Pr.Z.t : -Pr.Z.t
+        # Используем нашу локальную функцию get_min_distances
+        ds = Pr.type == 2 ? get_min_distances(Pr.xt, Pr.yt, Pr.xb, Pr.yb, Δ) : 
+                            get_min_distances(Pr.xb, Pr.yb, Pr.xt, Pr.yt, Δ)
+
+        distances = [1000d.dᵢ for d in ds]
+        min_d, max_d = extrema(distances)
+        colors = [cgrad(:viridis)[(d - min_d)/(max_d - min_d + 1e-9)] for d in distances]
+
+        # Отрисовка линий канала
+        for i in 1:length(Pr.xt)
+            p1 = Pr.type == 2 ? [Pr.xt[i], Pr.yt[i]] : [Pr.xb[i], Pr.yb[i]]
+            p2 = Pr.type == 2 ? [Pr.xb[ds[i].j], Pr.yb[ds[i].j] + Δ] : [Pr.xt[ds[i].j], Pr.yt[ds[i].j] + Δ]
+            lines!(ax, [p1[1], p2[1]], [p1[2], p2[2]], color=colors[i], linewidth=3)
+        end
+
+		mod = Pr.type == 2 ? 1 : -1
+        dir = Pr.type == 2 ? :up : :down
+        pnt = Pr.type == 2 ? 2 : 1
+
+        scatter!(ax, Pr.cntr, color=:gray, markersize=10)
+        arc!(ax, color = :gray, linewidth = 1, Pr.cₘₐₓ.pₘ, Pr.cₘₐₓ.cₘ, 0, 2π)
+
+        α  = atan(Pr.ξ / Pr.l) + pi/2
+        dl = Pr.type == 2 ? 0.4Pr.l * cos(α) : 0.3Pr.l * cos(α)
+        diam_points = [
+            (Pr.cₘₐₓ.pₘ[1]+Pr.cₘₐₓ.cₘ*cos(α), Pr.cₘₐₓ.pₘ[2]+Pr.cₘₐₓ.cₘ*sin(α)),
+            (Pr.cₘₐₓ.pₘ[1]-Pr.cₘₐₓ.cₘ*cos(α), Pr.cₘₐₓ.pₘ[2]-Pr.cₘₐₓ.cₘ*sin(α)),
+            (
+                Pr.cₘₐₓ.pₘ[1]+mod*(-Pr.cₘₐₓ.cₘ*cos(α) - dl),
+                Pr.cₘₐₓ.pₘ[2]+mod*(-Pr.cₘₐₓ.cₘ*sin(α) - dl * tan(α))
+            )
+        ]
+
+        lines!(ax, color = :gray, linewidth = 1, linestyle = :dash, 
+               [diam_points[2], diam_points[3]])
+        
+        bracket!(ax, color=:gray, linewidth = 0, width = 0,
+                 diam_points[pnt], diam_points[3],
+                 text  = "c = $(round(Int, Pr.cₘₐₓ.cₘ * 2000)) mm")
+        
+        arrows2d!(ax, color = :gray, argmode = :endpoint,
+                  shaftwidth = 1, tipwidth = 8, tiplength = 6,
+                  tailwidth = 8, taillength = 6,
+                  tail = Point2f[(0, 0), (1, -0.5), (1, 0.5)],
+                  diam_points[1], diam_points[2])
+
+        # Контуры окружностей
+        diam_points_1 = [
+            (0 + Pr.R₁ * cos(α), 0 + Pr.R₁ * sin(α)+Δ),
+            (0 - Pr.R₁ * cos(α), 0 - Pr.R₁ * sin(α)+Δ),
+            (0 + Pr.R₁ * cos(α) + dl, 0 +Δ + Pr.R₁ * sin(α) + dl * tan(α))
+        ]
+        lines!(ax, color = :gray, linewidth = 1, [diam_points_1[2], diam_points_1[3]])
+        
+        bracket!(ax, color = :gray, linewidth = 0, width = 0,
+                 diam_points_1[3], diam_points_1[1],
+                 text = "⌀ $(round(Int, 2000Pr.R₁)) mm")
+
+        diam_points_2 = [
+            (Pr.l + Pr.R₂ * cos(α)     , Pr.ξ + Pr.R₂ * sin(α)+Δ),
+            (Pr.l - Pr.R₂ * cos(α)     , Pr.ξ - Pr.R₂ * sin(α)+Δ),
+            (Pr.l - mod * (Pr.R₂ * cos(α) + dl), Pr.ξ +Δ - mod * (Pr.R₂ * sin(α) + dl * tan(α)))
+        ]
+        
+        if Pr.type == 2
+            lines!(ax, color = :gray, linewidth = 1, [diam_points_2[1], diam_points_2[3]])
+            bracket!(ax, color = :gray, linewidth = 0, width = 0,
+                     diam_points_2[3], diam_points_2[2],
+                     text = "⌀ $(round(Int, 2000Pr.R₂)) mm")
+        elseif Pr.type == 1
+            lines!(ax, color = :gray, linewidth = 1, [diam_points_2[2], diam_points_2[3]])
+            bracket!(ax, color = :gray, linewidth = 0, width = 0,
+                     diam_points_2[3], diam_points_2[1],
+                     text = "⌀ $(round(Int, 2000Pr.R₂)) mm")
+        end
+
+        # Хорда
+        lines!(ax, color = :gray, linewidth = 1, linestyle = :dash, [0, Pr.l], [0+Δ, Pr.ξ+Δ])
+        bracket!(ax, color = :gray, linewidth = 1, 0, 0+Δ, Pr.l, Pr.ξ+Δ, orientation = dir,
+                 text = "b = $(round(Int, Pr.b * 10^3)) mm")
+
+        arc!(ax, (0, 0+Δ), Pr.R₁, 0, 2π, color = :gray, linewidth = 1)
+        arc!(ax, (Pr.l, Pr.ξ+Δ), Pr.R₂, 0, 2π, color = :gray, linewidth = 1)
+		arc!(ax, (0, 0), Pr.R₁, 0, 2π, color = :gray, linewidth = 1)
+        arc!(ax, (Pr.l, Pr.ξ), Pr.R₂, 0, 2π, color = :gray, linewidth = 1)
+
+		bracket!(ax, color = :gray, linewidth = 1, 0, 0, 0, Δ, orientation = Pr.type == 1 ? :down : :up, text = "Δ = $(round(Int, 1000Pr.Z.t)) mm" )
+		lines!(ax, color = :gray, linewidth = 1, linestyle = :dash, [0, 0], [0, Δ])
+
+        # Два профиля
+        for d_y in [0, Δ]
+            arc!(ax, (0, d_y), Pr.R₁, deg2rad(90+Pr.ϕ₁ᵗ), deg2rad(360-90+Pr.ϕ₁ᵇ), color=:black, linewidth=2)
+            arc!(ax, (Pr.l, Pr.ξ+d_y), Pr.R₂, deg2rad(90+Pr.ϕ₂ᵗ), deg2rad(-90+Pr.ϕ₂ᵇ), color=:black, linewidth=2)
+
+			lines!(ax, Pr.xc, Pr.yc .+ d_y, color= :gray, linewidth=1)
+            lines!(ax, Pr.xt, Pr.yt .+ d_y, color=:black, linewidth=2)
+            lines!(ax, Pr.xb, Pr.yb .+ d_y, color=:black, linewidth=2)
+        end
+        return min_d, max_d
+    end
+
+    # Функция отрисовки одного 2D-профиля на указанной оси
+    # function draw_profile!(ax, Pr)
+    #     mod = Pr.type == 2 ? 1 : -1
+    #     dir = Pr.type == 2 ? :up : :down
+    #     pnt = Pr.type == 2 ? 2 : 1
+
+    #     scatter!(ax, Pr.cntr, color=:gray, markersize=10)
+    #     arc!(ax, color = :gray, linewidth = 1, Pr.cₘₐₓ.pₘ, Pr.cₘₐₓ.cₘ, 0, 2π)
+
+    #     α  = atan(Pr.ξ / Pr.l) + pi/2
+    #     dl = Pr.type == 2 ? 0.2Pr.l * cos(α) : 0.3Pr.l * cos(α)
+    #     diam_points = [
+    #         (Pr.cₘₐₓ.pₘ[1]+Pr.cₘₐₓ.cₘ*cos(α), Pr.cₘₐₓ.pₘ[2]+Pr.cₘₐₓ.cₘ*sin(α)),
+    #         (Pr.cₘₐₓ.pₘ[1]-Pr.cₘₐₓ.cₘ*cos(α), Pr.cₘₐₓ.pₘ[2]-Pr.cₘₐₓ.cₘ*sin(α)),
+    #         (
+    #             Pr.cₘₐₓ.pₘ[1]+mod*(-Pr.cₘₐₓ.cₘ*cos(α) - dl),
+    #             Pr.cₘₐₓ.pₘ[2]+mod*(-Pr.cₘₐₓ.cₘ*sin(α) - dl * tan(α))
+    #         )
+    #     ]
+
+    #     lines!(ax, color = :gray, linewidth = 1, linestyle = :dash, 
+    #            [diam_points[2], diam_points[3]])
+        
+    #     bracket!(ax, color=:gray, linewidth = 0, width = 0,
+    #              diam_points[pnt], diam_points[3],
+    #              text  = "c = $(round(Int, Pr.cₘₐₓ.cₘ * 2000)) mm")
+        
+    #     arrows2d!(ax, color = :gray, argmode = :endpoint,
+    #               shaftwidth = 1, tipwidth = 8, tiplength = 6,
+    #               tailwidth = 8, taillength = 6,
+    #               tail = Point2f[(0, 0), (1, -0.5), (1, 0.5)],
+    #               diam_points[1], diam_points[2])
+
+    #     # Контуры окружностей
+    #     diam_points_1 = [
+    #         (0 + Pr.R₁ * cos(α), 0 + Pr.R₁ * sin(α)),
+    #         (0 - Pr.R₁ * cos(α), 0 - Pr.R₁ * sin(α)),
+    #         (0 + Pr.R₁ * cos(α) + dl, 0 + Pr.R₁ * sin(α) + dl * tan(α))
+    #     ]
+    #     lines!(ax, color = :gray, linewidth = 1, [diam_points_1[2], diam_points_1[3]])
+        
+    #     bracket!(ax, color = :gray, linewidth = 0, width = 0,
+    #              diam_points_1[3], diam_points_1[1],
+    #              text = "⌀ $(round(Int, 2000Pr.R₁)) mm")
+
+    #     diam_points_2 = [
+    #         (Pr.l + Pr.R₂ * cos(α)     , Pr.ξ + Pr.R₂ * sin(α)),
+    #         (Pr.l - Pr.R₂ * cos(α)     , Pr.ξ - Pr.R₂ * sin(α)),
+    #         (Pr.l - mod * (Pr.R₂ * cos(α) + dl), Pr.ξ - mod * (Pr.R₂ * sin(α) + dl * tan(α)))
+    #     ]
+        
+    #     if Pr.type == 2
+    #         lines!(ax, color = :gray, linewidth = 1, [diam_points_2[1], diam_points_2[3]])
+    #         bracket!(ax, color = :gray, linewidth = 0, width = 0,
+    #                  diam_points_2[3], diam_points_2[2],
+    #                  text = "⌀ $(round(Int, 2000Pr.R₂)) mm")
+    #     elseif Pr.type == 1
+    #         lines!(ax, color = :gray, linewidth = 1, [diam_points_2[2], diam_points_2[3]])
+    #         bracket!(ax, color = :gray, linewidth = 0, width = 0,
+    #                  diam_points_2[3], diam_points_2[1],
+    #                  text = "⌀ $(round(Int, 2000Pr.R₂)) mm")
+    #     end
+
+    #     # Хорда
+    #     lines!(ax, color = :gray, linewidth = 1, linestyle = :dash, [0, Pr.l], [0, Pr.ξ])
+    #     bracket!(ax, color = :gray, linewidth = 1, 0, 0, Pr.l, Pr.ξ, orientation = dir,
+    #              text = "b = $(round(Int, Pr.b * 10^3)) mm")
+
+    #     arc!(ax, (0, 0), Pr.R₁, 0, 2π, color = :gray, linewidth = 1)
+    #     arc!(ax, (Pr.l, Pr.ξ), Pr.R₂, 0, 2π, color = :gray, linewidth = 1)
+
+    #     # Дуги скругления (входная и выходная кромки)
+    #     arc!(ax, color = :black, linewidth = 2, (0, 0), Pr.R₁,
+    #          deg2rad(90 + Pr.ϕ₁ᵗ), deg2rad(360 - 90 + Pr.ϕ₁ᵇ))
+    #     arc!(ax, color = :black, linewidth = 2, (Pr.l, Pr.ξ), Pr.R₂,
+    #          deg2rad(90 + Pr.ϕ₂ᵗ), deg2rad(-90 + Pr.ϕ₂ᵇ))
+
+    #     # Профиль лопатки
+    #     lines!(ax, Pr.xc, Pr.yc, color = :gray , linewidth = 1)
+    #     lines!(ax, Pr.xt, Pr.yt, color = :black, linewidth = 2)
+    #     lines!(ax, Pr.xb, Pr.yb, color = :black, linewidth = 2)
+    # end
+
+    # В calculate_blade_geometry мы возвращаем X, Y, Z и Pr[1]
+    function calculate_blade_geometry(F, ρK, Cα₁, Cβ⃰₂, P, S, l̄)
+        n_sections = 5
+        n_arc = 50 
+
+        swirl_params = (; α₁=Cα₁, F=F, ρK=ρK, β⃰₂=Cβ⃰₂)
+        R, a, b, c, ɤ = swirl_reverse(P[end], S[end], swirl_params)
+        
+        Pr1 = profile_build(S, R, 2, 1, 0.003  , 0.001 , 11, 6, l̄, 0  )
+        Pr2 = profile_build(S, R, 2, 2, 0.00285, 0.0008, 11, 6, l̄, Pr1)
+        Pr3 = profile_build(S, R, 2, 3, 0.00235, 0.0007, 11, 6, l̄, Pr1)
+        Pr4 = profile_build(S, R, 2, 4, 0.00175, 0.0006, 11, 6, l̄, Pr1)
+        Pr5 = profile_build(S, R, 2, 5, 0.00125, 0.0005, 11, 6, l̄, Pr1)
+        Pr = [Pr1, Pr2, Pr3, Pr4, Pr5]
+
+        n_total = length(Pr[1].xt) + n_arc + length(Pr[1].xb) + n_arc + 1
+        X = zeros(Float64, n_total, n_sections)
+        Y = zeros(Float64, n_total, n_sections)
+        Z = zeros(Float64, n_total, n_sections)
+
+        for i in 1:n_sections
+            cx, cy = Pr[i].cntr
+            z_val = Pr[i].r - Pr[1].r
+
+            xt_c = Pr[i].xt .- cx
+            yt_c = Pr[i].yt .- cy
+
+            arc_center2 = (Pr[i].l - cx, Pr[i].ξ - cy)
+            angles2 = range(deg2rad(90 + Pr[i].ϕ₂ᵗ), deg2rad(-90 + Pr[i].ϕ₂ᵇ), length=n_arc)
+            arc2_x = [arc_center2[1] + Pr[i].R₂ * cos(θ) for θ in angles2]
+            arc2_y = [arc_center2[2] + Pr[i].R₂ * sin(θ) for θ in angles2]
+
+            xb_c = reverse(Pr[i].xb .- cx)
+            yb_c = reverse(Pr[i].yb .- cy)
+
+            arc_center1 = (0 - cx, 0 - cy)
+            angles1 = range(deg2rad(90 + Pr[i].ϕ₁ᵗ), deg2rad(360 - 90 + Pr[i].ϕ₁ᵇ), length=n_arc)
+            arc1_x = [arc_center1[1] + Pr[i].R₁ * cos(θ) for θ in angles1]
+            arc1_y = [arc_center1[2] + Pr[i].R₁ * sin(θ) for θ in angles1]
+
+            full_x = vcat(xt_c, arc2_x, xb_c, reverse(arc1_x), [xt_c[1]])
+            full_y = vcat(yt_c, arc2_y, yb_c, reverse(arc1_y), [yt_c[1]])
+
+            X[:, i] .= full_x
+            Y[:, i] .= full_y
+            Z[:, i] .= z_val
+        end
+
+        return X, Y, Z, Pr[1]
+    end
+
+    # --- Подготовка данных и отрисовка ---
+    σ_matrix  = fill_matrix(:σ)
+    Δρ_matrix = fill_matrix(:Δρ)
+
+    with_theme(theme_latexfonts()) do
+        update_theme!(fontsize = 22)
+        fig = Figure(size=(1600, 800)) 
+        
+        # --- 1. Настройка осей ---
+        axis_settings = (
+            xminorticksvisible = true, xminorgridvisible = true,
+            xminorticks = IntervalsBetween(10),
+            yminorticksvisible = true, yminorgridvisible = true,
+            yminorticks = IntervalsBetween(10),
+        )
+
+        # Первая колонка: Графики σ и Δρ
+        ax_hm1 = Axis(fig[1, 1][1, 1]; ylabel = L"F", xlabel = L"\rho_K", 
+                      title = L"\sigma ($\alpha_1 '' = %$(Cα₁)$, $\beta^*_2 ' = %$(Cβ⃰₂)$)", axis_settings...)
+        ax_hm2 = Axis(fig[2, 1][1, 1]; ylabel = L"F", xlabel = L"\rho_K", 
+                      title = L"$\Delta \rho$ ($\alpha_1 '' = %$(Cα₁)$, $\beta^*_2 ' = %$(Cβ⃰₂)$)", axis_settings...)
+
+        # Вторая колонка: 2D Профиль
+		ax_shift = Axis(fig[1:2, 2][1, 1], aspect=DataAspect())
+		hidespines!(ax_shift); hidedecorations!(ax_shift)
+
+        # Третья колонка: 3D Лопатка
+        ax3d = Axis3(fig[1:2, 3], aspect = :data, azimuth = -pi, elevation = pi/8)
+        hidespines!(ax3d); hidedecorations!(ax3d)
+
+        # --- 2. Статичные графики ---
+        hm1 = heatmap!(ax_hm1, ρK_range, F_range, σ_matrix, rasterize = true)
+        Colorbar(fig[1, 1][1, 2], hm1, label="σ", width=15)
+        
+        hm2 = heatmap!(ax_hm2, ρK_range, F_range, abs.(Δρ_matrix), rasterize=true)
+        Colorbar(fig[2, 1][1, 2], hm2, label=L"\Delta \rho", width=15)
+
+		# Colorbar для канала (динамический)
+        cb_limits = Observable((0.0, 1.0))
+        Colorbar(fig[1:2, 2][1, 2], limits=cb_limits, label="t, mm", width=15, height = Relative(0.5), ticklabelspace = 40)
+
+		colsize!(fig.layout, 1, Relative(0.4))  # 40% ширины
+		colsize!(fig.layout, 2, Relative(0.4))  # 40% ширины
+		colsize!(fig.layout, 3, Relative(0.2))  # 20% ширины
+
+        # --- 3. Инициализация Observables ---
+        start_param = valid_FρK[1]
+        X_init, Y_init, Z_init, Pr1_init = calculate_blade_geometry(start_param.F, start_param.ρK, Cα₁, Cβ⃰₂, P, S, l̄)
+
+        X_obs = Observable(X_init)
+        Y_obs = Observable(Y_init)
+        Z_obs = Observable(Z_init)
+        point_obs = Observable(Point2f(start_param.ρK, start_param.F))
+
+        # --- 4. Связывание с Observables ---
+        
+        # 4.1. 3D Лопатка
+        surface!(ax3d, X_obs, Y_obs, Z_obs)
+        for i in [1, 5]
+            pts_2d = lift(X_obs, Y_obs) do x, y
+                [Point2f(x[j, i], y[j, i]) for j in 1:size(x, 1)]
+            end
+            p_fill = poly!(ax3d, pts_2d, color=cgrad(:viridis)[i==1 ? 0.0 : 1.0])
+            on(Z_obs) do z
+                translate!(p_fill, 0, 0, z[1, i])
+            end
+            translate!(p_fill, 0, 0, Z_init[1, i])
+        end
+        for i in 1:5
+            pts_3d = lift(X_obs, Y_obs, Z_obs) do x, y, z
+                [Point3f(x[j, i], y[j, i], z[j, i]) for j in 1:size(x, 1)]
+            end
+            lines!(ax3d, pts_3d, color = :black, linewidth = 1.5)
+        end
+
+        # 4.2. Тепловые карты
+        scatter!(ax_hm1, point_obs, color=:red, markersize=8)
+        scatter!(ax_hm2, point_obs, color=:red, markersize=8)
+
+
+        # --- 5. Запись анимации ---
+        points_to_animate = valid_FρK[1:100:end]
+        filepath = "assets/plots/optimization_anim.mp4"
+        
+        record(fig, filepath, points_to_animate; framerate = 5) do param
+            # Считаем новую геометрию и профиль
+            X_new, Y_new, Z_new, Pr1_new = calculate_blade_geometry(param.F, param.ρK, Cα₁, Cβ⃰₂, P, S, l̄)
+            
+            # Обновляем 3D и точки
+            X_obs[] = X_new
+            Y_obs[] = Y_new
+            Z_obs[] = Z_new
+            point_obs[] = Point2f(param.ρK, param.F)
+
+            # Обновление 2D Канала
+            empty!(ax_shift)
+            min_d, max_d = draw_2d_shift!(ax_shift, Pr1_new)
+            cb_limits[] = (min_d, max_d)
+            hidespines!(ax_shift); hidedecorations!(ax_shift)
+            autolimits!(ax_shift)
+        end
+        
+        PlutoUI.LocalResource(filepath)
+    end
+end
+  ╠═╡ =#
+
 # ╔═╡ b0aa65a1-3433-4b48-9196-d47e6e35379e
 md"# Приложение"
 
@@ -1185,410 +1589,6 @@ begin
 	md"Запись в файл"
 
 end
-
-# ╔═╡ 3a476e75-5619-4905-bcc3-e3942d3b83e0
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-    # --- Вспомогательные функции ---
-    
-    function fill_matrix(field)
-        matrix = fill(NaN, (length(ρK_range), length(F_range)))
-        for param in valid_FρK
-            i = findfirst(==(param.F), F_range)
-            j = findfirst(==(param.ρK), ρK_range)
-            if i !== nothing && j !== nothing
-                matrix[j, i] = getfield(param, field)
-            end
-        end
-        return matrix
-    end
-
-	function distance_fin(Pr, Δ)
-		d̄ = []
-
-		if Pr.type == 2
-			x1 = Pr.xt; x2 = Pr.xb
-			y1 = Pr.yt; y2 = Pr.yb
-		elseif Pr.type == 1
-			x1 = Pr.xb; x2 = Pr.xt
-			y1 = Pr.yb; y2 = Pr.yt
-		end
-	
-		for i in 1:length(x1)
-			j  = argmin( √( (x1[i]-x2[j])^2 + (y1[i]-y2[j]+Δ)^2 ) for j in 1:length(x2))
-			dᵢ = minimum(√( (x1[i]-x2[j])^2 + (y1[i]-y2[j]+Δ)^2 ) for j in 1:length(x2))
-		
-			push!(d̄, (; j, dᵢ))
-		end
-
-		d̄
-	end
-
-	function get_min_distances(x1, y1, x2, y2, shift_y)
-        # Ищем для каждой точки верхнего профиля (x1, y1) 
-        # ближайшую точку на нижнем профиле, смещенном на Δ (x2, y2 + shift_y)
-        res = []
-        for i in 1:length(x1)
-            p1 = [x1[i], y1[i]]
-            min_d = Inf
-            min_j = 1
-            for j in 1:length(x2)
-                p2 = [x2[j], y2[j] + shift_y]
-                d = sqrt((p1[1]-p2[1])^2 + (p1[2]-p2[2])^2)
-                if d < min_d
-                    min_d = d
-                    min_j = j
-                end
-            end
-            push!(res, (dᵢ = min_d, j = min_j))
-        end
-        return res
-    end
-
-	function draw_2d_shift!(ax, Pr)
-        Δ = Pr.type == 2 ? Pr.Z.t : -Pr.Z.t
-        # Используем нашу локальную функцию get_min_distances
-        ds = Pr.type == 2 ? get_min_distances(Pr.xt, Pr.yt, Pr.xb, Pr.yb, Δ) : 
-                            get_min_distances(Pr.xb, Pr.yb, Pr.xt, Pr.yt, Δ)
-
-        distances = [1000d.dᵢ for d in ds]
-        min_d, max_d = extrema(distances)
-        colors = [cgrad(:viridis)[(d - min_d)/(max_d - min_d + 1e-9)] for d in distances]
-
-        # Отрисовка линий канала
-        for i in 1:length(Pr.xt)
-            p1 = Pr.type == 2 ? [Pr.xt[i], Pr.yt[i]] : [Pr.xb[i], Pr.yb[i]]
-            p2 = Pr.type == 2 ? [Pr.xb[ds[i].j], Pr.yb[ds[i].j] + Δ] : [Pr.xt[ds[i].j], Pr.yt[ds[i].j] + Δ]
-            lines!(ax, [p1[1], p2[1]], [p1[2], p2[2]], color=colors[i], linewidth=3)
-        end
-
-		mod = Pr.type == 2 ? 1 : -1
-        dir = Pr.type == 2 ? :up : :down
-        pnt = Pr.type == 2 ? 2 : 1
-
-        scatter!(ax, Pr.cntr, color=:gray, markersize=10)
-        arc!(ax, color = :gray, linewidth = 1, Pr.cₘₐₓ.pₘ, Pr.cₘₐₓ.cₘ, 0, 2π)
-
-        α  = atan(Pr.ξ / Pr.l) + pi/2
-        dl = Pr.type == 2 ? 0.4Pr.l * cos(α) : 0.3Pr.l * cos(α)
-        diam_points = [
-            (Pr.cₘₐₓ.pₘ[1]+Pr.cₘₐₓ.cₘ*cos(α), Pr.cₘₐₓ.pₘ[2]+Pr.cₘₐₓ.cₘ*sin(α)),
-            (Pr.cₘₐₓ.pₘ[1]-Pr.cₘₐₓ.cₘ*cos(α), Pr.cₘₐₓ.pₘ[2]-Pr.cₘₐₓ.cₘ*sin(α)),
-            (
-                Pr.cₘₐₓ.pₘ[1]+mod*(-Pr.cₘₐₓ.cₘ*cos(α) - dl),
-                Pr.cₘₐₓ.pₘ[2]+mod*(-Pr.cₘₐₓ.cₘ*sin(α) - dl * tan(α))
-            )
-        ]
-
-        lines!(ax, color = :gray, linewidth = 1, linestyle = :dash, 
-               [diam_points[2], diam_points[3]])
-        
-        bracket!(ax, color=:gray, linewidth = 0, width = 0,
-                 diam_points[pnt], diam_points[3],
-                 text  = "c = $(round(Int, Pr.cₘₐₓ.cₘ * 2000)) mm")
-        
-        arrows2d!(ax, color = :gray, argmode = :endpoint,
-                  shaftwidth = 1, tipwidth = 8, tiplength = 6,
-                  tailwidth = 8, taillength = 6,
-                  tail = Point2f[(0, 0), (1, -0.5), (1, 0.5)],
-                  diam_points[1], diam_points[2])
-
-        # Контуры окружностей
-        diam_points_1 = [
-            (0 + Pr.R₁ * cos(α), 0 + Pr.R₁ * sin(α)+Δ),
-            (0 - Pr.R₁ * cos(α), 0 - Pr.R₁ * sin(α)+Δ),
-            (0 + Pr.R₁ * cos(α) + dl, 0 +Δ + Pr.R₁ * sin(α) + dl * tan(α))
-        ]
-        lines!(ax, color = :gray, linewidth = 1, [diam_points_1[2], diam_points_1[3]])
-        
-        bracket!(ax, color = :gray, linewidth = 0, width = 0,
-                 diam_points_1[3], diam_points_1[1],
-                 text = "⌀ $(round(Int, 2000Pr.R₁)) mm")
-
-        diam_points_2 = [
-            (Pr.l + Pr.R₂ * cos(α)     , Pr.ξ + Pr.R₂ * sin(α)+Δ),
-            (Pr.l - Pr.R₂ * cos(α)     , Pr.ξ - Pr.R₂ * sin(α)+Δ),
-            (Pr.l - mod * (Pr.R₂ * cos(α) + dl), Pr.ξ +Δ - mod * (Pr.R₂ * sin(α) + dl * tan(α)))
-        ]
-        
-        if Pr.type == 2
-            lines!(ax, color = :gray, linewidth = 1, [diam_points_2[1], diam_points_2[3]])
-            bracket!(ax, color = :gray, linewidth = 0, width = 0,
-                     diam_points_2[3], diam_points_2[2],
-                     text = "⌀ $(round(Int, 2000Pr.R₂)) mm")
-        elseif Pr.type == 1
-            lines!(ax, color = :gray, linewidth = 1, [diam_points_2[2], diam_points_2[3]])
-            bracket!(ax, color = :gray, linewidth = 0, width = 0,
-                     diam_points_2[3], diam_points_2[1],
-                     text = "⌀ $(round(Int, 2000Pr.R₂)) mm")
-        end
-
-        # Хорда
-        lines!(ax, color = :gray, linewidth = 1, linestyle = :dash, [0, Pr.l], [0+Δ, Pr.ξ+Δ])
-        bracket!(ax, color = :gray, linewidth = 1, 0, 0+Δ, Pr.l, Pr.ξ+Δ, orientation = dir,
-                 text = "b = $(round(Int, Pr.b * 10^3)) mm")
-
-        arc!(ax, (0, 0+Δ), Pr.R₁, 0, 2π, color = :gray, linewidth = 1)
-        arc!(ax, (Pr.l, Pr.ξ+Δ), Pr.R₂, 0, 2π, color = :gray, linewidth = 1)
-		arc!(ax, (0, 0), Pr.R₁, 0, 2π, color = :gray, linewidth = 1)
-        arc!(ax, (Pr.l, Pr.ξ), Pr.R₂, 0, 2π, color = :gray, linewidth = 1)
-
-		bracket!(ax, color = :gray, linewidth = 1, 0, 0, 0, Δ, orientation = Pr.type == 1 ? :down : :up, text = "Δ = $(round(Int, 1000Pr.Z.t)) mm" )
-		lines!(ax, color = :gray, linewidth = 1, linestyle = :dash, [0, 0], [0, Δ])
-
-        # Два профиля
-        for d_y in [0, Δ]
-            arc!(ax, (0, d_y), Pr.R₁, deg2rad(90+Pr.ϕ₁ᵗ), deg2rad(360-90+Pr.ϕ₁ᵇ), color=:black, linewidth=2)
-            arc!(ax, (Pr.l, Pr.ξ+d_y), Pr.R₂, deg2rad(90+Pr.ϕ₂ᵗ), deg2rad(-90+Pr.ϕ₂ᵇ), color=:black, linewidth=2)
-
-			lines!(ax, Pr.xc, Pr.yc .+ d_y, color= :gray, linewidth=1)
-            lines!(ax, Pr.xt, Pr.yt .+ d_y, color=:black, linewidth=2)
-            lines!(ax, Pr.xb, Pr.yb .+ d_y, color=:black, linewidth=2)
-        end
-        return min_d, max_d
-    end
-
-    # Функция отрисовки одного 2D-профиля на указанной оси
-    # function draw_profile!(ax, Pr)
-    #     mod = Pr.type == 2 ? 1 : -1
-    #     dir = Pr.type == 2 ? :up : :down
-    #     pnt = Pr.type == 2 ? 2 : 1
-
-    #     scatter!(ax, Pr.cntr, color=:gray, markersize=10)
-    #     arc!(ax, color = :gray, linewidth = 1, Pr.cₘₐₓ.pₘ, Pr.cₘₐₓ.cₘ, 0, 2π)
-
-    #     α  = atan(Pr.ξ / Pr.l) + pi/2
-    #     dl = Pr.type == 2 ? 0.2Pr.l * cos(α) : 0.3Pr.l * cos(α)
-    #     diam_points = [
-    #         (Pr.cₘₐₓ.pₘ[1]+Pr.cₘₐₓ.cₘ*cos(α), Pr.cₘₐₓ.pₘ[2]+Pr.cₘₐₓ.cₘ*sin(α)),
-    #         (Pr.cₘₐₓ.pₘ[1]-Pr.cₘₐₓ.cₘ*cos(α), Pr.cₘₐₓ.pₘ[2]-Pr.cₘₐₓ.cₘ*sin(α)),
-    #         (
-    #             Pr.cₘₐₓ.pₘ[1]+mod*(-Pr.cₘₐₓ.cₘ*cos(α) - dl),
-    #             Pr.cₘₐₓ.pₘ[2]+mod*(-Pr.cₘₐₓ.cₘ*sin(α) - dl * tan(α))
-    #         )
-    #     ]
-
-    #     lines!(ax, color = :gray, linewidth = 1, linestyle = :dash, 
-    #            [diam_points[2], diam_points[3]])
-        
-    #     bracket!(ax, color=:gray, linewidth = 0, width = 0,
-    #              diam_points[pnt], diam_points[3],
-    #              text  = "c = $(round(Int, Pr.cₘₐₓ.cₘ * 2000)) mm")
-        
-    #     arrows2d!(ax, color = :gray, argmode = :endpoint,
-    #               shaftwidth = 1, tipwidth = 8, tiplength = 6,
-    #               tailwidth = 8, taillength = 6,
-    #               tail = Point2f[(0, 0), (1, -0.5), (1, 0.5)],
-    #               diam_points[1], diam_points[2])
-
-    #     # Контуры окружностей
-    #     diam_points_1 = [
-    #         (0 + Pr.R₁ * cos(α), 0 + Pr.R₁ * sin(α)),
-    #         (0 - Pr.R₁ * cos(α), 0 - Pr.R₁ * sin(α)),
-    #         (0 + Pr.R₁ * cos(α) + dl, 0 + Pr.R₁ * sin(α) + dl * tan(α))
-    #     ]
-    #     lines!(ax, color = :gray, linewidth = 1, [diam_points_1[2], diam_points_1[3]])
-        
-    #     bracket!(ax, color = :gray, linewidth = 0, width = 0,
-    #              diam_points_1[3], diam_points_1[1],
-    #              text = "⌀ $(round(Int, 2000Pr.R₁)) mm")
-
-    #     diam_points_2 = [
-    #         (Pr.l + Pr.R₂ * cos(α)     , Pr.ξ + Pr.R₂ * sin(α)),
-    #         (Pr.l - Pr.R₂ * cos(α)     , Pr.ξ - Pr.R₂ * sin(α)),
-    #         (Pr.l - mod * (Pr.R₂ * cos(α) + dl), Pr.ξ - mod * (Pr.R₂ * sin(α) + dl * tan(α)))
-    #     ]
-        
-    #     if Pr.type == 2
-    #         lines!(ax, color = :gray, linewidth = 1, [diam_points_2[1], diam_points_2[3]])
-    #         bracket!(ax, color = :gray, linewidth = 0, width = 0,
-    #                  diam_points_2[3], diam_points_2[2],
-    #                  text = "⌀ $(round(Int, 2000Pr.R₂)) mm")
-    #     elseif Pr.type == 1
-    #         lines!(ax, color = :gray, linewidth = 1, [diam_points_2[2], diam_points_2[3]])
-    #         bracket!(ax, color = :gray, linewidth = 0, width = 0,
-    #                  diam_points_2[3], diam_points_2[1],
-    #                  text = "⌀ $(round(Int, 2000Pr.R₂)) mm")
-    #     end
-
-    #     # Хорда
-    #     lines!(ax, color = :gray, linewidth = 1, linestyle = :dash, [0, Pr.l], [0, Pr.ξ])
-    #     bracket!(ax, color = :gray, linewidth = 1, 0, 0, Pr.l, Pr.ξ, orientation = dir,
-    #              text = "b = $(round(Int, Pr.b * 10^3)) mm")
-
-    #     arc!(ax, (0, 0), Pr.R₁, 0, 2π, color = :gray, linewidth = 1)
-    #     arc!(ax, (Pr.l, Pr.ξ), Pr.R₂, 0, 2π, color = :gray, linewidth = 1)
-
-    #     # Дуги скругления (входная и выходная кромки)
-    #     arc!(ax, color = :black, linewidth = 2, (0, 0), Pr.R₁,
-    #          deg2rad(90 + Pr.ϕ₁ᵗ), deg2rad(360 - 90 + Pr.ϕ₁ᵇ))
-    #     arc!(ax, color = :black, linewidth = 2, (Pr.l, Pr.ξ), Pr.R₂,
-    #          deg2rad(90 + Pr.ϕ₂ᵗ), deg2rad(-90 + Pr.ϕ₂ᵇ))
-
-    #     # Профиль лопатки
-    #     lines!(ax, Pr.xc, Pr.yc, color = :gray , linewidth = 1)
-    #     lines!(ax, Pr.xt, Pr.yt, color = :black, linewidth = 2)
-    #     lines!(ax, Pr.xb, Pr.yb, color = :black, linewidth = 2)
-    # end
-
-    # В calculate_blade_geometry мы возвращаем X, Y, Z и Pr[1]
-    function calculate_blade_geometry(F, ρK, Cα₁, Cβ⃰₂, P, S, l̄)
-        n_sections = 5
-        n_arc = 50 
-
-        swirl_params = (; α₁=Cα₁, F=F, ρK=ρK, β⃰₂=Cβ⃰₂)
-        R, a, b, c, ɤ = swirl_reverse(P[end], S[end], swirl_params)
-        
-        Pr1 = profile_build(S, R, 2, 1, 0.003  , 0.001 , 11, 6, l̄, 0  )
-        Pr2 = profile_build(S, R, 2, 2, 0.00285, 0.0008, 11, 6, l̄, Pr1)
-        Pr3 = profile_build(S, R, 2, 3, 0.00235, 0.0007, 11, 6, l̄, Pr1)
-        Pr4 = profile_build(S, R, 2, 4, 0.00175, 0.0006, 11, 6, l̄, Pr1)
-        Pr5 = profile_build(S, R, 2, 5, 0.00125, 0.0005, 11, 6, l̄, Pr1)
-        Pr = [Pr1, Pr2, Pr3, Pr4, Pr5]
-
-        n_total = length(Pr[1].xt) + n_arc + length(Pr[1].xb) + n_arc + 1
-        X = zeros(Float64, n_total, n_sections)
-        Y = zeros(Float64, n_total, n_sections)
-        Z = zeros(Float64, n_total, n_sections)
-
-        for i in 1:n_sections
-            cx, cy = Pr[i].cntr
-            z_val = Pr[i].r - Pr[1].r
-
-            xt_c = Pr[i].xt .- cx
-            yt_c = Pr[i].yt .- cy
-
-            arc_center2 = (Pr[i].l - cx, Pr[i].ξ - cy)
-            angles2 = range(deg2rad(90 + Pr[i].ϕ₂ᵗ), deg2rad(-90 + Pr[i].ϕ₂ᵇ), length=n_arc)
-            arc2_x = [arc_center2[1] + Pr[i].R₂ * cos(θ) for θ in angles2]
-            arc2_y = [arc_center2[2] + Pr[i].R₂ * sin(θ) for θ in angles2]
-
-            xb_c = reverse(Pr[i].xb .- cx)
-            yb_c = reverse(Pr[i].yb .- cy)
-
-            arc_center1 = (0 - cx, 0 - cy)
-            angles1 = range(deg2rad(90 + Pr[i].ϕ₁ᵗ), deg2rad(360 - 90 + Pr[i].ϕ₁ᵇ), length=n_arc)
-            arc1_x = [arc_center1[1] + Pr[i].R₁ * cos(θ) for θ in angles1]
-            arc1_y = [arc_center1[2] + Pr[i].R₁ * sin(θ) for θ in angles1]
-
-            full_x = vcat(xt_c, arc2_x, xb_c, reverse(arc1_x), [xt_c[1]])
-            full_y = vcat(yt_c, arc2_y, yb_c, reverse(arc1_y), [yt_c[1]])
-
-            X[:, i] .= full_x
-            Y[:, i] .= full_y
-            Z[:, i] .= z_val
-        end
-
-        return X, Y, Z, Pr[1]
-    end
-
-    # --- Подготовка данных и отрисовка ---
-    σ_matrix  = fill_matrix(:σ)
-    Δρ_matrix = fill_matrix(:Δρ)
-
-    with_theme(theme_latexfonts()) do
-        update_theme!(fontsize = 22)
-        fig = Figure(size=(1600, 800)) 
-        
-        # --- 1. Настройка осей ---
-        axis_settings = (
-            xminorticksvisible = true, xminorgridvisible = true,
-            xminorticks = IntervalsBetween(10),
-            yminorticksvisible = true, yminorgridvisible = true,
-            yminorticks = IntervalsBetween(10),
-        )
-
-        # Первая колонка: Графики σ и Δρ
-        ax_hm1 = Axis(fig[1, 1][1, 1]; ylabel = L"F", xlabel = L"\rho_K", 
-                      title = L"\sigma ($\alpha_1 '' = %$(Cα₁)$, $\beta^*_2 ' = %$(Cβ⃰₂)$)", axis_settings...)
-        ax_hm2 = Axis(fig[2, 1][1, 1]; ylabel = L"F", xlabel = L"\rho_K", 
-                      title = L"$\Delta \rho$ ($\alpha_1 '' = %$(Cα₁)$, $\beta^*_2 ' = %$(Cβ⃰₂)$)", axis_settings...)
-
-        # Вторая колонка: 2D Профиль
-		ax_shift = Axis(fig[1:2, 2][1, 1], aspect=DataAspect())
-		hidespines!(ax_shift); hidedecorations!(ax_shift)
-
-        # Третья колонка: 3D Лопатка
-        ax3d = Axis3(fig[1:2, 3], aspect = :data, azimuth = -pi, elevation = pi/8)
-        hidespines!(ax3d); hidedecorations!(ax3d)
-
-        # --- 2. Статичные графики ---
-        hm1 = heatmap!(ax_hm1, ρK_range, F_range, σ_matrix, rasterize = true)
-        Colorbar(fig[1, 1][1, 2], hm1, label="σ", width=15)
-        
-        hm2 = heatmap!(ax_hm2, ρK_range, F_range, abs.(Δρ_matrix), rasterize=true)
-        Colorbar(fig[2, 1][1, 2], hm2, label=L"\Delta \rho", width=15)
-
-		# Colorbar для канала (динамический)
-        cb_limits = Observable((0.0, 1.0))
-        Colorbar(fig[1:2, 2][1, 2], limits=cb_limits, label="t, mm", width=15, height = Relative(0.5), ticklabelspace = 40)
-
-		colsize!(fig.layout, 1, Relative(0.4))  # 40% ширины
-		colsize!(fig.layout, 2, Relative(0.4))  # 40% ширины
-		colsize!(fig.layout, 3, Relative(0.2))  # 20% ширины
-
-        # --- 3. Инициализация Observables ---
-        start_param = valid_FρK[1]
-        X_init, Y_init, Z_init, Pr1_init = calculate_blade_geometry(start_param.F, start_param.ρK, Cα₁, Cβ⃰₂, P, S, l̄)
-
-        X_obs = Observable(X_init)
-        Y_obs = Observable(Y_init)
-        Z_obs = Observable(Z_init)
-        point_obs = Observable(Point2f(start_param.ρK, start_param.F))
-
-        # --- 4. Связывание с Observables ---
-        
-        # 4.1. 3D Лопатка
-        surface!(ax3d, X_obs, Y_obs, Z_obs)
-        for i in [1, 5]
-            pts_2d = lift(X_obs, Y_obs) do x, y
-                [Point2f(x[j, i], y[j, i]) for j in 1:size(x, 1)]
-            end
-            p_fill = poly!(ax3d, pts_2d, color=cgrad(:viridis)[i==1 ? 0.0 : 1.0])
-            on(Z_obs) do z
-                translate!(p_fill, 0, 0, z[1, i])
-            end
-            translate!(p_fill, 0, 0, Z_init[1, i])
-        end
-        for i in 1:5
-            pts_3d = lift(X_obs, Y_obs, Z_obs) do x, y, z
-                [Point3f(x[j, i], y[j, i], z[j, i]) for j in 1:size(x, 1)]
-            end
-            lines!(ax3d, pts_3d, color = :black, linewidth = 1.5)
-        end
-
-        # 4.2. Тепловые карты
-        scatter!(ax_hm1, point_obs, color=:red, markersize=8)
-        scatter!(ax_hm2, point_obs, color=:red, markersize=8)
-
-
-        # --- 5. Запись анимации ---
-        points_to_animate = valid_FρK[1:100:end]
-        filepath = "assets/plots/optimization_anim.mp4"
-        
-        record(fig, filepath, points_to_animate; framerate = 5) do param
-            # Считаем новую геометрию и профиль
-            X_new, Y_new, Z_new, Pr1_new = calculate_blade_geometry(param.F, param.ρK, Cα₁, Cβ⃰₂, P, S, l̄)
-            
-            # Обновляем 3D и точки
-            X_obs[] = X_new
-            Y_obs[] = Y_new
-            Z_obs[] = Z_new
-            point_obs[] = Point2f(param.ρK, param.F)
-
-            # Обновление 2D Канала
-            empty!(ax_shift)
-            min_d, max_d = draw_2d_shift!(ax_shift, Pr1_new)
-            cb_limits[] = (min_d, max_d)
-            hidespines!(ax_shift); hidedecorations!(ax_shift)
-            autolimits!(ax_shift)
-        end
-        
-        PlutoUI.LocalResource(filepath)
-    end
-end
-  ╠═╡ =#
 
 # ╔═╡ f3210104-8de0-4394-997c-8cc2858c800a
 begin

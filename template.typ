@@ -1,4 +1,4 @@
-#import "@preview/cetz:0.5.0"
+#import "@preview/cetz:0.5.2"
 #import "@preview/lilaq:0.6.0" as lq
 #import "@preview/zero:0.6.1": *
 #import "@preview/fletcher:0.5.8" as fletcher: diagram, node, edge
@@ -165,6 +165,16 @@
     }
   }
 
+  // Lilaq diagrams
+  show: lq.set-diagram(
+    width: 100%,
+    yaxis: (exponent:0),
+    xaxis: (exponent:0)
+  )
+  show lq.selector(lq.legend): set grid(row-gutter: 2pt)
+  
+
+  // Numerals formatting using Zero
   // set-num(
   //   // exponent: "eng",
   //   product: math.dot
