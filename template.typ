@@ -6,7 +6,6 @@
 
 #let conf(body) = {
   set text(
-    font: "Times New Roman",
     size: 14pt,
     lang: "ru"
   )
@@ -69,10 +68,12 @@
   }
   show figure.where(kind: table): set figure(supplement: [Таблица])
   
-  set list(marker: [--])
   set figure.caption(separator: [ --- ])
   show figure.where(kind:"listing"): set figure.caption(position:top)
   show figure.caption.where(kind: "listing"): it => align(left, it)
+
+  set list(marker: [--], indent: 1.25cm)
+  set enum(indent: 1.25cm, full: true)
 
   show figure.where(kind: table): set figure.caption(position:top)
   show figure.caption.where(kind: table): it => align(left, it)
@@ -172,6 +173,7 @@
     xaxis: (exponent:0)
   )
   show lq.selector(lq.legend): set grid(row-gutter: 2pt)
+  show lq.selector(lq.tick-label): set text(12pt)
   
 
   // Numerals formatting using Zero
@@ -189,6 +191,8 @@
 }
 
 #let noind = h(-1.25cm)
+#let undo-line() = context {v(-measure[A].height - 0.75em)}
+#let skip-line() = context {v( measure[A].height + 0.75em)}
 
 #let centred-heading(title) = align(center, heading(numbering:none, title))
 
