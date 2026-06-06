@@ -1232,8 +1232,8 @@
 #let Prt = num(0.07900699148263503) 
 #let RawPrt = 0.07900699148263503
  
-#let Prsz = num(58.0) 
-#let RawPrsz = 58.0
-#let Prst = num(0.07900699148263503) 
-#let RawPrst = 0.07900699148263503
+#let Prsz = num(56.0) 
+#let RawPrsz = 56.0
+#let Prst = num(0.07956647245687685) 
+#let RawPrst = 0.07956647245687685
  

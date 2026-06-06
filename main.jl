@@ -1687,7 +1687,7 @@ begin
 			  typst_vars(R[5]; prefix ="R5"), "\n \n",
 
 			  typst_vars(Pr3.Z;  prefix ="Pr"), "\n \n",
-			  typst_vars(Pr3.Z; prefix ="Prs"), "\n \n",
+			  typst_vars(Prs3.Z; prefix ="Prs"), "\n \n",
 			  
 			 )
 	end
@@ -4080,7 +4080,7 @@ version = "4.1.0+0"
 # ╟─4b0d698d-7921-4bf0-b5d4-0bf680d992e5
 # ╟─fb7eb31f-8d28-4e05-b994-29a85e359b14
 # ╟─56a5a75a-20ff-443e-992a-c8a5957b7a90
-# ╠═09e32411-d88a-456f-8118-300e1b9f981b
+# ╟─09e32411-d88a-456f-8118-300e1b9f981b
 # ╟─40561c16-193e-4349-bc16-a7d9ceb55f62
 # ╟─0648057a-709b-40bb-ba4c-6de37981fc82
 # ╟─ec47fa62-62ea-4bf8-a57f-9e6b10b5fa0b
@@ -4091,7 +4091,7 @@ version = "4.1.0+0"
 # ╟─23866f8f-bdff-45be-afcd-91d3c87a200e
 # ╟─3e5014a8-e39f-4d3c-bb2f-122dea8482bb
 # ╟─e24903de-8706-4d29-aaf0-2005799675e1
-# ╠═34f423b5-2564-41f9-b7da-847595973ba8
+# ╟─34f423b5-2564-41f9-b7da-847595973ba8
 # ╟─1f21d0d2-43a3-489b-9b77-d09d0824f799
 # ╟─4e7e1ddb-8a03-4818-be9e-fa31698faf07
 # ╟─4acc88bf-4bbf-49b5-8006-920901d8ddc9
@@ -4102,7 +4102,7 @@ version = "4.1.0+0"
 # ╟─d51bd461-3106-4b8d-9d3a-66c7fb6c8ab1
 # ╟─43b474fc-51fa-4aef-86fa-cba0eb59bcf9
 # ╟─9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
-# ╟─20f45d03-754e-4d6a-b1ad-431745281c4e
+# ╠═20f45d03-754e-4d6a-b1ad-431745281c4e
 # ╟─a79a9761-eb35-4000-9e86-a6d109feed8d
 # ╠═a50cd219-7dc9-46d4-9e9e-9fec5fdbbe52
 # ╟─d98408fe-9751-4f1d-8131-8e4ff6e5eb51
