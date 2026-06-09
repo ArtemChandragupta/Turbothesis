@@ -57,6 +57,7 @@
     it
     linebreak()
   }
+  show figure: set text(hyphenate: false)
   show figure.where(kind: table): it => {
     set figure.caption(position: top)
     show figure.caption: it => align(left, it)

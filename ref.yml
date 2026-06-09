@@ -173,3 +173,11 @@ SpecRus:
    city: Санкт-Петербург
    publisher: СПбПУ
    date: 2024
+
+Viridis:
+   type: article
+   title: Accessible Color Sequences for Data Visualization
+   author: Petroff, Matthew
+   date: 2021
+   serial-number:
+      doi: "10.48550/2107.02270"
