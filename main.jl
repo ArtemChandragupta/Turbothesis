@@ -1480,7 +1480,7 @@ begin
 		z     = round(Lᵒ / tₒₚₜ)
 		t     = Lᵒ / z
 
-		(; c̄, t̄ₒₚₜ, tₒₚₜ, Lᵒ, z, t)
+		(; c̄, t̄ₒₚₜ, tₒₚₜ, Lᵒ, z, t, b, c, r)
 	end
 
 	md"λ Вычисление числа лопаток"
@@ -1688,6 +1688,8 @@ begin
 
 			  typst_vars(Pr3.Z;  prefix ="Pr"), "\n \n",
 			  typst_vars(Prs3.Z; prefix ="Prs"), "\n \n",
+			  typst_vars(Pr1.Z;  prefix ="Pr"), "\n \n",
+			  typst_vars(Prs5.Z; prefix ="Prs"), "\n \n",
 			  
 			 )
 	end
@@ -4108,7 +4110,7 @@ version = "4.1.0+0"
 # ╟─d98408fe-9751-4f1d-8131-8e4ff6e5eb51
 # ╟─e12ca256-c439-4eac-83f0-e7ccff7c749b
 # ╟─0fb5895e-2d20-4716-86ba-3ee7a3c55433
-# ╟─fdfad875-453c-4a56-ad68-2b56bdeb2a16
+# ╠═fdfad875-453c-4a56-ad68-2b56bdeb2a16
 # ╟─3a476e75-5619-4905-bcc3-e3942d3b83e0
 # ╟─b0aa65a1-3433-4b48-9196-d47e6e35379e
 # ╟─7e82ca6c-5c36-4c0d-ba07-914ff604f107
@@ -4120,10 +4122,10 @@ version = "4.1.0+0"
 # ╟─bd295267-109a-4c84-bba3-7cdd0d682b18
 # ╟─ca7636ed-2d30-4086-bc61-ef31ab371969
 # ╟─5d979de0-beb0-41df-a5cd-779eec0e611f
-# ╟─456abb60-9448-4a7b-9331-04c38e6d7cc0
+# ╠═456abb60-9448-4a7b-9331-04c38e6d7cc0
 # ╟─93863518-c9c4-46f4-a33b-a7b32e815ad0
 # ╟─77b92f16-e304-433e-bbf1-857ec40d08c2
-# ╟─c4fabc38-a030-4e61-96d5-4d4ecdf0c5e2
+# ╠═c4fabc38-a030-4e61-96d5-4d4ecdf0c5e2
 # ╟─f3210104-8de0-4394-997c-8cc2858c800a
 # ╟─8fe1c00d-4ebb-420d-8349-165b663f0d6a
 # ╟─fcc47753-9b48-4bf2-8b0e-02b8f8417fe7
