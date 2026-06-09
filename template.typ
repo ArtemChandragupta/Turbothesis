@@ -104,19 +104,16 @@
 
       #v(4em)
 
-      #table(
-        columns:(1.5fr, 1fr, 1fr), align: left + bottom,
-        stroke: none, row-gutter: 10pt,
+      #grid(
+        columns:(1fr, 1fr), align: left + bottom, row-gutter: 2.5em,
         [Выполнил: \ Студент гр. 3231303/21201],
-        "_____________", [А. К. Дмитриев],
+        align(right)[А. К. Дмитриев],
     
-        [],[],[],
         [Руководитель: \ Профессор ВШЭМ, д.т.н.],
-        "_____________", [В. А. Черников],
+        align(right)[В. А. Черников],
 
-        [],[],[],
         [Консультант по нормоконтролю: \ Доцент ВШЭМ, к.т.н.],
-        "_____________", [Ю. В. Матвеев]
+        align(right)[Ю. В. Матвеев]
       )
     ]
 
@@ -186,7 +183,6 @@
 
     + Консультанты по работе:
       - Коршунов Андрей Васильевич.
-      // - Широких Андрей Антонович;
 
     + Дата выдачи задания: 1 апреля 2025 года.
 
@@ -228,6 +224,7 @@
     show heading: set align(center)
     it
   }
+  show bibliography: set text(hyphenate: false)
 
   // Уравнения - нумерация только для упоминаемых
   set math.equation(
@@ -273,10 +270,10 @@
 #let skip-line() = context {v( measure[A].height + 0.75em)}
 
 #let centred-heading(title) = align(center, heading(numbering:none, title))
+#let abstract-heading(title) = align(center, heading(numbering:none, outlined: false, title))
 
 #let appendix(body) = {
   set heading(numbering: none, supplement: [Приложение])
-  counter(heading).update(0)
   set text(hyphenate: false, size: 14pt, weight: "regular")
   body
 }
