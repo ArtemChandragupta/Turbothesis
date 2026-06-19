@@ -1894,7 +1894,7 @@ begin
 
 		with_theme(theme_latexfonts()) do
 			fig = Figure(
-				figure_padding = 1
+				figure_padding = 1, size = (500, 600)
 			)
     		ax = Axis(fig[1, 1], aspect = DataAspect())
 			hidespines!(ax); hidedecorations!(ax)
@@ -2024,12 +2024,16 @@ begin
     		lines!(ax, Pr.xt, Pr.yt .+ Δ, color = :black, linewidth = 2)
     		lines!(ax, Pr.xb, Pr.yb .+ Δ, color = :black, linewidth = 2)
 
-			bracket!(ax, color = :gray, linewidth = 1, 0, 0, 0, Δ, orientation = Pr.type == 2 ? :down : :up, text = "Δ = $(round(Int, 1000Pr.Z.t)) mm" )
+            ratio = round(distances[1] / distances[end], digits = 2)
+
+			bracket!(ax, color = :gray, linewidth = 1, 0, 0, 0, Δ, orientation = Pr.type == 2 ? :down : :up, text = "Δ = $(round(Int, 1000Pr.Z.t)) mm, K = $(ratio)" )
 			lines!(ax, color = :gray, linewidth = 1, linestyle = :dash, [0, 0], [0, Δ])
 
 			Colorbar(fig[1, 2], limits=(min_dist,max_dist), minorticksvisible=true,
 					 label = L"t, \ м м"
 					)
+
+			colgap!(fig.layout, 10)
 
 			save("assets/profiles/$(Pr.type)/profile_combined$(Pr.n).svg", fig)
     
@@ -4085,8 +4089,8 @@ version = "4.1.0+0"
 # ╟─09e32411-d88a-456f-8118-300e1b9f981b
 # ╟─40561c16-193e-4349-bc16-a7d9ceb55f62
 # ╟─0648057a-709b-40bb-ba4c-6de37981fc82
-# ╟─ec47fa62-62ea-4bf8-a57f-9e6b10b5fa0b
-# ╟─65781f50-667a-44c0-beb2-466dfb293d36
+# ╠═ec47fa62-62ea-4bf8-a57f-9e6b10b5fa0b
+# ╠═65781f50-667a-44c0-beb2-466dfb293d36
 # ╟─77bbea27-c0fa-4320-ab84-ff91730410e3
 # ╟─7290e07c-eedc-429f-a2fa-7130dae8da37
 # ╟─c2b940ae-7013-4184-916f-cc2c6c3bb718
@@ -4095,7 +4099,7 @@ version = "4.1.0+0"
 # ╟─e24903de-8706-4d29-aaf0-2005799675e1
 # ╟─34f423b5-2564-41f9-b7da-847595973ba8
 # ╟─1f21d0d2-43a3-489b-9b77-d09d0824f799
-# ╟─4e7e1ddb-8a03-4818-be9e-fa31698faf07
+# ╠═4e7e1ddb-8a03-4818-be9e-fa31698faf07
 # ╟─4acc88bf-4bbf-49b5-8006-920901d8ddc9
 # ╟─7e4039e8-ed6c-46eb-a079-9df82d4272d6
 # ╟─d1889b73-726a-468b-9bb9-e69cd81a796b
@@ -4104,13 +4108,13 @@ version = "4.1.0+0"
 # ╟─d51bd461-3106-4b8d-9d3a-66c7fb6c8ab1
 # ╟─43b474fc-51fa-4aef-86fa-cba0eb59bcf9
 # ╟─9ade3b75-1232-4b47-bd1f-a5ac636d3fc6
-# ╠═20f45d03-754e-4d6a-b1ad-431745281c4e
+# ╟─20f45d03-754e-4d6a-b1ad-431745281c4e
 # ╟─a79a9761-eb35-4000-9e86-a6d109feed8d
 # ╠═a50cd219-7dc9-46d4-9e9e-9fec5fdbbe52
 # ╟─d98408fe-9751-4f1d-8131-8e4ff6e5eb51
 # ╟─e12ca256-c439-4eac-83f0-e7ccff7c749b
 # ╟─0fb5895e-2d20-4716-86ba-3ee7a3c55433
-# ╠═fdfad875-453c-4a56-ad68-2b56bdeb2a16
+# ╟─fdfad875-453c-4a56-ad68-2b56bdeb2a16
 # ╟─3a476e75-5619-4905-bcc3-e3942d3b83e0
 # ╟─b0aa65a1-3433-4b48-9196-d47e6e35379e
 # ╟─7e82ca6c-5c36-4c0d-ba07-914ff604f107
@@ -4122,13 +4126,13 @@ version = "4.1.0+0"
 # ╟─bd295267-109a-4c84-bba3-7cdd0d682b18
 # ╟─ca7636ed-2d30-4086-bc61-ef31ab371969
 # ╟─5d979de0-beb0-41df-a5cd-779eec0e611f
-# ╠═456abb60-9448-4a7b-9331-04c38e6d7cc0
+# ╟─456abb60-9448-4a7b-9331-04c38e6d7cc0
 # ╟─93863518-c9c4-46f4-a33b-a7b32e815ad0
 # ╟─77b92f16-e304-433e-bbf1-857ec40d08c2
-# ╠═c4fabc38-a030-4e61-96d5-4d4ecdf0c5e2
+# ╟─c4fabc38-a030-4e61-96d5-4d4ecdf0c5e2
 # ╟─f3210104-8de0-4394-997c-8cc2858c800a
 # ╟─8fe1c00d-4ebb-420d-8349-165b663f0d6a
-# ╟─fcc47753-9b48-4bf2-8b0e-02b8f8417fe7
+# ╠═fcc47753-9b48-4bf2-8b0e-02b8f8417fe7
 # ╟─f2c9597e-84c3-4e0a-8fc0-73131b7254ce
 # ╟─9759fc89-22be-4927-9353-24161255a800
 # ╟─e3eb9ae9-4a31-4ce2-9ca7-607abd52e8f6
