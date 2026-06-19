@@ -1861,7 +1861,7 @@ $ z_s = ceil(l''/t_"opt") = ceil(PrsLᵒ / Prsr) = Prsz. $
 #undo-line()
 
 #figure(
-  image("assets/profiles/2/profile_combined5.svg"),
+  image("assets/profiles/2/profile_combined5.svg", width:62%),
   caption: [Профили РЛ в периферийном сечении и демонстрация конфузорности канала между ними]
 ) <blade-last>
 
