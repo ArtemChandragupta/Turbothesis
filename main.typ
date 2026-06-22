@@ -1081,20 +1081,20 @@ $ Y = u_2 dot sqrt(m / (2 H_(0 T) ) ) = Tu2 dot sqrt( COm / (2 dot TH0ₜ) ) = C
     node(name: <P0>, (0,0), corner-radius: 10pt, [
       Получение исходных данных
     ]),
-    edge(),
+    edge("-|>"),
 
     node(name: <P1>, (0,1), [
       Инициализация: $ [R], [R^*] $ 
     ]),
-    edge(),
+    edge("-|>"),
 
-    node(name: <Cyc1>, (0,2), shape: diamond,
+    node(name: <Cyc1>, (0,2), shape: hexagon,
       inset: 0.8em, [
         Цикл по $#sym.Phi in [0.94, 0.98] $
       ]
     ),
 
-    node(name: <Cyc2>, (-1,3), shape: diamond,
+    node(name: <Cyc2>, (-1,3), shape: hexagon,
       inset: 0.8em, [
         Цикл по $#sym.Psi in [0.94, 0.98] $
       ]
@@ -1108,8 +1108,8 @@ $ Y = u_2 dot sqrt(m / (2 H_(0 T) ) ) = Tu2 dot sqrt( COm / (2 dot TH0ₜ) ) = C
     ),
     edge("-|>"),
 
-    node(name: <CycG>, (-1,5), shape: diamond,
-      [Цикл по \ $ G_i in [G_A-20, G_A+20]$ \ #hide[t]]
+    node(name: <CycG>, (-1,5), shape: hexagon,
+      [Цикл по \ $ G_i in [G_A-20, G_A+20]$]
     ),
     edge("-|>"),
 
@@ -1144,18 +1144,18 @@ $ Y = u_2 dot sqrt(m / (2 H_(0 T) ) ) = Tu2 dot sqrt( COm / (2 dot TH0ₜ) ) = C
     edge(<G.east>, (-0.5, 10), "d,d", <result.east>, "-|>",[Нет], label-pos: 20%),
 
     edge(<CycG.west>, (-2.0,5), (-2.0,9.4), (-1,9.4), <G.north>,
-      "-|>", [Конец цикла], label-pos: 8%, label-sep: 5pt
+      "-|>", [Конец цикла], label-pos: 15%, label-sep: 5pt
     ),
 
 
 
-    edge(<Cyc1.east>, (1,2), <InitDelta>, "-|>", [Конец цикла], label-pos: 10%),
+    edge(<Cyc1.east>, (1,2), <InitDelta>, "-|>", [Конец цикла], label-pos: 15%),
     node(name: <InitDelta>, (1,3),
       [Инициализация: \ $Delta N_min = infinity$, $R^*$]
     ),
     edge("-|>"),
 
-    node(name: <CycRes>, (1,4), shape: diamond,
+    node(name: <CycRes>, (1,4), shape: hexagon,
       [Цикл по $R^*_i in [R^*] $]
     ),
     edge("-|>"),
@@ -1181,7 +1181,7 @@ $ Y = u_2 dot sqrt(m / (2 H_(0 T) ) ) = Tu2 dot sqrt( COm / (2 dot TH0ₜ) ) = C
     node(name: <end>, (0,7), corner-radius: 10pt, [
       Вывод всех результатов \ и их передача \ в следующие расчеты  
     ]),
-    edge(<CycRes>, "l", <end-start>, "-|>", [Конец цикла], label-pos: 10%)
+    edge(<CycRes>, "l", <end-start>, "-|>", [Конец цикла], label-pos: 15%)
   )),
   caption: [Условная схема алгоритма расчета турбины по среднему диаметру]
 ) <Block-1>
@@ -1417,15 +1417,15 @@ $ <Swirl-stop>
       Инициализация:\ $[R], R^* $ 
     ]), edge("-|>"),
 
-    node(name: <Cyc1>, (0,2), shape: diamond, inset: 0.8em, [
+    node(name: <Cyc1>, (0,2), shape: hexagon, inset: 0.8em, [
         Цикл по $F in [-0.5, 0] $
     ]),
 
-    node(name: <Cyc2>, (-1,3), shape: diamond, inset: 0.8em, [
+    node(name: <Cyc2>, (-1,3), shape: hexagon, inset: 0.8em, [
         Цикл по $rho'_k in [0.2, 0.5] $
     ]),
     edge(<Cyc1.west>, (-1,2), <Cyc2.north>, "-|>"),
-    edge(<Cyc2.east>, ( 0,3), <Cyc1.south>, "-|>", [Конец цикла], label-pos: 10%),
+    edge(<Cyc2.east>, ( 0,3), <Cyc1.south>, "-|>", [Конец цикла], label-pos: 15%),
 
     edge("-|>"),
 
@@ -1459,13 +1459,13 @@ $ <Swirl-stop>
     node(name:<LeftS>,(1,3),[Инициализация:\ $sigma_min =infinity$]),
     edge("-|>"),
 
-    node(name: <CycL>, (1,4), shape: diamond, inset: 0.8em, [
+    node(name: <CycL>, (1,4), shape: hexagon, inset: 0.8em, [
       Цикл по $R_i in [R] $
     ]),
     edge("-|>"),
 
     node(name: <IfL>, (1,5), shape: diamond, inset: 0.8em, [
-      $sigma_i < sigma_min, \ Delta rho_i < 0.005 $
+      $sigma_i < sigma_min,$\ $Delta rho_i < 0.005 $
     ]),
     edge("-|>", [Да]),
 
@@ -1474,7 +1474,7 @@ $ <Swirl-stop>
     edge(<IfL.east>, (2.2,5), "u", [Нет], label-pos: 10%),
 
     node(name: <resS>, (0,5), [Расчет коэффициентов \ закрутки потока по $R^*$]),
-    edge(<CycL.west>, (0,4), <resS.north>, "-|>", [Конец цикла], label-pos: 10%),
+    edge(<CycL.west>, (0,4), <resS.north>, "-|>", [Конец цикла], label-pos: 15%),
     edge("-|>"),
 
     node((0,6), [Расчет закрутки потока \ по $R^*$]),
@@ -3776,7 +3776,8 @@ $ C_p^"ид" = 1 - 1/( frac(A_"out", A_"in", style: "horizontal"))^2, $
       legend: (position: right),
       height: 9cm, ylim: (0, 1), xlim: (0.88, 1.1),
       xaxis: (subticks: 1), yaxis: (subticks: none),
-      xlabel:text(12pt)[Относительная длина диффузора], ylabel:$C_p$,
+      xlabel:text(12pt)[Относительные величины полей давления],
+      ylabel:text(12pt)[Относительная высота канала],
       grid: (stroke-sub: 0.1pt),
     
       lq.plot(label: $delta = 0.35$, color: red, clip: false,
